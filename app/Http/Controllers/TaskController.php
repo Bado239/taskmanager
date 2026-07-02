@@ -17,57 +17,18 @@ class TaskController extends Controller
     {
         $today = Carbon::today();
 
-        // On affiche uniquement les tâches planifiées pour aujourd'hui
+        // Utilisation de CASE WHEN (compatible SQLite et MySQL) au lieu de FIELD()
         $todayTasks = Task::with(['category', 'project'])
             ->whereDate('date_prevue', $today)
-            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 END")
+            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END")
             ->get();
 
         return view('tasks.index', compact('todayTasks'));
     }
 
     /**
-     * TABLEAU DE BORD : Indicateurs & listes filtrées
+     * Formulaire création
      */
-    public function dashboard(Request $request)
-    {
-        $today = Carbon::today();
-        $filter = $request->query('filter');
-
-        // Compteur 1 : En retard (date passée et pas encore terminée)
-        $countLate = Task::whereDate('date_prevue', '<', $today)
-            ->where('status', '!=', 'done')
-            ->count();
-
-        // Compteur 2 : À venir
-        $countFuture = Task::whereDate('date_prevue', '>', $today)->count();
-
-        // Compteur 3 : Sans date
-        $countNoDate = Task::whereNull('date_prevue')->count();
-
-        // Chargement selon le filtre
-        $tasks = collect();
-        if ($filter === 'late') {
-            $tasks = Task::with(['category', 'project'])
-                ->whereDate('date_prevue', '<', $today)
-                ->where('status', '!=', 'done')
-                ->orderBy('date_prevue', 'desc')
-                ->get();
-        } elseif ($filter === 'future') {
-            $tasks = Task::with(['category', 'project'])
-                ->whereDate('date_prevue', '>', $today)
-                ->orderBy('date_prevue', 'asc')
-                ->get();
-        } elseif ($filter === 'nodate') {
-            $tasks = Task::with(['category', 'project'])
-                ->whereNull('date_prevue')
-                ->orderBy('title', 'asc')
-                ->get();
-        }
-
-        return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'tasks', 'filter'));
-    }
-
     public function create()
     {
         return view('tasks.create', [
@@ -76,37 +37,41 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * Enregistrement
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'date_prevue' => 'nullable|date',
+            'title' => 'required|max:255',
             'category_id' => 'required|exists:categories,id',
             'project_id' => 'nullable|exists:projects,id',
             'priority' => 'required|in:high,medium,low',
+            'date_prevue' => 'nullable|date',
             'progress' => 'nullable|integer|min:0|max:100',
         ]);
 
         $progress = $request->progress ?? 0;
-        
-        // Détermination automatique du statut
         $status = 'todo';
         if ($progress == 100) $status = 'done';
         elseif ($progress > 0) $status = 'doing';
 
         Task::create([
             'title' => $request->title,
-            'date_prevue' => $request->date_prevue,
             'category_id' => $request->category_id,
             'project_id' => $request->project_id,
             'priority' => $request->priority,
+            'date_prevue' => $request->date_prevue,
             'progress' => $progress,
             'status' => $status,
         ]);
 
-        return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès.');
+        return redirect()->route('tasks.index')->with('success', 'Tâche créée avec succès.');
     }
 
+    /**
+     * Formulaire modification
+     */
     public function edit($id)
     {
         $task = Task::findOrFail($id);
@@ -117,14 +82,17 @@ class TaskController extends Controller
         ]);
     }
 
+    /**
+     * Mise à jour
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'date_prevue' => 'nullable|date',
+            'title' => 'required|max:255',
             'category_id' => 'required|exists:categories,id',
             'project_id' => 'nullable|exists:projects,id',
             'priority' => 'required|in:high,medium,low',
+            'date_prevue' => 'nullable|date',
             'progress' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -137,26 +105,23 @@ class TaskController extends Controller
 
         $task->update([
             'title' => $request->title,
-            'date_prevue' => $request->date_prevue,
             'category_id' => $request->category_id,
             'project_id' => $request->project_id,
             'priority' => $request->priority,
+            'date_prevue' => $request->date_prevue,
             'progress' => $progress,
             'status' => $status,
         ]);
 
-        return redirect()->route('tasks.index')->with('success', 'Activité modifiée avec succès.');
+        return redirect()->route('tasks.index')->with('success', 'Tâche modifiée avec succès.');
     }
 
-    public function destroy(Task $task)
+    /**
+     * Suppression
+     */
+    public function destroy($id)
     {
-        $task->delete();
-        $previousUrl = url()->previous();
-
-        if (str_contains($previousUrl, route('tasks.dashboard'))) {
-            return redirect()->to($previousUrl)->with('success', 'Activité supprimée avec succès.');
-        }
-
-        return redirect()->route('tasks.index')->with('success', 'Activité supprimée avec succès.');
+        Task::destroy($id);
+        return redirect()->route('tasks.index')->with('success', 'Tâche supprimée.');
     }
 }
