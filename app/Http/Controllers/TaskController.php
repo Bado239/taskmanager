@@ -26,8 +26,24 @@ class TaskController extends Controller
         return view('tasks.index', compact('todayTasks'));
     }
 
+    /**
+     * Formulaire de création (Injecte des données si la base est vide)
+     */
     public function create()
     {
+        // SÉCURITÉ RENDER : Crée automatiquement les catégories si la base est vide
+        if (Category::count() === 0) {
+            Category::create(['name' => 'Professionnel']);
+            Category::create(['name' => 'Personnel']);
+            Category::create(['name' => 'Études']);
+        }
+
+        // SÉCURITÉ RENDER : Crée automatiquement les projets si la base est vide
+        if (Project::count() === 0) {
+            Project::create(['title' => 'Développement Web']);
+            Project::create(['title' => 'Organisation']);
+        }
+
         return view('tasks.create', [
             'categories' => Category::orderBy('name')->get(),
             'projects' => Project::orderBy('title')->get(),
@@ -61,9 +77,24 @@ class TaskController extends Controller
         return redirect()->route('tasks.index')->with('success', 'Tâche créée avec succès.');
     }
 
+    /**
+     * Formulaire de modification (Sécurisé également)
+     */
     public function edit($id)
     {
         $task = Task::findOrFail($id);
+
+        if (Category::count() === 0) {
+            Category::create(['name' => 'Professionnel']);
+            Category::create(['name' => 'Personnel']);
+            Category::create(['name' => 'Études']);
+        }
+
+        if (Project::count() === 0) {
+            Project::create(['title' => 'Développement Web']);
+            Project::create(['title' => 'Organisation']);
+        }
+
         return view('tasks.edit', [
             'task' => $task,
             'categories' => Category::orderBy('name')->get(),
