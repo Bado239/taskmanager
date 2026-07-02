@@ -1,117 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
-    <title>Gestion des tâches</title>
-
+    <title>Mes Tâches d'Aujourd'hui</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-
-        body{
-            background:#f4f6f9;
-        }
-
-        .task-card{
-            background:white;
-            border-radius:12px;
-            padding:20px;
-            margin-bottom:30px;
-            box-shadow:0 2px 10px rgba(0,0,0,.08);
-        }
-
+        body { background: #f4f6f9; }
+        .task-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     </style>
-
 </head>
-
 <body>
 
 <div class="container mt-4">
-
+    <!-- DEUX BOUTONS TOUT EN HAUT -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <h2>📋 Gestion des tâches</h2>
-
-        <a href="{{ route('tasks.create') }}" class="btn btn-primary">
-            Nouvelle tâche
-        </a>
-
+        <a href="#" class="btn btn-outline-secondary px-4 fw-bold">📊 Dashboard</a>
+        <a href="{{ route('tasks.create') }}" class="btn btn-primary px-4 fw-bold">➕ Nouvelle tâche</a>
     </div>
 
     @if(session('success'))
-
-        <div class="alert alert-success">
-
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
             {{ session('success') }}
-
         </div>
-
     @endif
 
-
-    <!-- AUJOURD'HUI -->
-
+    <!-- BLOC UNIQUE : AUJOURD'HUI -->
     <div class="task-card">
-
-        <h3 class="text-primary fw-bold mb-3">
-
-            📅 Aujourd'hui
-
-        </h3>
-
-        @include('tasks.partials.table',['tasks'=>$todayTasks])
-
+        <h2 class="text-primary fw-bold mb-4">📅 Aujourd'hui</h2>
+        @include('tasks.partials.table', ['tasks' => $todayTasks])
     </div>
-
-
-    <!-- EN RETARD -->
-
-    <div class="task-card">
-
-        <h3 class="text-danger fw-bold mb-3">
-
-            ⚠️ En retard
-
-        </h3>
-
-        @include('tasks.partials.table',['tasks'=>$lateTasks])
-
-    </div>
-
-
-    <!-- A VENIR -->
-
-    <div class="task-card">
-
-        <h3 class="text-success fw-bold mb-3">
-
-            📆 À venir
-
-        </h3>
-
-        @include('tasks.partials.table',['tasks'=>$futureTasks])
-
-    </div>
-
-
-    <!-- SANS DATE -->
-
-    <div class="task-card">
-
-        <h3 class="text-secondary fw-bold mb-3">
-
-            📥 Sans date
-
-        </h3>
-
-        @include('tasks.partials.table',['tasks'=>$noDateTasks])
-
-    </div>
-
-
 </div>
 
 </body>
-
 </html>
