@@ -37,5 +37,5 @@ RUN echo 'server { \
 
 EXPOSE 80
 
-# Démarrer PHP-FPM et Nginx ensemble
-CMD php-fpm -D && nginx -g "daemon off;"
+# Créer le fichier de base de données s'il n'existe pas et lancer les migrations au démarrage
+CMD touch database/database.sqlite && php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
