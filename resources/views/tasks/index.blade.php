@@ -7,7 +7,6 @@
     <style>
         body { background-color: #f4f6f9; }
         .focus-container { background: white; border-radius: 15px; padding: 30px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); }
-        .row-in-progress { font-weight: bold; }
     </style>
 </head>
 <body>
@@ -26,7 +25,7 @@
 <div class="container">
     <div class="mb-4">
         <h2 class="fw-bold text-dark mb-0">🎯 Mes activités du jour</h2>
-        <p class="text-muted mb-0">Heure actuelle : <strong>{{ \Carbon\Carbon::parse($now)->format('H:i') }}</strong></p>
+        <p class="text-muted mb-0">Planification et priorités d'aujourd'hui</p>
     </div>
 
     @if(session('success'))
@@ -40,33 +39,33 @@
                     <th scope="col" class="py-3">Titre</th>
                     <th scope="col" class="py-3">Catégorie</th>
                     <th scope="col" class="py-3">Projet</th>
-                    <th scope="col" class="py-3">Heure début</th>
-                    <th scope="col" class="py-3">Heure fin</th>
+                    <th scope="col" class="py-3">Priorité</th>
+                    <th scope="col" class="py-3" style="width: 20%;">Progression</th>
                     <th scope="col" class="py-3 text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($todayTasks as $task)
-                    @php
-                        // Détermination dynamique si la tâche est en cours actuellement
-                        $isInProgress = false;
-                        if ($task->heure_debut && $task->heure_fin) {
-                            $isInProgress = ($now >= $task->heure_debut && $now <= $task->heure_fin);
-                        }
-                    @endphp
-                    
-                    <tr class="{{ $isInProgress ? 'table-warning row-in-progress' : '' }}">
-                        <td>{{ $task->title }}</td>
+                    <tr>
+                        <td class="fw-bold">{{ $task->title }}</td>
                         <td><span class="badge bg-light text-dark border">{{ $task->category->name ?? '-' }}</span></td>
                         <td><span class="text-secondary">{{ $task->project->title ?? '-' }}</span></td>
                         <td>
-                            {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '-' }}
+                            @if($task->priority === 'high')
+                                <span class="badge bg-danger">Haute</span>
+                            @elseif($task->priority === 'medium')
+                                <span class="badge bg-warning text-dark">Moyenne</span>
+                            @else
+                                <span class="badge bg-secondary">Basse</span>
+                            @endif
                         </td>
                         <td>
-                            {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '-' }}
-                            @if($isInProgress)
-                                <span class="badge bg-warning text-dark ms-2">⚡ En cours</span>
-                            @endif
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress w-100" style="height: 8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ $task->progress }}%;" aria-valuenow="{{ $task->progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <small class="text-muted fw-bold">{{ $task->progress }}%</small>
+                            </div>
                         </td>
                         <td class="text-end">
                             <div class="d-flex justify-content-end gap-1">
@@ -82,7 +81,7 @@
                 @empty
                     <tr>
                         <td colspan="6" class="text-center text-muted py-4">
-                            🎉 Aucune activité restante programmée pour aujourd'hui !
+                            🎉 Aucune activité programmée pour aujourd'hui !
                         </td>
                     </tr>
                 @endforelse
