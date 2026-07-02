@@ -10,81 +10,61 @@ RUN apk add --no-cache \
     unzip \
     curl \
     openssl \
-    postgresql-dev \
-    libpng-dev \
-    libzip-dev \
-    oniguruma-dev
+    postgresql-dev
 
 # =========================
-# 2. Extensions PHP
+# 2. Extensions PHP (IMPORTANT ordre + build deps)
 # =========================
-RUN docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    pdo_pgsql \
-    mbstring \
-    zip \
-    gd \
-    exif
+RUN docker-php-ext-install pdo pdo_mysql
+
+RUN docker-php-ext-install pdo_pgsql
 
 # =========================
-# 3. Composer
+# 3. Vérification (DEBUG utile)
+# =========================
+RUN php -m | grep pdo_pgsql
+
+# =========================
+# 4. Composer
 # =========================
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # =========================
-# 4. Working directory
+# 5. App
 # =========================
 WORKDIR /var/www/html
-
-# =========================
-# 5. Copier projet
-# =========================
 COPY . .
 
 # =========================
-# 6. Installer dépendances Laravel
+# 6. Composer install
 # =========================
-RUN composer install \
-    --no-dev \
-    --optimize-autoloader \
-    --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # =========================
-# 7. Permissions Laravel
+# 7. Permissions
 # =========================
-RUN chown -R www-data:www-data \
-    /var/www/html/storage \
-    /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # =========================
-# 8. Config Nginx
+# 8. Nginx config
 # =========================
 RUN mkdir -p /etc/nginx/http.d && \
     echo 'server {
     listen 80;
     root /var/www/html/public;
-    index index.php index.html;
+    index index.php;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
     location ~ \.php$ {
-        try_files $uri =404;
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_index index.php;
         include fastcgi_params;
+        fastcgi_pass 127.0.0.1:9000;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
     }
 }' > /etc/nginx/http.d/default.conf
 
-# =========================
-# 9. Port
-# =========================
 EXPOSE 80
 
-# =========================
-# 10. Startup script propre
-# =========================
 CMD sh -c "php-fpm -D && nginx -g 'daemon off;'"
