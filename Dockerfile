@@ -1,8 +1,8 @@
 FROM php:8.2-fpm-alpine
 
-# Installer les dépendances système et extensions PHP requises
-RUN apk add --no-cache nginx wget git unzip openssl bash \
-    && docker-php-ext-install pdo pdo_mysql
+# Installer les dépendances système et extensions PHP requises (y compris PostgreSQL)
+RUN apk add --no-cache nginx wget git unzip openssl bash postgresql-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
 
 # Installer Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -37,5 +37,5 @@ RUN echo 'server { \
 
 EXPOSE 80
 
-# Nettoyer et rejouer proprement les migrations au démarrage
-CMD touch database/database.sqlite && php artisan migrate:fresh --force && php-fpm -D && nginx -g "daemon off;"
+# Lancer les migrations en toute sécurité et démarrer les services
+CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
