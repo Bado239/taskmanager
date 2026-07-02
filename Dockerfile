@@ -37,5 +37,5 @@ RUN echo 'server { \
 
 EXPOSE 80
 
-# Créer le fichier de base de données s'il n'existe pas et lancer les migrations au démarrage
-CMD touch database/database.sqlite && php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
+# Nettoyer et rejouer proprement les migrations au démarrage
+CMD touch database/database.sqlite && php artisan migrate:fresh --force && php-fpm -D && nginx -g "daemon off;"
