@@ -1,41 +1,90 @@
 FROM php:8.2-fpm-alpine
 
-# Installer les dépendances système et extensions PHP requises (y compris PostgreSQL)
-RUN apk add --no-cache nginx wget git unzip openssl bash postgresql-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
+# =========================
+# 1. Dépendances système
+# =========================
+RUN apk add --no-cache \
+    nginx \
+    bash \
+    git \
+    unzip \
+    curl \
+    openssl \
+    postgresql-dev \
+    libpng-dev \
+    libzip-dev \
+    oniguruma-dev
 
-# Installer Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# =========================
+# 2. Extensions PHP
+# =========================
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    pdo_pgsql \
+    mbstring \
+    zip \
+    gd \
+    exif
 
+# =========================
+# 3. Composer
+# =========================
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# =========================
+# 4. Working directory
+# =========================
 WORKDIR /var/www/html
+
+# =========================
+# 5. Copier projet
+# =========================
 COPY . .
 
-# Installer les dépendances du projet
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# =========================
+# 6. Installer dépendances Laravel
+# =========================
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction
 
-# Ajuster les permissions pour Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# =========================
+# 7. Permissions Laravel
+# =========================
+RUN chown -R www-data:www-data \
+    /var/www/html/storage \
+    /var/www/html/bootstrap/cache
 
-# Configurer Nginx
-RUN echo 'server { \
-    listen 80; \
-    root /var/www/html/public; \
-    index index.php index.html; \
-    location / { \
-        try_files $uri $uri/ /index.php?$query_string; \
-    } \
-    location ~ \.php$ { \
-        try_files $uri =404; \
-        fastcgi_split_path_info ^(.+\.php)(/.+)$; \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_index index.php; \
-        include fastcgi_params; \
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
-        fastcgi_param PATH_INFO $fastcgi_path_info; \
-    } \
+# =========================
+# 8. Config Nginx
+# =========================
+RUN mkdir -p /etc/nginx/http.d && \
+    echo 'server {
+    listen 80;
+    root /var/www/html/public;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
 }' > /etc/nginx/http.d/default.conf
 
+# =========================
+# 9. Port
+# =========================
 EXPOSE 80
 
-# Lancer les migrations en toute sécurité et démarrer les services
-CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
+# =========================
+# 10. Startup script propre
+# =========================
+CMD sh -c "php-fpm -D && nginx -g 'daemon off;'"
