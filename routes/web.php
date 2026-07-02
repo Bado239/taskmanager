@@ -13,3 +13,16 @@ Route::get('/tasks/dashboard', [TaskController::class, 'dashboard'])->name('task
 
 // 📋 CRUD des tâches (index, create, store, edit, update, destroy)
 Route::resource('tasks', TaskController::class);
+
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schema;
+
+Route::get('/force-clean-db', function () {
+    try {
+        // Force la réinitialisation complète des tables
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        return "Base de données réinitialisée avec succès !";
+    } catch (\Exception $e) {
+        return "Erreur lors de la réinitialisation : " . $e->getMessage();
+    }
+});
