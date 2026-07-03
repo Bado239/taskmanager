@@ -70,33 +70,31 @@ class TaskController extends Controller
 /**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
      */
+/**
+ * Formulaire de création d'une tâche
+ */
     public function create()
     {
-        $categories = Category::orderBy('name')->get();
-        $projects = Project::orderBy('title')->get();
+        // On récupère les vraies données de la BD en éliminant les doublons textuels
+        $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
+        $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
 
-        // Si la base est vide (ex: restriction Render), on crée des structures virtuelles en mémoire
-        if ($categories->isEmpty()) {
-            $categories = collect([
-                (object) ['id' => 1, 'name' => 'Professionnel'],
-                (object) ['id' => 2, 'name' => 'Personnel'],
-                (object) ['id' => 3, 'name' => 'Études'],
-            ]);
-        }
-
-        if ($projects->isEmpty()) {
-            $projects = collect([
-                (object) ['id' => 1, 'title' => 'Développement Web'],
-                (object) ['id' => 2, 'title' => 'Organisation'],
-            ]);
-        }
-
-        return view('tasks.create', [
-            'categories' => $categories,
-            'projects' => $projects,
-        ]);
+        return view('tasks.create', compact('categories', 'projects'));
     }
 
+    /**
+     * Formulaire de modification d'une tâche
+     */
+    public function edit($id)
+    {
+        $task = \App\Models\Task::findOrFail($id);
+        
+        // On applique le même nettoyage anti-doublon pour l'édition
+        $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
+        $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
+
+        return view('tasks.edit', compact('task', 'categories', 'projects'));
+    }
 public function store(Request $request)
 {
     $validated = $request->validate([
@@ -120,33 +118,6 @@ public function store(Request $request)
     /**
      * Formulaire de modification
      */
-    public function edit($id)
-    {
-        $task = Task::findOrFail($id);
-        $categories = Category::orderBy('name')->get();
-        $projects = Project::orderBy('title')->get();
-
-        if ($categories->isEmpty()) {
-            $categories = collect([
-                (object) ['id' => 1, 'name' => 'Professionnel'],
-                (object) ['id' => 2, 'name' => 'Personnel'],
-                (object) ['id' => 3, 'name' => 'Études'],
-            ]);
-        }
-
-        if ($projects->isEmpty()) {
-            $projects = collect([
-                (object) ['id' => 1, 'title' => 'Développement Web'],
-                (object) ['id' => 2, 'title' => 'Organisation'],
-            ]);
-        }
-
-        return view('tasks.edit', [
-            'task' => $task,
-            'categories' => $categories,
-            'projects' => $projects,
-        ]);
-    }
 
     public function update(Request $request, $id)
     {
