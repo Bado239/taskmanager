@@ -13,36 +13,34 @@ class TaskController extends Controller
     /**
      * Affiche uniquement les tâches d'aujourd'hui
      */
+
+// 1. La page principale (Uniquement Aujourd'hui)
+// 1. Page principale : uniquement les tâches d'aujourd'hui
     public function index()
     {
         $today = \Carbon\Carbon::today()->toDateString();
-
-        // Tri de base pour la priorité : Haute -> Moyenne -> Basse
         $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
 
-        // 1. Tâches pour Aujourd'hui
-        $todayTasks = Task::whereDate('date_prevue', $today)
+        $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
             ->orderByRaw($priorityOrder)
             ->get();
 
-        // 2. Tâches En retard (date dépassée et non terminées à 100%)
-        $lateTasks = Task::whereDate('date_prevue', '<', $today)
-            ->where('progress', '<', 100)
-            ->orderByRaw($priorityOrder)
-            ->get();
+        return view('tasks.index', compact('todayTasks'));
+    }
 
-        // 3. Tâches À venir (dates futures)
-        $futureTasks = Task::whereDate('date_prevue', '>', $today)
-            ->orderByRaw($priorityOrder)
-            ->get();
+    // 2. Page du Dashboard : charge toutes les sections pour les indicateurs
+    public function dashboard()
+    {
+        $today = \Carbon\Carbon::today()->toDateString();
+        $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
 
-        // 4. Tâches Sans date
-        $noDateTasks = Task::whereNull('date_prevue')
-            ->orderByRaw($priorityOrder)
-            ->get();
+        $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)->orderByRaw($priorityOrder)->get();
+        $lateTasks = \App\Models\Task::whereDate('date_prevue', '<', $today)->where('progress', '<', 100)->orderByRaw($priorityOrder)->get();
+        $futureTasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderByRaw($priorityOrder)->get();
+        $noDateTasks = \App\Models\Task::whereNull('date_prevue')->orderByRaw($priorityOrder)->get();
 
-        // Envoi de toutes les variables nécessaires à la vue
-        return view('tasks.index', compact('todayTasks', 'lateTasks', 'futureTasks', 'noDateTasks'));
+        // Renvoie vers le fichier resources/views/tasks/dashboard.blade.php
+        return view('tasks.dashboard', compact('todayTasks', 'lateTasks', 'futureTasks', 'noDateTasks'));
     }
     /**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
