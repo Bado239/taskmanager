@@ -14,7 +14,8 @@
 <div class="container mt-4">
     <!-- DEUX BOUTONS TOUT EN HAUT -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary px-4 fw-bold">📊 Dashboard</a>
+<!-- Remplacer la route tasks.index par la vraie route du dashboard -->
+        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary px-4 fw-bold">📊 Dashboard</a>
         <a href="{{ route('tasks.create') }}" class="btn btn-primary px-4 fw-bold">➕ Nouvelle tâche</a>
     </div>
 
