@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine
 
-# Installer les dépendances système, extensions PHP et Node.js/NPM
+# Installer les dépendances système, extensions PHP et Node.js/NPM requis
 RUN apk add --no-cache nginx wget git unzip openssl bash postgresql-dev nodejs npm \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql
 
@@ -13,13 +13,13 @@ COPY . .
 # Installer les dépendances du projet
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Installer et compiler les assets (Vite/Tailwind/Alpine) pour le Dashboard
+# Installer et compiler les éléments du Dashboard (Vite/Tailwind)
 RUN npm install && npm run build
 
 # Ajuster les permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Configurer Nginx pour le port 10000
+# Configurer Nginx pour écouter sur le port 10000
 RUN echo 'server { \
     listen 10000; \
     root /var/www/html/public; \
@@ -40,5 +40,5 @@ RUN echo 'server { \
 
 EXPOSE 10000
 
-# Lancer les migrations et démarrer les services
+# Lancer les migrations en toute sécurité et démarrer les services
 CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
