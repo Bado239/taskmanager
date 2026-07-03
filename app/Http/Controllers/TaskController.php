@@ -96,38 +96,25 @@ class TaskController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        // En mode gratuit temporaire, on assouplit la validation exists pour éviter les conflits de lecture seule
-        $request->validate([
-            'title' => 'required|max:255',
-            'category_id' => 'required',
-            'project_id' => 'nullable',
-            'priority' => 'required|in:high,medium,low',
-            'date_prevue' => 'nullable|date',
-            'progress' => 'nullable|integer|min:0|max:100',
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'category_id' => 'required|exists:categories,id',
+        'project_id' => 'nullable|exists:projects,id',
+        'priority' => 'required|in:high,medium,low',
+        'date_prevue' => 'nullable|date',
+        'heure_debut' => 'nullable',
+        'heure_fin' => 'nullable',
+    ]);
 
-        $progress = $request->progress ?? 0;
-        $status = $progress == 100 ? 'done' : ($progress > 0 ? 'doing' : 'todo');
+    // On force la progression par défaut à 0 lors de la création
+    $validated['progress'] = 0;
 
-        try {
-            Task::create([
-                'title' => $request->title,
-                'category_id' => $request->category_id ?: null,
-                'project_id' => $request->project_id ?: null,
-                'priority' => $request->priority,
-                'date_prevue' => $request->date_prevue,
-                'progress' => $progress,
-                'status' => $status,
-            ]);
-        } catch (\Exception $e) {
-            // Si la base globale reste bloquée en écriture, on redirige avec un message descriptif
-            return redirect()->route('tasks.index')->with('success', 'Note : Base de données en lecture seule, enregistrement simulé !');
-        }
+    \App\Models\Task::create($validated);
 
-        return redirect()->route('tasks.index')->with('success', 'Tâche créée avec succès.');
-    }
+    return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès !');
+}
 
     /**
      * Formulaire de modification

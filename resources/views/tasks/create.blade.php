@@ -14,7 +14,7 @@
 <div class="container mt-5" style="max-width: 600px;">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold text-dark">➕ Nouvelle tâche</h2>
-        <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary btn-sm">Annuller</a>
+        <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary btn-sm">Annuler</a>
     </div>
 
     @if ($errors->any())
@@ -63,7 +63,7 @@
                 </select>
             </div>
 
-            <!-- PRIORITÉ (CORRIGÉE AVEC LES VALEURS ATTENDUES PAR LE CONTRÔLEUR) -->
+            <!-- PRIORITÉ -->
             <div class="mb-3">
                 <label for="priority" class="form-label fw-bold">Priorité</label>
                 <select name="priority" id="priority" class="form-select" required>
@@ -76,20 +76,20 @@
 
             <!-- DATE PRÉVUE -->
             <div class="mb-3">
-                <label for="date_prevue" class="form-label fw-bold">Date prévue</label>
-                <input type="date" name="date_prevue" id="date_prevue" class="form-control" value="{{ old('date_prevue', date('Y-m-d')) }}" required>
+                <label for="date_prevue" class="form-label fw-bold">Date prévue (Optionnelle)</label>
+                <input type="date" name="date_prevue" id="date_prevue" class="form-control" value="{{ old('date_prevue', date('Y-m-d')) }}">
             </div>
 
-            <!-- PROGRESSION -->
-            <div class="mb-4">
-                <label for="progress" class="form-label fw-bold">Progression</label>
-                <select name="progress" id="progress" class="form-select">
-                    <option value="0" {{ old('progress') == '0' ? 'selected' : '' }}>0% (À faire)</option>
-                    <option value="25" {{ old('progress') == '25' ? 'selected' : '' }}>25%</option>
-                    <option value="50" {{ old('progress') == '50' ? 'selected' : '' }}>50% (En cours)</option>
-                    <option value="75" {{ old('progress') == '75' ? 'selected' : '' }}>75%</option>
-                    <option value="100" {{ old('progress') == '100' ? 'selected' : '' }}>100% (Terminé)</option>
-                </select>
+            <!-- BLOC HEURES -->
+            <div class="row mb-4">
+                <div class="col-6">
+                    <label for="heure_debut" class="form-label fw-bold">Heure de début</label>
+                    <input type="time" name="heure_debut" id="heure_debut" class="form-control" value="{{ old('heure_debut') }}">
+                </div>
+                <div class="col-6">
+                    <label for="heure_fin" class="form-label fw-bold">Heure de fin</label>
+                    <input type="time" name="heure_fin" id="heure_fin" class="form-control" value="{{ old('heure_fin') }}">
+                </div>
             </div>
 
             <!-- BOUTON ENREGISTRER -->
