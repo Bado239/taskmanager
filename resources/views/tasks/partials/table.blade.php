@@ -15,10 +15,9 @@
             @foreach($tasks as $task)
                 @php
                     $isInProgress = false;
-                    $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
-                    $today = \Carbon\Carbon::today()->format('Y-m-d');
+                    $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
+                    $today = \Carbon\Carbon::today('Africa/Dakar')->format('Y-m-d');
                     
-                    // Vérification si la tâche est en cours en ce moment précis
                     if ($task->date_prevue && \Carbon\Carbon::parse($task->date_prevue)->format('Y-m-d') === $today) {
                         if ($task->heure_debut && $task->heure_fin) {
                             $isInProgress = ($now >= $task->heure_debut && $now <= $task->heure_fin);

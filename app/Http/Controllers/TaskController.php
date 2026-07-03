@@ -19,14 +19,14 @@ class TaskController extends Controller
 
     public function index()
     {
-        $today = \Carbon\Carbon::today()->toDateString();
-        // On s'assure d'utiliser le bon fuseau horaire
-        $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
+        // Heure et date du Sénégal
+        $today = \Carbon\Carbon::today('Africa/Dakar')->toDateString();
+        $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
 
-        // On affiche les tâches d'aujourd'hui en cours ou à venir
+        // On affiche les tâches d'aujourd'hui en cours OU à venir (heure de fin non dépassée ou non définie)
         $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
-                $query->where('heure_fin', '>=', $now) // Pas encore dépassée
+                $query->where('heure_fin', '>=', $now)
                     ->orWhereNull('heure_fin');
             })
             ->orderBy('heure_debut', 'asc')
@@ -37,16 +37,18 @@ class TaskController extends Controller
 
     public function dashboard(\Illuminate\Http\Request $request)
     {
-        $today = \Carbon\Carbon::today()->toDateString();
-        $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
+        $today = \Carbon\Carbon::today('Africa/Dakar')->toDateString();
+        $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
         $filter = $request->query('filter');
 
-        // Les tâches passées : uniquement si l'heure de fin est strictement inférieure à l'heure actuelle
+        // Une tâche va dans "Passées / En retard" si :
+        // - Sa date est passée
+        // - OU c'est aujourd'hui mais son heure de fin est strictement dépassée
         $lateQuery = \App\Models\Task::where(function($query) use ($today, $now) {
             $query->whereDate('date_prevue', '<', $today)
                 ->orWhere(function($q) use ($today, $now) {
                     $q->whereDate('date_prevue', $today)
-                        ->where('heure_fin', '<', $now); // Heure de fin passée
+                        ->where('heure_fin', '<', $now);
                 });
         });
 
