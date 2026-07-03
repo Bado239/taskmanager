@@ -19,9 +19,13 @@ use Illuminate\Support\Facades\Schema;
 
 Route::get('/force-clean-db', function () {
     try {
-        // Force la réinitialisation complète des tables
+        // 1. Force la réinitialisation complète des tables
         Artisan::call('migrate:fresh', ['--force' => true]);
-        return "Base de données réinitialisée avec succès !";
+
+        // 2. AJOUT : Force l'exécution du DatabaseSeeder avec les nouvelles modalités
+        Artisan::call('db:seed', ['--force' => true]);
+
+        return "Base de données réinitialisée et repeuplée avec succès !";
     } catch (\Exception $e) {
         return "Erreur lors de la réinitialisation : " . $e->getMessage();
     }
