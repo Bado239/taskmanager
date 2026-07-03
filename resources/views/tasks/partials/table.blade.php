@@ -1,65 +1,65 @@
-<div class="table-responsive border rounded">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
+@if($tasks->count())
+    <table class="table table-hover align-middle">
+        <thead class="table-dark">
             <tr>
-                <th scope="col" class="py-3 ps-3">Titre</th>
-                <th scope="col" class="py-3">Catégorie</th>
-                <th scope="col" class="py-3">Projet</th>
-                <th scope="col" class="py-3">Priorité</th>
-                <th scope="col" class="py-3" style="width: 25%;">Progression</th>
-                <th scope="col" class="py-3 text-end pe-3">Actions</th>
+                <th>Tâche</th>
+                <th>Catégorie</th>
+                <th>Projet</th>
+                <th>Priorité</th>
+                <th>Heure Début</th>
+                <th>Heure Fin</th>
+                <th width="160">Actions</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($tasks as $task)
-                <tr>
-                    <td class="fw-bold ps-3">{{ $task->title }}</td>
+            @foreach($tasks as $task)
+                @php
+                    $isInProgress = false;
+                    $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
+                    $today = \Carbon\Carbon::today()->format('Y-m-d');
+                    
+                    // Vérification si la tâche est en cours en ce moment précis
+                    if ($task->date_prevue && \Carbon\Carbon::parse($task->date_prevue)->format('Y-m-d') === $today) {
+                        if ($task->heure_debut && $task->heure_fin) {
+                            $isInProgress = ($now >= $task->heure_debut && $now <= $task->heure_fin);
+                        }
+                    }
+                @endphp
+
+                <tr class="{{ $isInProgress ? 'table-warning fw-bold' : '' }}">
                     <td>
-                        <span class="badge bg-light text-dark border">
-                            {{ $task->category->name ?? 'Aucune' }}
-                        </span>
+                        <strong>{{ $task->title }}</strong>
+                        @if($isInProgress)
+                            <span class="badge bg-warning text-dark ms-2">⚡ En cours</span>
+                        @endif
                     </td>
+                    <td>{{ $task->category->name ?? '-' }}</td>
+                    <td>{{ $task->project->title ?? '-' }}</td>
                     <td>
-                        <span class="text-secondary">
-                            {{ $task->project->title ?? 'Aucun' }}
-                        </span>
-                    </td>
-                    <td>
-                        @if(($task->priority ?? '') === 'high')
+                        @if($task->priority == 'high')
                             <span class="badge bg-danger">Haute</span>
-                        @elseif(($task->priority ?? '') === 'medium')
+                        @elseif($task->priority == 'medium')
                             <span class="badge bg-warning text-dark">Moyenne</span>
                         @else
                             <span class="badge bg-secondary">Basse</span>
                         @endif
                     </td>
+                    <td>{{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '-' }}</td>
+                    <td>{{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '-' }}</td>
                     <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="progress w-100" style="height: 6px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ $task->progress ?? 0 }}%;"></div>
-                            </div>
-                            <small class="text-muted fw-bold">{{ $task->progress ?? 0 }}%</small>
-                        </div>
-                    </td>
-                    <td class="text-end pe-3">
-                        <div class="d-flex justify-content-end gap-1">
-                            <!-- BOUTON MODIFIER -->
-                            <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-sm btn-outline-warning" title="Modifier">✏️</a>
-                            
-                            <!-- BOUTON SUPPRIMER -->
-                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?');" style="display: inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">🗑️</button>
-                            </form>
-                        </div>
+                        <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-warning btn-sm">✏️</a>
+                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm" onclick="return confirm('Supprimer cette tâche ?')">🗑️</button>
+                        </form>
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center text-muted py-4">Aucune tâche prévue pour aujourd'hui.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
-</div>
+@else
+    <div class="alert alert-light border text-center">
+        Aucune tâche pour le moment.
+    </div>
+@endif

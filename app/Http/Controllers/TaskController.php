@@ -19,51 +19,53 @@ class TaskController extends Controller
     public function index()
     {
         $today = \Carbon\Carbon::today()->toDateString();
-        $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
+        $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
 
+        // On affiche les tâches d'aujourd'hui qui sont en cours ou à venir (l'heure de fin n'est pas dépassée)
         $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
-            ->orderByRaw($priorityOrder)
+            ->where(function($query) use ($now) {
+                $query->where('heure_fin', '>=', $now)
+                    ->orWhereNull('heure_fin');
+            })
+            ->orderBy('heure_debut', 'asc')
             ->get();
 
         return view('tasks.index', compact('todayTasks'));
     }
 
-    // 2. Page du Dashboard : charge toutes les sections pour les indicateurs
-    public function dashboard(Request $request)
+    public function dashboard(\Illuminate\Http\Request $request)
     {
-        $today = Carbon::today()->toDateString();
-        $now = Carbon::now()->format('H:i:s');
-        
-        // Récupération du filtre depuis l'URL (?filter=...)
+        $today = \Carbon\Carbon::today()->toDateString();
+        $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
         $filter = $request->query('filter');
 
-        // 1. Calcul des compteurs pour les cartes d'indicateurs
-        $countLate = Task::whereDate('date_prevue', '<', $today)->where('progress', '<', 100)->count();
-        $countFuture = Task::whereDate('date_prevue', '>', $today)->count();
-        $countNoDate = Task::whereNull('date_prevue')->count();
+        // 1. Les tâches passées incluent : dates antérieures OU aujourd'hui avec heure_fin dépassée
+        $lateQuery = \App\Models\Task::where(function($query) use ($today, $now) {
+            $query->whereDate('date_prevue', '<', $today)
+                ->orWhere(function($q) use ($today, $now) {
+                    $q->whereDate('date_prevue', $today)
+                        ->where('heure_fin', '<', $now);
+                });
+        })->where('progress', '<', 100);
 
-        // 2. Chargement de la liste selon l'indicateur cliqué
-        $tasks = collect(); // par défaut, liste vide
-        $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
+        $countLate = $lateQuery->count();
+        
+        // Tâches à venir (dates futures uniquement)
+        $countFuture = \App\Models\Task::whereDate('date_prevue', '>', $today)->count();
+        $countNoDate = \App\Models\Task::whereNull('date_prevue')->count();
 
+        // 2. Traitement du filtre dynamique cliqué
+        $tasks = collect();
         if ($filter === 'late') {
-            $tasks = Task::whereDate('date_prevue', '<', $today)
-                ->where('progress', '<', 100)
-                ->orderByRaw($priorityOrder)
-                ->get();
+            $tasks = $lateQuery->orderBy('date_prevue', 'desc')->orderBy('heure_fin', 'desc')->get();
         } elseif ($filter === 'future') {
-            $tasks = Task::whereDate('date_prevue', '>', $today)
-                ->orderByRaw($priorityOrder)
-                ->get();
+            $tasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->orderBy('heure_debut', 'asc')->get();
         } elseif ($filter === 'nodate') {
-            $tasks = Task::whereNull('date_prevue')
-                ->orderByRaw($priorityOrder)
-                ->get();
+            $tasks = \App\Models\Task::whereNull('date_prevue')->get();
         }
 
-        // Envoi de toutes les variables attendues par ta vue dashboard.blade.php
         return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
-    }    
+    }
     /**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
      */
