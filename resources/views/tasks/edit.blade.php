@@ -29,17 +29,19 @@
             @csrf
             @method('PUT')
 
+            <!-- TITRE -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Titre de l'activité</label>
                 <input type="text" name="title" class="form-control" value="{{ old('title', $task->title) }}" required>
             </div>
 
+            <!-- DATE PRÉVUE -->
             <div class="mb-3">
-                <label class="form-label fw-bold">Date prévue</label>
+                <label class="form-label fw-bold">Date prévue (Optionnelle)</label>
                 <input type="date" name="date_prevue" class="form-control" value="{{ old('date_prevue', $task->date_prevue ? \Illuminate\Support\Carbon::parse($task->date_prevue)->format('Y-m-d') : '') }}">
             </div>
 
-            <!-- NOUVEAU : CRÉNEAUX HORAIRES MODIFIABLES -->
+            <!-- CRÉNEAUX HORAIRES -->
             <div class="row mb-3">
                 <div class="col-6">
                     <label class="form-label fw-bold">De (Heure début)</label>
@@ -51,6 +53,17 @@
                 </div>
             </div>
 
+            <!-- PRIORITÉ -->
+            <div class="mb-3">
+                <label for="priority" class="form-label fw-bold">Priorité</label>
+                <select name="priority" id="priority" class="form-select" required>
+                    <option value="high" {{ old('priority', $task->priority) == 'high' ? 'selected' : '' }}>🔴 Haute</option>
+                    <option value="medium" {{ old('priority', $task->priority) == 'medium' ? 'selected' : '' }}>🟡 Moyenne</option>
+                    <option value="low" {{ old('priority', $task->priority) == 'low' ? 'selected' : '' }}>🔵 Basse</option>
+                </select>
+            </div>
+
+            <!-- CATÉGORIE -->
             <div class="mb-3">
                 <label class="form-label fw-bold">Catégorie</label>
                 <select name="category_id" class="form-select" required>
@@ -60,6 +73,7 @@
                 </select>
             </div>
 
+            <!-- PROJET ASSOCIÉ -->
             <div class="mb-4">
                 <label class="form-label fw-bold">Projet associé (Optionnel)</label>
                 <select name="project_id" class="form-select">
@@ -70,8 +84,9 @@
                 </select>
             </div>
 
+            <!-- BOUTONS -->
             <div class="d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">Enregistrer les modifications</button>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Enregistrer les modifications</button>
                 <a href="{{ route('tasks.index') }}" class="btn btn-light border w-100">Annuler</a>
             </div>
         </form>
