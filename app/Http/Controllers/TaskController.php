@@ -15,17 +15,35 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $today = Carbon::today();
+        $today = \Carbon\Carbon::today()->toDateString();
 
-        // Récupère uniquement les tâches prévues pour aujourd'hui
-        $todayTasks = Task::with(['category', 'project'])
-            ->whereDate('date_prevue', $today)
-            ->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END")
+        // Tri de base pour la priorité : Haute -> Moyenne -> Basse
+        $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
+
+        // 1. Tâches pour Aujourd'hui
+        $todayTasks = Task::whereDate('date_prevue', $today)
+            ->orderByRaw($priorityOrder)
             ->get();
 
-        return view('tasks.index', compact('todayTasks'));
-    }
+        // 2. Tâches En retard (date dépassée et non terminées à 100%)
+        $lateTasks = Task::whereDate('date_prevue', '<', $today)
+            ->where('progress', '<', 100)
+            ->orderByRaw($priorityOrder)
+            ->get();
 
+        // 3. Tâches À venir (dates futures)
+        $futureTasks = Task::whereDate('date_prevue', '>', $today)
+            ->orderByRaw($priorityOrder)
+            ->get();
+
+        // 4. Tâches Sans date
+        $noDateTasks = Task::whereNull('date_prevue')
+            ->orderByRaw($priorityOrder)
+            ->get();
+
+        // Envoi de toutes les variables nécessaires à la vue
+        return view('tasks.index', compact('todayTasks', 'lateTasks', 'futureTasks', 'noDateTasks'));
+    }
     /**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
      */
