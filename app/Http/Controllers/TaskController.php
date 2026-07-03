@@ -16,15 +16,17 @@ class TaskController extends Controller
 
 // 1. La page principale (Uniquement Aujourd'hui)
 // 1. Page principale : uniquement les tâches d'aujourd'hui
+
     public function index()
     {
         $today = \Carbon\Carbon::today()->toDateString();
+        // On s'assure d'utiliser le bon fuseau horaire
         $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
 
-        // On affiche les tâches d'aujourd'hui qui sont en cours ou à venir (l'heure de fin n'est pas dépassée)
+        // On affiche les tâches d'aujourd'hui en cours ou à venir
         $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
-                $query->where('heure_fin', '>=', $now)
+                $query->where('heure_fin', '>=', $now) // Pas encore dépassée
                     ->orWhereNull('heure_fin');
             })
             ->orderBy('heure_debut', 'asc')
@@ -39,34 +41,31 @@ class TaskController extends Controller
         $now = \Carbon\Carbon::now('Europe/Paris')->format('H:i:s');
         $filter = $request->query('filter');
 
-        // 1. Les tâches passées incluent : dates antérieures OU aujourd'hui avec heure_fin dépassée
+        // Les tâches passées : uniquement si l'heure de fin est strictement inférieure à l'heure actuelle
         $lateQuery = \App\Models\Task::where(function($query) use ($today, $now) {
             $query->whereDate('date_prevue', '<', $today)
                 ->orWhere(function($q) use ($today, $now) {
                     $q->whereDate('date_prevue', $today)
-                        ->where('heure_fin', '<', $now);
+                        ->where('heure_fin', '<', $now); // Heure de fin passée
                 });
-        })->where('progress', '<', 100);
+        });
 
         $countLate = $lateQuery->count();
-        
-        // Tâches à venir (dates futures uniquement)
         $countFuture = \App\Models\Task::whereDate('date_prevue', '>', $today)->count();
         $countNoDate = \App\Models\Task::whereNull('date_prevue')->count();
 
-        // 2. Traitement du filtre dynamique cliqué
         $tasks = collect();
         if ($filter === 'late') {
             $tasks = $lateQuery->orderBy('date_prevue', 'desc')->orderBy('heure_fin', 'desc')->get();
         } elseif ($filter === 'future') {
-            $tasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->orderBy('heure_debut', 'asc')->get();
+            $tasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->get();
         } elseif ($filter === 'nodate') {
             $tasks = \App\Models\Task::whereNull('date_prevue')->get();
         }
 
         return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
     }
-    /**
+/**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
      */
     public function create()
