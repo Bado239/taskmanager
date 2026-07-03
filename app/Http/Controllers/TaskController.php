@@ -29,19 +29,41 @@ class TaskController extends Controller
     }
 
     // 2. Page du Dashboard : charge toutes les sections pour les indicateurs
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $today = \Carbon\Carbon::today()->toDateString();
+        $today = Carbon::today()->toDateString();
+        $now = Carbon::now()->format('H:i:s');
+        
+        // Récupération du filtre depuis l'URL (?filter=...)
+        $filter = $request->query('filter');
+
+        // 1. Calcul des compteurs pour les cartes d'indicateurs
+        $countLate = Task::whereDate('date_prevue', '<', $today)->where('progress', '<', 100)->count();
+        $countFuture = Task::whereDate('date_prevue', '>', $today)->count();
+        $countNoDate = Task::whereNull('date_prevue')->count();
+
+        // 2. Chargement de la liste selon l'indicateur cliqué
+        $tasks = collect(); // par défaut, liste vide
         $priorityOrder = "CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END";
 
-        $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)->orderByRaw($priorityOrder)->get();
-        $lateTasks = \App\Models\Task::whereDate('date_prevue', '<', $today)->where('progress', '<', 100)->orderByRaw($priorityOrder)->get();
-        $futureTasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderByRaw($priorityOrder)->get();
-        $noDateTasks = \App\Models\Task::whereNull('date_prevue')->orderByRaw($priorityOrder)->get();
+        if ($filter === 'late') {
+            $tasks = Task::whereDate('date_prevue', '<', $today)
+                ->where('progress', '<', 100)
+                ->orderByRaw($priorityOrder)
+                ->get();
+        } elseif ($filter === 'future') {
+            $tasks = Task::whereDate('date_prevue', '>', $today)
+                ->orderByRaw($priorityOrder)
+                ->get();
+        } elseif ($filter === 'nodate') {
+            $tasks = Task::whereNull('date_prevue')
+                ->orderByRaw($priorityOrder)
+                ->get();
+        }
 
-        // Renvoie vers le fichier resources/views/tasks/dashboard.blade.php
-        return view('tasks.dashboard', compact('todayTasks', 'lateTasks', 'futureTasks', 'noDateTasks'));
-    }
+        // Envoi de toutes les variables attendues par ta vue dashboard.blade.php
+        return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
+    }    
     /**
      * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
      */
