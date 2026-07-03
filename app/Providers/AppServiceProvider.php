@@ -3,8 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,14 +20,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force l'exécution des migrations et du seeder de manière transparente au démarrage
-        if (!app()->runningInConsole()) {
-            try {
-                Artisan::call('migrate', ['--force' => true]);
-                Artisan::call('db:seed', ['--force' => true]);
-            } catch (\Exception $e) {
-                // Évite de bloquer l'application si la base est déjà prête
-            }
+        // Force le HTTPS sur Render en production pour activer les scripts des boutons
+        if (config('app.env') === 'production' || env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
         }
     }
 }
