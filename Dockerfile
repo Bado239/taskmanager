@@ -1,70 +1,41 @@
 FROM php:8.2-fpm-alpine
 
-# =========================
-# 1. Dépendances système
-# =========================
-RUN apk add --no-cache \
-    nginx \
-    bash \
-    git \
-    unzip \
-    curl \
-    openssl \
-    postgresql-dev
+# Installer les dépendances système et extensions PHP requises (y compris PostgreSQL)
+RUN apk add --no-cache nginx wget git unzip openssl bash postgresql-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
 
-# =========================
-# 2. Extensions PHP (IMPORTANT ordre + build deps)
-# =========================
-RUN docker-php-ext-install pdo pdo_mysql
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN docker-php-ext-install pdo_pgsql
-
-# =========================
-# 3. Vérification (DEBUG utile)
-# =========================
-RUN php -m | grep pdo_pgsql
-
-# =========================
-# 4. Composer
-# =========================
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# =========================
-# 5. App
-# =========================
 WORKDIR /var/www/html
 COPY . .
 
-# =========================
-# 6. Composer install
-# =========================
+# Installer les dépendances du projet
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# =========================
-# 7. Permissions
-# =========================
+# Ajuster les permissions pour Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# =========================
-# 8. Nginx config
-# =========================
-RUN mkdir -p /etc/nginx/http.d && \
-    echo 'server {
-    listen 80;
-    root /var/www/html/public;
-    index index.php;
-
-    location / {
-        try_files $uri $uri/ /index.php?$query_string;
-    }
-
-    location ~ \.php$ {
-        include fastcgi_params;
-        fastcgi_pass 127.0.0.1:9000;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }
+# Configurer Nginx pour écouter sur le port 10000 (Recommandé pour la version gratuite de Render)
+RUN echo 'server { \
+    listen 10000; \
+    root /var/www/html/public; \
+    index index.php index.html; \
+    location / { \
+        try_files $uri $uri/ /index.php?$query_string; \
+    } \
+    location ~ \.php$ { \
+        try_files $uri =404; \
+        fastcgi_split_path_info ^(.+\.php)(/.+)$; \
+        fastcgi_pass 127.0.0.1:9000; \
+        fastcgi_index index.php; \
+        include fastcgi_params; \
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
+        fastcgi_param PATH_INFO $fastcgi_path_info; \
+    } \
 }' > /etc/nginx/http.d/default.conf
 
-EXPOSE 80
+EXPOSE 10000
 
-CMD sh -c "php-fpm -D && nginx -g 'daemon off;'"
+# Lancer les migrations en toute sécurité et démarrer les services
+CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
