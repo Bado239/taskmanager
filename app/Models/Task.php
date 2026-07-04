@@ -13,6 +13,7 @@ class Task extends Model
         'title',
         'category_id',
         'project_id',
+        'priority', // 🔴 AJOUT UNIQUE : Permet d'enregistrer la priorité choisie (high, medium, low)
         'date_prevue',
         'heure_debut', // Autorise l'enregistrement de l'heure de début
         'heure_fin',   // Autorise l'enregistrement de l'heure de fin
