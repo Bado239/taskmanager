@@ -89,6 +89,7 @@ class TaskController extends Controller
     }
 
     /**
+/**
      * Enregistrement d'une nouvelle tâche
      */
     public function store(Request $request)
@@ -100,7 +101,9 @@ class TaskController extends Controller
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
-            'heure_fin' => 'nullable',
+            'heure_fin' => 'nullable|after:heure_debut', // ⏱️ L'heure de fin doit être après l'heure de début
+        ], [
+            'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
 
         $validated['progress'] = 0;
@@ -121,9 +124,10 @@ class TaskController extends Controller
             'project_id' => 'nullable|exists:projects,id',
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
-            'heure_debut' => 'nullable', // Validation ajoutée !
-            'heure_fin' => 'nullable',   // Validation ajoutée !
-            'progress' => 'nullable|integer|min:0|max:100',
+            'heure_debut' => 'nullable',
+            'heure_fin' => 'nullable|after:heure_debut', // ⏱️ L'heure de fin doit être après l'heure de début
+        ], [
+            'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
 
         try {
@@ -137,8 +141,8 @@ class TaskController extends Controller
                 'project_id' => $request->project_id ?: null,
                 'priority' => $request->priority,
                 'date_prevue' => $request->date_prevue,
-                'heure_debut' => $request->heure_debut, // Enregistrement ajouté !
-                'heure_fin' => $request->heure_fin,     // Enregistrement ajouté !
+                'heure_debut' => $request->heure_debut,
+                'heure_fin' => $request->heure_fin,
                 'progress' => $progress,
                 'status' => $status,
             ]);
@@ -148,7 +152,6 @@ class TaskController extends Controller
 
         return redirect()->route('tasks.index')->with('success', 'Tâche modifiée avec succès.');
     }
-
     /**
      * Suppression d'une tâche
      */
