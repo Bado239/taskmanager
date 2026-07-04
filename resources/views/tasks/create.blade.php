@@ -97,6 +97,32 @@
         </form>
     </div>
 </div>
+<!-- Insère ce script tout en bas de ton fichier create.blade.php -->
+<script>
+    document.getElementById('heure_debut').addEventListener('change', function() {
+        const heureDebutVal = this.value; // Format "HH:MM"
+        
+        if (heureDebutVal) {
+            // Découpage des heures et minutes
+            let [heures, minutes] = heureDebutVal.split(':').map(Number);
+            
+            // Ajout des 2 heures
+            heures += 2;
+            
+            // Gestion du passage au lendemain (ex: 23:00 + 2h = 01:00)
+            if (heures >= 24) {
+                heures -= 24;
+            }
+            
+            // Formatage à deux chiffres (ex: "9" devient "09")
+            const heuresFormattees = String(heures).padStart(2, '0');
+            const minutesFormattees = String(minutes).padStart(2, '0');
+            
+            // Attribution automatique à l'heure de fin
+            document.getElementById('heure_fin').value = `${heuresFormattees}:${minutesFormattees}`;
+        }
+    });
+</script>
 
 </body>
 </html>
