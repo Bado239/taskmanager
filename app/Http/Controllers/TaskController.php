@@ -13,10 +13,6 @@ class TaskController extends Controller
     /**
      * Affiche uniquement les tâches d'aujourd'hui
      */
-
-// 1. La page principale (Uniquement Aujourd'hui)
-// 1. Page principale : uniquement les tâches d'aujourd'hui
-
     public function index()
     {
         // Heure et date du Sénégal
@@ -35,15 +31,15 @@ class TaskController extends Controller
         return view('tasks.index', compact('todayTasks'));
     }
 
+    /**
+     * Tableau de bord avec indicateurs
+     */
     public function dashboard(\Illuminate\Http\Request $request)
     {
         $today = \Carbon\Carbon::today('Africa/Dakar')->toDateString();
         $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
         $filter = $request->query('filter');
 
-        // Une tâche va dans "Passées / En retard" si :
-        // - Sa date est passée
-        // - OU c'est aujourd'hui mais son heure de fin est strictement dépassée
         $lateQuery = \App\Models\Task::where(function($query) use ($today, $now) {
             $query->whereDate('date_prevue', '<', $today)
                 ->orWhere(function($q) use ($today, $now) {
@@ -67,15 +63,12 @@ class TaskController extends Controller
 
         return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
     }
-/**
-     * Formulaire de création (Génère des catégories virtuelles si la base est vide/lecture seule)
+
+    /**
+     * Formulaire de création d'une tâche
      */
-/**
- * Formulaire de création d'une tâche
- */
     public function create()
     {
-        // On récupère les vraies données de la BD en éliminant les doublons textuels
         $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
         $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
 
@@ -89,42 +82,47 @@ class TaskController extends Controller
     {
         $task = \App\Models\Task::findOrFail($id);
         
-        // On applique le même nettoyage anti-doublon pour l'édition
         $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
         $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
 
         return view('tasks.edit', compact('task', 'categories', 'projects'));
     }
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'category_id' => 'required|exists:categories,id',
-        'project_id' => 'nullable|exists:projects,id',
-        'priority' => 'required|in:high,medium,low',
-        'date_prevue' => 'nullable|date',
-        'heure_debut' => 'nullable',
-        'heure_fin' => 'nullable',
-    ]);
-
-    // On force la progression par défaut à 0 lors de la création
-    $validated['progress'] = 0;
-
-    \App\Models\Task::create($validated);
-
-    return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès !');
-}
 
     /**
-     * Formulaire de modification
+     * Enregistrement d'une nouvelle tâche
      */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'project_id' => 'nullable|exists:projects,id',
+            'priority' => 'required|in:high,medium,low',
+            'date_prevue' => 'nullable|date',
+            'heure_debut' => 'nullable',
+            'heure_fin' => 'nullable',
+        ]);
 
+        $validated['progress'] = 0;
+
+        \App\Models\Task::create($validated);
+
+        return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès !');
+    }
+
+    /**
+     * Mise à jour d'une tâche existante
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required|max:255',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'project_id' => 'nullable|exists:projects,id',
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
+            'heure_debut' => 'nullable', // Validation ajoutée !
+            'heure_fin' => 'nullable',   // Validation ajoutée !
             'progress' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -135,26 +133,31 @@ public function store(Request $request)
 
             $task->update([
                 'title' => $request->title,
-                'category_id' => $request->category_id ?: null,
+                'category_id' => $request->category_id,
                 'project_id' => $request->project_id ?: null,
                 'priority' => $request->priority,
                 'date_prevue' => $request->date_prevue,
+                'heure_debut' => $request->heure_debut, // Enregistrement ajouté !
+                'heure_fin' => $request->heure_fin,     // Enregistrement ajouté !
                 'progress' => $progress,
                 'status' => $status,
             ]);
         } catch (\Exception $e) {
-            return redirect()->route('tasks.index')->with('success', 'Modification simulée (Base en lecture seule).');
+            return redirect()->route('tasks.index')->with('success', 'Erreur lors de la modification : ' . $e->getMessage());
         }
 
         return redirect()->route('tasks.index')->with('success', 'Tâche modifiée avec succès.');
     }
 
+    /**
+     * Suppression d'une tâche
+     */
     public function destroy($id)
     {
         try {
             Task::destroy($id);
         } catch (\Exception $e) {
-            return redirect()->route('tasks.index')->with('success', 'Suppression simulée (Base en lecture seule).');
+            return redirect()->route('tasks.index')->with('success', 'Erreur lors de la suppression.');
         }
         return redirect()->route('tasks.index')->with('success', 'Tâche supprimée avec succès.');
     }
