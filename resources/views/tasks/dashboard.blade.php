@@ -130,5 +130,23 @@
     @endif
 </div>
 
+<!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
+<footer class="text-center py-4 mt-5" style="background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%); border-top: 1px dashed #dee2e6;">
+    <div class="container">
+        <div class="d-flex flex-column align-items-center justify-content-center gap-1">
+            <p class="mb-0 fw-semibold text-secondary" style="letter-spacing: 0.8px; font-size: 0.95rem;">
+                🚀 <span class="text-dark border-end pe-2 me-2">TaskManager</span> 
+                Propulsé avec passion par 
+                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold ms-1 shadow-sm" style="letter-spacing: 1px;">
+                    ✍️ BADO
+                </span>
+            </p>
+            <small class="text-muted opacity-75" style="font-size: 0.75rem;">
+                &copy; {{ date('Y') }} &bull; Tous droits réservés &bull; Amélioration continue
+            </small>
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>
