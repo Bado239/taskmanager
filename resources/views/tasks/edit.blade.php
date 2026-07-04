@@ -45,14 +45,16 @@
             <div class="row mb-3">
                 <div class="col-6">
                     <label class="form-label fw-bold">De (Heure début)</label>
-                    <input type="time" name="heure_debut" class="form-control" value="{{ old('heure_debut', $task->heure_debut ? \Illuminate\Support\Carbon::parse($task->heure_debut)->format('H:i') : '') }}">
+                    <!-- AJOUT DE id="heure_debut" ICI -->
+                    <input type="time" name="heure_debut" id="heure_debut" class="form-control" value="{{ old('heure_debut', $task->heure_debut ? \Illuminate\Support\Carbon::parse($task->heure_debut)->format('H:i') : '') }}">
                 </div>
                 <div class="col-6">
                     <label class="form-label fw-bold">À (Heure fin)</label>
-                    <input type="time" name="heure_fin" class="form-control" value="{{ old('heure_fin', $task->heure_fin ? \Illuminate\Support\Carbon::parse($task->heure_fin)->format('H:i') : '') }}">
+                    <!-- AJOUT DE id="heure_fin" ICI -->
+                    <input type="time" name="heure_fin" id="heure_fin" class="form-control" value="{{ old('heure_fin', $task->heure_fin ? \Illuminate\Support\Carbon::parse($task->heure_fin)->format('H:i') : '') }}">
                 </div>
             </div>
-
+            
             <!-- PRIORITÉ -->
             <div class="mb-3">
                 <label for="priority" class="form-label fw-bold">Priorité</label>
