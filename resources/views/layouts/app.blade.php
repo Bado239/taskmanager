@@ -12,11 +12,15 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
+        <style>
+            body {
+                font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+            }
+        </style>
         <!-- Scripts (Tailwind est chargé ici) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-100">
-
+    <body class="font-sans antialiased bg-gray-100 text-gray-900">
         <div class="flex h-screen overflow-hidden" id="wrapper">
             
             <!-- 1. BARRE VERTICALE À GAUCHE (SIDEBAR) -->
