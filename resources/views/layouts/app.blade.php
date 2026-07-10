@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Gestionnaire de taches') }}</title>
+        <title>Gestionnaire de tâches</title>
 
         <!-- Fonts & FontAwesome pour les icônes -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -25,9 +25,9 @@
             
             <!-- 1. BARRE VERTICALE À GAUCHE (SIDEBAR) -->
             <div id="sidebar-wrapper" class="w-64 bg-green-700 text-white flex flex-col transition-all duration-300 fixed inset-y-0 left-0 z-50 md:static md:translate-x-0 shadow-lg transform -translate-x-full">
-                <!-- Titre personnalisé demandé -->
+                <!-- TITRE CORRIGÉ EN DUR ICI -->
                 <div class="p-5 text-lg font-bold border-b border-green-600 flex items-center justify-between tracking-wide">
-                    <span>📋 Liste des pages</span>
+                    <span>📋 Gestionnaire de tâches</span>
                 </div>
                 
                 <nav class="flex-1 px-3 py-4 space-y-1">
