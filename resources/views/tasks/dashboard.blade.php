@@ -1,152 +1,121 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Tableau de Bord - TaskManager</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #f4f6f9; }
-        .stat-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0px 4px 10px rgba(0,0,0,0.03); text-decoration: none; color: inherit; display: block; transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-3px); color: inherit; }
-        .list-container { background: white; border-radius: 15px; padding: 25px; box-shadow: 0px 4px 15px rgba(0,0,0,0.05); }
-        .row-in-progress { font-weight: bold; }
-    </style>
-</head>
-<body>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Dashboard') }}
+        </h2>
+    </x-slot>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-primary mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{{ route('tasks.index') }}">📊 Tableau de Bord</a>
-        <a href="{{ route('tasks.index') }}" class="btn btn-light btn-sm">🎯 Retour au Focus Journée</a>
-    </div>
-</nav>
+    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        
+        <!-- INDICATEURS DE PERFORMANCE -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- 1. Passées / En retard -->
+            <a href="{{ route('tasks.dashboard', ['filter' => 'late']) }}" class="block bg-white p-5 rounded-lg shadow-sm border-l-4 border-red-500 hover:translate-y-[-2px] transition duration-200">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Passées / En retard</span>
+                <h2 class="text-3xl font-extrabold text-red-600 mt-1">{{ $countLate }}</h2>
+            </a>
 
-<div class="container">
-    <h2 class="fw-bold text-dark mb-4">📊 Indicateurs de Performance</h2>
+            <!-- 2. Activités à venir -->
+            <a href="{{ route('tasks.dashboard', ['filter' => 'future']) }}" class="block bg-white p-5 rounded-lg shadow-sm border-l-4 border-blue-500 hover:translate-y-[-2px] transition duration-200">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Activités à venir</span>
+                <h2 class="text-3xl font-extrabold text-blue-600 mt-1">{{ $countFuture }}</h2>
+            </a>
 
-    <!-- CARTES DES INDICATEURS -->
-    <div class="row g-3 mb-4">
-        <!-- 1. Passées / En retard -->
-        <div class="col-md-4">
-            <a href="{{ route('tasks.dashboard', ['filter' => 'late']) }}" class="stat-card border-start border-danger border-4">
-                <span class="text-muted small text-uppercase fw-bold">Passées / En retard</span>
-                <h2 class="fw-bold text-danger m-0">{{ $countLate }}</h2>
+            <!-- 3. Activités sans date -->
+            <a href="{{ route('tasks.dashboard', ['filter' => 'nodate']) }}" class="block bg-white p-5 rounded-lg shadow-sm border-l-4 border-gray-500 hover:translate-y-[-2px] transition duration-200">
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sans date de planification</span>
+                <h2 class="text-3xl font-extrabold text-gray-600 mt-1">{{ $countNoDate }}</h2>
             </a>
         </div>
-        <!-- 2. Activités à venir -->
-        <div class="col-md-4">
-            <a href="{{ route('tasks.dashboard', ['filter' => 'future']) }}" class="stat-card border-start border-primary border-4">
-                <span class="text-muted small text-uppercase fw-bold">Activités à venir</span>
-                <h2 class="fw-bold text-primary m-0">{{ $countFuture }}</h2>
-            </a>
-        </div>
-        <!-- 3. Activités sans date -->
-        <div class="col-md-4">
-            <a href="{{ route('tasks.dashboard', ['filter' => 'nodate']) }}" class="stat-card border-start border-secondary border-4">
-                <span class="text-muted small text-uppercase fw-bold">Sans date de planification</span>
-                <h2 class="fw-bold text-secondary m-0">{{ $countNoDate }}</h2>
-            </a>
-        </div>
-    </div>
 
-    <!-- LISTE DYNAMIQUE DES TÂCHES FILTRÉES -->
-    @if($filter)
-        <div class="list-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="fw-bold m-0 text-capitalize">
-                    @if($filter === 'late') 🔴 Liste des activités passées / en retard
-                    @elseif($filter === 'future') 🔵 Liste des activités à venir
-                    @elseif($filter === 'nodate') ⚫ Liste des activités de fond (sans date)
-                    @endif
-                </h4>
-                <a href="{{ route('tasks.dashboard') }}" class="btn-close" aria-label="Close"></a>
-            </div>
-
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Titre</th>
-                        <th>Catégorie</th>
-                        <th>Projet</th>
-                        @if($filter !== 'nodate')
-                            <th>Date prévue</th>
+        <!-- LISTE FILTRÉE DYNAMIQUE -->
+        @if($filter)
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">
+                        @if($filter === 'late') 🔴 Liste des activités passées / en retard
+                        @elseif($filter === 'future') 🔵 Liste des activités à venir
+                        @elseif($filter === 'nodate') ⚫ Liste des activités de fond (sans date)
                         @endif
-                        <th>Heure début</th>
-                        <th>Heure fin</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($tasks as $task)
-                        @php
-                            $isInProgress = false;
-                            $today = \Illuminate\Support\Carbon::today()->format('Y-m-d');
-                            // Si c'est aujourd'hui et qu'on est dans le créneau horaire
-                            if ($task->date_prevue && \Illuminate\Support\Carbon::parse($task->date_prevue)->format('Y-m-d') === $today) {
-                                if ($task->heure_debut && $task->heure_fin) {
-                                    $isInProgress = ($filter === 'late' || $now >= $task->heure_debut && $now <= $task->heure_fin);
-                                }
-                            }
-                        @endphp
+                    </h3>
+                    <a href="{{ route('tasks.dashboard') }}" class="text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </a>
+                </div>
 
-                        <tr class="{{ $isInProgress ? 'table-warning row-in-progress' : '' }}">
-                            <td>{{ $task->title }}</td>
-                            <td><span class="badge bg-light text-dark border">{{ $task->category->name ?? '-' }}</span></td>
-                            <td><span class="text-secondary">{{ $task->project->title ?? '-' }}</span></td>
-                            @if($filter !== 'nodate')
-                                <td>{{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}</td>
-                            @endif
-                            <td>{{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '-' }}</td>
-                            <td>
-                                {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '-' }}
-                                @if($isInProgress && $filter !== 'late')
-                                    <span class="badge bg-warning text-dark ms-2">⚡ En cours</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                <th class="py-3 px-4">Titre</th>
+                                <th class="py-3 px-4">Catégorie</th>
+                                <th class="py-3 px-4">Projet</th>
+                                @if($filter !== 'nodate')
+                                    <th class="py-3 px-4">Date prévue</th>
                                 @endif
-                            </td>
-                            <td class="text-end">
-                                <div class="d-flex justify-content-end gap-1">
-                                    <a href="{{ route('tasks.edit', $task->id) }}" class="btn btn-sm btn-outline-primary">✏️</a>
-                                    <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">🗑️</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Aucune activité trouvée dans cette catégorie.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    @else
-        <div class="alert alert-info text-center py-4">
-            💡 Cliquez sur un des indicateurs ci-dessus pour afficher la liste des activités correspondantes.
-        </div>
-    @endif
-</div>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 text-sm">
+                            @forelse($tasks as $task)
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-3.5 px-4 font-medium text-gray-900">{{ $task->title }}</td>
+                                    <td class="py-3.5 px-4">
+                                        <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2.5 py-1 rounded border border-gray-200">
+                                            {{ $task->category->name ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3.5 px-4 text-gray-500">{{ $task->project->title ?? '-' }}</td>
+                                    @if($filter !== 'nodate')
+                                        <td class="py-3.5 px-4 text-gray-600">
+                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
+                                        </td>
+                                    @endif
+                                    <td class="py-3.5 px-4 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="{{ route('tasks.edit', $task->id) }}" class="text-blue-600 hover:text-blue-800 p-1">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </a>
+                                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement ?');" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-800 p-1">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-gray-400 py-8">Aucune activité trouvée dans cette catégorie.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @else
+            <div class="bg-blue-50 border border-blue-200 text-blue-700 text-center py-6 px-4 rounded-lg shadow-sm">
+                💡 Cliquez sur un des indicateurs ci-dessus pour afficher la liste des activités correspondantes.
+            </div>
+        @endif
+    </div>
 
-<!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
-<footer class="text-center py-4 mt-5" style="background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%); border-top: 1px dashed #dee2e6;">
-    <div class="container">
-        <div class="d-flex flex-column align-items-center justify-content-center gap-1">
-            <p class="mb-0 fw-semibold text-secondary" style="letter-spacing: 0.8px; font-size: 0.95rem;">
-                🚀 <span class="text-dark border-end pe-2 me-2">TaskManager</span> 
+    <!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
+    <footer class="text-center py-6 border-t border-dashed border-gray-200 mt-auto">
+        <div class="flex flex-col items-center justify-center space-y-1">
+            <p class="text-sm font-semibold text-gray-500 tracking-wide">
+                🚀 <span class="text-gray-800 border-r border-gray-300 pr-2 mr-2">TaskManager</span> 
                 Propulsé avec passion par 
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold ms-1 shadow-sm" style="letter-spacing: 1px;">
+                <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold ml-1 shadow-sm">
                     ✍️ BADO
                 </span>
             </p>
-            <small class="text-muted opacity-75" style="font-size: 0.75rem;">
+            <span class="text-xs text-gray-400 opacity-75">
                 &copy; {{ date('Y') }} &bull; Tous droits réservés &bull; Amélioration continue
-            </small>
+            </span>
         </div>
-    </div>
-</footer>
-
-</body>
-</html>
+    </footer>
+</x-app-layout>
