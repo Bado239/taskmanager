@@ -64,8 +64,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
-
+    'timezone' => 'Africa/Dakar',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

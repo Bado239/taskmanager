@@ -7,129 +7,68 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts & Icons -->
+        <!-- Fonts & FontAwesome pour les icônes -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        <!-- Scripts -->
+        <!-- Scripts (Tailwind est chargé ici) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-        <style>
-            body {
-                overflow-x: hidden;
-            }
-            /* Structure de la Sidebar */
-            #wrapper {
-                display: flex;
-                width: 100vw;
-                height: 100vh;
-            }
-            #sidebar-wrapper {
-                min-height: 100vh;
-                width: 260px;
-                margin-left: -260px;
-                transition: margin 0.25s ease-out;
-                background-color: #198754; /* Vert Sénégal */
-                z-index: 1000;
-            }
-            #sidebar-wrapper .sidebar-heading {
-                padding: 1.2rem 1.25rem;
-                font-size: 1.2rem;
-            }
-            /* Toggle de la Sidebar */
-            #wrapper.toggled #sidebar-wrapper {
-                margin-left: 0;
-            }
-            #page-content-wrapper {
-                flex: 1;
-                width: 100%;
-                overflow-y: auto;
-            }
-            @media (min-width: 768px) {
-                #sidebar-wrapper {
-                    margin-left: 0;
-                }
-                #wrapper.toggled #sidebar-wrapper {
-                    margin-left: -260px;
-                }
-            }
-            /* Liens de la barre */
-            .sidebar-link {
-                color: rgba(255, 255, 255, 0.8);
-                text-decoration: none;
-                padding: 14px 20px;
-                display: block;
-                transition: 0.3s;
-                font-weight: 500;
-            }
-            .sidebar-link:hover, .sidebar-link.active {
-                background-color: rgba(255, 255, 255, 0.15);
-                color: #fff;
-            }
-        </style>
     </head>
     <body class="font-sans antialiased bg-gray-100">
 
-        <div id="wrapper">
+        <div class="flex h-screen overflow-hidden" id="wrapper">
             
             <!-- 1. BARRE VERTICALE À GAUCHE (SIDEBAR) -->
-            <div class="border-end shadow-sm" id="sidebar-wrapper">
-                <div class="sidebar-heading text-white fw-bold border-bottom border-light border-opacity-25 d-flex align-items-center">
+            <div id="sidebar-wrapper" class="w-64 bg-green-700 text-white flex flex-col transition-all duration-300 transform -ml-64 md:ml-0 md:relative fixed inset-y-0 left-0 z-50 shadow-lg">
+                <div class="p-5 text-xl font-bold border-b border-green-600 flex items-center justify-between">
                     <span>🇸🇳 {{ config('app.name', 'PharmaGarde') }}</span>
                 </div>
-                <div class="list-group list-group-flush my-3">
-                    <a href="{{ route('tasks.index') }}" class="sidebar-link {{ request()->routeIs('tasks.index') ? 'active' : '' }}">
-                        <i class="fa-solid fa-list-check me-2"></i> Toutes les tâches
+                
+                <nav class="flex-1 px-3 py-4 space-y-1">
+                    <a href="{{ route('tasks.index') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.index') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                        <i class="fa-solid fa-list-check w-6"></i> Toutes les tâches
                     </a>
-                    <a href="{{ route('tasks.create') }}" class="sidebar-link {{ request()->routeIs('tasks.create') ? 'active' : '' }}">
-                        <i class="fa-solid fa-plus me-2"></i> Créer une tâche
+                    <a href="{{ route('tasks.create') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.create') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                        <i class="fa-solid fa-plus w-6"></i> Créer une tâche
                     </a>
-                    <!-- Tu pourras ajouter les futurs liens pour ton site de pharmacie ici -->
-                </div>
+                </nav>
             </div>
 
-            <!-- 2. CONTENU DE LA PAGE (À DROITE) -->
-            <div id="page-content-wrapper" class="d-flex flex-column">
+            <!-- 2. CONTENU À DROITE -->
+            <div class="flex-1 flex flex-col overflow-y-auto min-w-0">
                 
-                <!-- Navbar du haut avec bouton Menu & l'ancienne navigation (profil, déconnexion...) -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-2 shadow-sm d-flex justify-content-between">
-                    <button class="btn btn-success" id="sidebarToggle">
-                        <i class="fa-solid fa-bars"></i>
+                <!-- Navbar du haut -->
+                <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 shadow-sm shrink-0">
+                    <button id="sidebarToggle" class="text-gray-600 hover:text-green-700 focus:outline-none p-2 rounded-md hover:bg-gray-100">
+                        <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                     
-                    <div class="d-flex align-items-center">
-                        <!-- On garde les infos utilisateur à droite de la navbar -->
-                        <span class="text-muted me-3">{{ Auth::user()->name ?? '' }}</span>
+                    <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-700">{{ Auth::user()->name ?? '' }}</span>
                     </div>
-                </nav>
+                </header>
 
-                <!-- En-tête dynamique (Page Heading) -->
-                @isset($header)
-                    <header class="bg-white shadow-sm border-bottom py-3 px-4">
-                        <div class="fs-4 fw-medium text-gray-800">
-                            {{ $header }}
-                        </div>
-                    </header>
-                @endisset
-
-                <!-- Injection des pages (Page Content) -->
-                <main class="flex-grow-1 p-4">
+                <!-- Injection dynamique des pages (Ton index.blade.php atterrit ici !) -->
+                <main class="flex-grow p-6">
                     {{ $slot }}
                 </main>
             </div>
 
         </div>
 
-        <!-- SCRIPT JAVASCRIPT POUR LE TOGGLE -->
+        <!-- SCRIPT JAVASCRIPT POUR LE TOGGLE (OUVRIR/FERMER) -->
         <script>
             window.addEventListener('DOMContentLoaded', event => {
                 const sidebarToggle = document.body.querySelector('#sidebarToggle');
-                if (sidebarToggle) {
+                const sidebar = document.body.querySelector('#sidebar-wrapper');
+                
+                if (sidebarToggle && sidebar) {
                     sidebarToggle.addEventListener('click', event => {
                         event.preventDefault();
-                        document.body.querySelector('#wrapper').classList.toggle('toggled');
+                        // Alterne les classes Tailwind pour afficher/masquer
+                        sidebar.classList.toggle('-ml-64');
+                        sidebar.classList.toggle('md:-ml-64');
                     });
                 }
             });
