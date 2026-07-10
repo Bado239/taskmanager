@@ -46,9 +46,9 @@
                     <i class="fa-solid fa-globe w-6"></i> Veille Tech
                 </a>
 
-                <!-- ➕ FEUILLE AJOUTER UNE PAGE -->
+                <!-- ➕ FEUILLE AJOUTER UNE TACHE -->
                 <a href="{{ route('tasks.create') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.create') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
-                    <i class="fa-solid fa-plus w-6"></i> Ajouter une page
+                    <i class="fa-solid fa-plus w-6"></i> Ajouter une activité
                 </a>
             </nav>
             </div>
