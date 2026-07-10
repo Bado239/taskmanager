@@ -20,15 +20,22 @@
         <div class="flex h-screen overflow-hidden" id="wrapper">
             
             <!-- 1. BARRE VERTICALE À GAUCHE (SIDEBAR) -->
-            <div id="sidebar-wrapper" class="w-64 bg-green-700 text-white flex flex-col transition-all duration-300 transform -ml-64 md:ml-0 md:relative fixed inset-y-0 left-0 z-50 shadow-lg">
+            <!-- Note le changement ici : md:static et utilisation de transition de largeur pour éviter les conflits -->
+            <div id="sidebar-wrapper" class="w-64 bg-green-700 text-white flex flex-col transition-all duration-300 fixed inset-y-0 left-0 z-50 md:static md:translate-x-0 shadow-lg transform -translate-x-full">
                 <div class="p-5 text-xl font-bold border-b border-green-600 flex items-center justify-between">
                     <span>🇸🇳 {{ config('app.name', 'PharmaGarde') }}</span>
                 </div>
                 
                 <nav class="flex-1 px-3 py-4 space-y-1">
+                    <!-- 📊 AJOUT DU LIEN DASHBOARD -->
+                    <a href="{{ route('tasks.dashboard') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.dashboard') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                        <i class="fa-solid fa-chart-pie w-6"></i> Dashboard
+                    </a>
+
                     <a href="{{ route('tasks.index') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.index') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
                         <i class="fa-solid fa-list-check w-6"></i> Toutes les tâches
                     </a>
+                    
                     <a href="{{ route('tasks.create') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.create') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
                         <i class="fa-solid fa-plus w-6"></i> Créer une tâche
                     </a>
@@ -49,7 +56,7 @@
                     </div>
                 </header>
 
-                <!-- Injection dynamique des pages (Ton index.blade.php atterrit ici !) -->
+                <!-- Injection dynamique des pages -->
                 <main class="flex-grow p-6">
                     {{ $slot }}
                 </main>
@@ -57,7 +64,7 @@
 
         </div>
 
-        <!-- SCRIPT JAVASCRIPT POUR LE TOGGLE (OUVRIR/FERMER) -->
+        <!-- SCRIPT JAVASCRIPT CORRIGÉ POUR LE TOGGLE -->
         <script>
             window.addEventListener('DOMContentLoaded', event => {
                 const sidebarToggle = document.body.querySelector('#sidebarToggle');
@@ -66,9 +73,14 @@
                 if (sidebarToggle && sidebar) {
                     sidebarToggle.addEventListener('click', event => {
                         event.preventDefault();
-                        // Alterne les classes Tailwind pour afficher/masquer
-                        sidebar.classList.toggle('-ml-64');
-                        sidebar.classList.toggle('md:-ml-64');
+                        
+                        // Gestion propre pour mobile et ordinateur sans bug de superposition
+                        if (window.innerWidth >= 768) {
+                            sidebar.classList.toggle('md:w-0');
+                            sidebar.classList.toggle('md:overflow-hidden');
+                        } else {
+                            sidebar.classList.toggle('-translate-x-full');
+                        }
                     });
                 }
             });
