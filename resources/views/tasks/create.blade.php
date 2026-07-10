@@ -23,8 +23,8 @@
 
                 <!-- TITRE -->
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titre de la tâche</label>
-                    <input type="text" name="title" id="title" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Ex: Finir le rapport de stage" value="{{ old('title') }}" required>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titre de la tâche</label>                   
+                    <input type="text" name="title" id="title" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Ex: Finir le rapport de stage" value="{{ old('title', $prefilledTitle) }}" required>
                 </div>
 
                 <!-- CATÉGORIE -->
