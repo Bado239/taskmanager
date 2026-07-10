@@ -18,9 +18,6 @@
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">📅 Activités prévues pour aujourd'hui</h3>
-                <a href="{{ route('tasks.create') }}" class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
-                    ➕ Ajouter une activité
-                </a>
             </div>
 
             <div class="overflow-x-auto">
