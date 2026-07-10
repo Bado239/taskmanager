@@ -1,148 +1,127 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Créer une Nouvelle Tâche</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background: #f4f6f9; }
-        .form-card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    </style>
-</head>
-<body>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Ajouter une page') }}
+        </h2>
+    </x-slot>
 
-<div class="container mt-5" style="max-width: 600px;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">➕ Nouvelle tâche</h2>
-        <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary btn-sm">Annuler</a>
-    </div>
-
-    @if ($errors->any())
-        <div class="alert alert-danger mb-4">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <div class="form-card">
-        <form action="{{ route('tasks.store') }}" method="POST">
-            @csrf
-
-            <!-- TITRE -->
-            <div class="mb-3">
-                <label for="title" class="form-label fw-bold">Titre de la tâche</label>
-                <input type="text" name="title" id="title" class="form-control" placeholder="Ex: Finir le rapport de stage" value="{{ old('title') }}" required>
-            </div>
-
-            <!-- CATÉGORIE -->
-            <div class="mb-3">
-                <label for="category_id" class="form-label fw-bold">Catégorie</label>
-                <select name="category_id" id="category_id" class="form-select" required>
-                    <option value="">-- Choisir une catégorie --</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                            {{ $category->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- PROJET ASSOCIÉ -->
-            <div class="mb-3">
-                <label for="project_id" class="form-label fw-bold">Projet associé (Optionnel)</label>
-                <select name="project_id" id="project_id" class="form-select">
-                    <option value="">-- Aucun --</option>
-                    @foreach($projects as $project)
-                        <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
-                            {{ $project->title }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <!-- PRIORITÉ -->
-            <div class="mb-3">
-                <label for="priority" class="form-label fw-bold">Priorité</label>
-                <select name="priority" id="priority" class="form-select" required>
-                    <option value="">-- Choisir le niveau --</option>
-                    <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>🔴 Haute</option>
-                    <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>🟡 Moyenne</option>
-                    <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>🔵 Basse</option>
-                </select>
-            </div>
-
-            <!-- DATE PRÉVUE -->
-            <div class="mb-3">
-                <label for="date_prevue" class="form-label fw-bold">Date prévue (Optionnelle)</label>
-                <input type="date" name="date_prevue" id="date_prevue" class="form-control" value="{{ old('date_prevue', date('Y-m-d')) }}">
-            </div>
-
-            <!-- BLOC HEURES -->
-            <div class="row mb-4">
-                <div class="col-6">
-                    <label for="heure_debut" class="form-label fw-bold">Heure de début</label>
-                    <input type="time" name="heure_debut" id="heure_debut" class="form-control" value="{{ old('heure_debut') }}">
-                </div>
-                <div class="col-6">
-                    <label for="heure_fin" class="form-label fw-bold">Heure de fin</label>
-                    <input type="time" name="heure_fin" id="heure_fin" class="form-control" value="{{ old('heure_fin') }}">
-                </div>
-            </div>
-
-            <!-- BOUTON ENREGISTRER -->
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">💾 Enregistrer l'activité</button>
-        </form>
-    </div>
-</div>
-<!-- Insère ce script tout en bas de ton fichier create.blade.php -->
-<script>
-    document.getElementById('heure_debut').addEventListener('change', function() {
-        const heureDebutVal = this.value; // Format "HH:MM"
+    <div class="py-6 max-w-3xl mx-auto sm:px-6 lg:px-8">
         
-        if (heureDebutVal) {
-            // Découpage des heures et minutes
-            let [heures, minutes] = heureDebutVal.split(':').map(Number);
-            
-            // Ajout des 2 heures
-            heures += 2;
-            
-            // Gestion du passage au lendemain (ex: 23:00 + 2h = 01:00)
-            if (heures >= 24) {
-                heures -= 24;
-            }
-            
-            // Formatage à deux chiffres (ex: "9" devient "09")
-            const heuresFormattees = String(heures).padStart(2, '0');
-            const minutesFormattees = String(minutes).padStart(2, '0');
-            
-            // Attribution automatique à l'heure de fin
-            document.getElementById('heure_fin').value = `${heuresFormattees}:${minutesFormattees}`;
-        }
-    });
-</script>
+        @if ($errors->any())
+            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-<!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
-<footer class="text-center py-4 mt-5" style="background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%); border-top: 1px dashed #dee2e6;">
-    <div class="container">
-        <div class="d-flex flex-column align-items-center justify-content-center gap-1">
-            <!-- Ligne principale -->
-            <p class="mb-0 fw-semibold text-secondary" style="letter-spacing: 0.8px; font-size: 0.95rem;">
-                🚀 <span class="text-dark border-end pe-2 me-2">TaskManager</span> 
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <form action="{{ route('tasks.store') }}" method="POST" class="space-y-4">
+                @csrf
+
+                <!-- TITRE -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titre de la tâche</label>
+                    <input type="text" name="title" id="title" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Ex: Finir le rapport de stage" value="{{ old('title') }}" required>
+                </div>
+
+                <!-- CATÉGORIE -->
+                <div>
+                    <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                    <select name="category_id" id="category_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                        <option value="">-- Choisir une catégorie --</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- PROJET ASSOCIÉ -->
+                <div>
+                    <label for="project_id" class="block text-sm font-medium text-gray-700 mb-1">Projet associé (Optionnel)</label>
+                    <select name="project_id" id="project_id" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+                        <option value="">-- Aucun --</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}" {{ old('project_id') == $project->id ? 'selected' : '' }}>
+                                {{ $project->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- PRIORITÉ -->
+                <div>
+                    <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priorité</label>
+                    <select name="priority" id="priority" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" required>
+                        <option value="">-- Choisir le niveau --</option>
+                        <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>🔴 Haute</option>
+                        <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>🟡 Moyenne</option>
+                        <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>🔵 Basse</option>
+                    </select>
+                </div>
+
+                <!-- DATE PRÉVUE -->
+                <div>
+                    <label for="date_prevue" class="block text-sm font-medium text-gray-700 mb-1">Date prévue (Optionnelle)</label>
+                    <input type="date" name="date_prevue" id="date_prevue" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('date_prevue', date('Y-m-d')) }}">
+                </div>
+
+                <!-- BLOC HEURES -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="heure_debut" class="block text-sm font-medium text-gray-700 mb-1">Heure de début</label>
+                        <input type="time" name="heure_debut" id="heure_debut" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('heure_debut') }}">
+                    </div>
+                    <div>
+                        <label for="heure_fin" class="block text-sm font-medium text-gray-700 mb-1">Heure de fin</label>
+                        <input type="time" name="heure_fin" id="heure_fin" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('heure_fin') }}">
+                    </div>
+                </div>
+
+                <!-- BOUTON ENREGISTRER -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-md shadow transition">
+                        💾 Enregistrer l'activité
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
+    <footer class="text-center py-6 border-t border-dashed border-gray-200 mt-auto">
+        <div class="flex flex-col items-center justify-center space-y-1">
+            <p class="text-sm font-semibold text-gray-500 tracking-wide">
+                🚀 <span class="text-gray-800 border-r border-gray-300 pr-2 mr-2">TaskManager</span> 
                 Propulsé avec passion par 
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold ms-1 shadow-sm" style="letter-spacing: 1px;">
+                <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold ml-1 shadow-sm">
                     ✍️ BADO
                 </span>
             </p>
-            <!-- Ligne copyright secondaire -->
-            <small class="text-muted opacity-75" style="font-size: 0.75rem;">
+            <span class="text-xs text-gray-400 opacity-75">
                 &copy; {{ date('Y') }} &bull; Tous droits réservés &bull; Amélioration continue
-            </small>
+            </span>
         </div>
-    </div>
-</footer>
+    </footer>
 
-</body>
-</html>
+    <!-- SCRIPT AUTOMATIQUE DES +2 HEURES -->
+    <script>
+        document.getElementById('heure_debut').addEventListener('change', function() {
+            const heureDebutVal = this.value;
+            if (heureDebutVal) {
+                let [heures, minutes] = heureDebutVal.split(':').map(Number);
+                heures += 2;
+                if (heures >= 24) {
+                    heures -= 24;
+                }
+                const heuresFormattees = String(heures).padStart(2, '0');
+                const minutesFormattees = String(minutes).padStart(2, '0');
+                document.getElementById('heure_fin').value = `${heuresFormattees}:${minutesFormattees}`;
+            }
+        });
+    </script>
+</x-app-layout>
