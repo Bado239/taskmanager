@@ -14,6 +14,8 @@ Route::get('/tasks/dashboard', [TaskController::class, 'dashboard'])->name('task
 // 📋 CRUD des tâches (index, create, store, edit, update, destroy)
 Route::resource('tasks', TaskController::class);
 
+Route::get('/veille-tech', [App\Http\Controllers\TaskController::class, 'veilleTech'])->name('tasks.veille');
+
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 

@@ -30,22 +30,27 @@
                     <span>📋 Gestionnaire de tâches</span>
                 </div>
                 
-                <nav class="flex-1 px-3 py-4 space-y-1">
-                    <!-- 📅 FEUILLE AUJOURD'HUI -->
-                    <a href="{{ route('tasks.index') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.index') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
-                        <i class="fa-solid fa-calendar-day w-6"></i> Aujourd'hui
-                    </a>
+            <nav class="flex-1 px-3 py-4 space-y-1">
+                <!-- 📅 FEUILLE AUJOURD'HUI -->
+                <a href="{{ route('tasks.index') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.index') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                    <i class="fa-solid fa-calendar-day w-6"></i> Aujourd'hui
+                </a>
 
-                    <!-- 📊 FEUILLE DASHBOARD -->
-                    <a href="{{ route('tasks.dashboard') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.dashboard') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
-                        <i class="fa-solid fa-chart-pie w-6"></i> Dashboard
-                    </a>
+                <!-- 📊 FEUILLE DASHBOARD -->
+                <a href="{{ route('tasks.dashboard') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.dashboard') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                    <i class="fa-solid fa-chart-pie w-6"></i> Dashboard
+                </a>
 
-                    <!-- ➕ FEUILLE AJOUTER UNE PAGE -->
-                    <a href="{{ route('tasks.create') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.create') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
-                        <i class="fa-solid fa-plus w-6"></i> Ajouter une page
-                    </a>
-                </nav>
+                <!-- 🌐 FEUILLE VEILLE TECH (AJOUTÉE ICI) -->
+                <a href="{{ route('tasks.veille') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.veille') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                    <i class="fa-solid fa-globe w-6"></i> Veille Tech
+                </a>
+
+                <!-- ➕ FEUILLE AJOUTER UNE PAGE -->
+                <a href="{{ route('tasks.create') }}" class="flex items-center px-4 py-3 rounded-md transition hover:bg-green-600 {{ request()->routeIs('tasks.create') ? 'bg-green-800 font-semibold text-white' : 'text-green-100' }}">
+                    <i class="fa-solid fa-plus w-6"></i> Ajouter une page
+                </a>
+            </nav>
             </div>
 
             <!-- 2. CONTENU À DROITE -->

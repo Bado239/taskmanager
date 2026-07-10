@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class TaskController extends Controller
 {
@@ -65,14 +67,49 @@ class TaskController extends Controller
     }
 
     /**
+     * Page de Veille Technologique (Scraping via flux RSS)
+     */
+    public function veilleTech()
+    {
+        // URL du flux RSS de TechCrunch
+        $url = "https://techcrunch.com/feed/";
+        $articles = [];
+        
+        try {
+            $content = file_get_contents($url);
+            $xml = simplexml_load_string($content);
+            
+            if ($xml) {
+                foreach ($xml->channel->item as $item) {
+                    $articles[] = [
+                        'title' => (string) $item->title,
+                        'description' => strip_tags((string) $item->description),
+                        'link' => (string) $item->link,
+                        'date' => date('d/m/Y à H:i', strtotime((string) $item->pubDate)),
+                    ];
+                    
+                    if (count($articles) >= 10) break;
+                }
+            }
+        } catch (\Exception $e) {
+            $articles = [];
+        }
+
+        return view('tasks.veille', compact('articles'));
+    }
+
+    /**
      * Formulaire de création d'une tâche
      */
-    public function create()
+    public function create(Request $request)
     {
         $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
         $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
 
-        return view('tasks.create', compact('categories', 'projects'));
+        // Permet de pré-remplir le titre si on vient de la page Veille Tech
+        $prefilledTitle = $request->query('title', '');
+
+        return view('tasks.create', compact('categories', 'projects', 'prefilledTitle'));
     }
 
     /**
@@ -89,7 +126,6 @@ class TaskController extends Controller
     }
 
     /**
-/**
      * Enregistrement d'une nouvelle tâche
      */
     public function store(Request $request)
@@ -101,7 +137,7 @@ class TaskController extends Controller
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
-            'heure_fin' => 'nullable|after:heure_debut', // ⏱️ L'heure de fin doit être après l'heure de début
+            'heure_fin' => 'nullable|after:heure_debut',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -125,11 +161,11 @@ class TaskController extends Controller
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
-            'heure_fin' => 'nullable|after:heure_debut', // ⏱️ L'heure de fin doit être après l'heure de début
+            'heure_fin' => 'nullable|after:heure_debut',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
-
+        
         try {
             $task = Task::findOrFail($id);
             $progress = $request->progress ?? 0;
@@ -152,6 +188,7 @@ class TaskController extends Controller
 
         return redirect()->route('tasks.index')->with('success', 'Tâche modifiée avec succès.');
     }
+
     /**
      * Suppression d'une tâche
      */
