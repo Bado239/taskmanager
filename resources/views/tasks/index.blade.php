@@ -1,55 +1,44 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Mes Tâches d'Aujourd'hui</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background: #f4f6f9; }
-        .task-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    </style>
-</head>
-<body>
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Mes Tâches d\'Aujourd\'hui') }}
+        </h2>
+    </x-slot>
 
-<div class="container mt-4">
-    <!-- DEUX BOUTONS TOUT EN HAUT -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <a href="{{ route('tasks.dashboard') }}" class="btn btn-outline-secondary px-4 fw-bold">📊 Dashboard</a>
-        <a href="{{ route('tasks.create') }}" class="btn btn-primary px-4 fw-bold">➕ Nouvelle tâche</a>
-    </div>
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            @if(session('success'))
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            {{ session('success') }}
+            <!-- BLOC UNIQUE : AUJOURD'HUI -->
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <h3 class="text-lg font-bold text-green-700 mb-4 flex items-center">
+                    <span class="mr-2">📅</span> Aujourd'hui
+                </h3>
+                
+                <!-- Inclusion de ton tableau de tâches -->
+                @include('tasks.partials.table', ['tasks' => $todayTasks])
+            </div>
         </div>
-    @endif
-
-    <!-- BLOC UNIQUE : AUJOURD'HUI -->
-    <div class="task-card">
-        <h2 class="text-primary fw-bold mb-4">📅 Aujourd'hui</h2>
-        @include('tasks.partials.table', ['tasks' => $todayTasks])
     </div>
-</div>
 
-<!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
-<footer class="text-center py-4 mt-5" style="background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%); border-top: 1px dashed #dee2e6;">
-    <div class="container">
-        <div class="d-flex flex-column align-items-center justify-content-center gap-1">
-            <!-- Ligne principale -->
-            <p class="mb-0 fw-semibold text-secondary" style="letter-spacing: 0.8px; font-size: 0.95rem;">
-                🚀 <span class="text-dark border-end pe-2 me-2">TaskManager</span> 
+    <!-- 🌟 PIED DE PAGE & SIGNATURE BADO 🌟 -->
+    <footer class="text-center py-6 mt-8 border-t border-dashed border-gray-200">
+        <div class="flex flex-col items-center justify-center space-y-1">
+            <p class="text-sm font-semibold text-gray-500 tracking-wide">
+                🚀 <span class="text-gray-800 border-r border-gray-300 pr-2 mr-2">TaskManager</span> 
                 Propulsé avec passion par 
-                <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold ms-1 shadow-sm" style="letter-spacing: 1px;">
+                <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold ml-1 shadow-sm">
                     ✍️ BADO
                 </span>
             </p>
-            <!-- Ligne copyright secondaire -->
-            <small class="text-muted opacity-75" style="font-size: 0.75rem;">
+            <span class="text-xs text-gray-400 opacity-75">
                 &copy; {{ date('Y') }} &bull; Tous droits réservés &bull; Amélioration continue
-            </small>
+            </span>
         </div>
-    </div>
-</footer>
-
-</body>
-</html>
+    </footer>
+</x-app-layout>
