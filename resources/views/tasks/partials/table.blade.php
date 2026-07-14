@@ -27,10 +27,23 @@
 
                 <tr class="{{ $isInProgress ? 'table-warning fw-bold' : '' }}">
                     <td>
-                        <strong>{{ $task->title }}</strong>
-                        @if($isInProgress)
-                            <span class="badge bg-warning text-dark ms-2">⚡ En cours</span>
-                        @endif
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <strong>{{ $task->title }}</strong>
+                            
+                            <!-- Badge Statut Temporel -->
+                            @if($isInProgress)
+                                <span class="badge bg-warning text-dark">⚡ En cours</span>
+                            @endif
+
+                            <!-- 🔗 Bouton d'accès rapide au cours ou à l'emploi du temps -->
+                            @if($task->document_link)
+                                <a href="{{ $task->document_link }}" target="_blank" 
+                                   class="badge bg-info text-dark text-decoration-none"
+                                   title="Ouvrir le document de cours ou de planning">
+                                    📄 Cours / Doc
+                                </a>
+                            @endif
+                        </div>
                     </td>
                     <td>{{ $task->category->name ?? '-' }}</td>
                     <td>{{ $task->project->title ?? '-' }}</td>
