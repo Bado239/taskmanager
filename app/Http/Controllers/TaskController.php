@@ -25,7 +25,7 @@ class TaskController extends Controller
         $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
                 $query->where('heure_fin', '>=', $now)
-                    ->orWhereNull('heure_fin');
+                      ->orWhereNull('heure_fin');
             })
             ->orderBy('heure_debut', 'asc')
             ->get();
@@ -138,6 +138,7 @@ class TaskController extends Controller
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
+            'document_link' => 'nullable|url', // ✅ Ajouté à la validation
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -162,6 +163,7 @@ class TaskController extends Controller
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
+            'document_link' => 'nullable|url', // ✅ Ajouté à la validation
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -179,6 +181,7 @@ class TaskController extends Controller
                 'date_prevue' => $request->date_prevue,
                 'heure_debut' => $request->heure_debut,
                 'heure_fin' => $request->heure_fin,
+                'document_link' => $request->document_link, // ✅ Enregistré ici aussi
                 'progress' => $progress,
                 'status' => $status,
             ]);
