@@ -63,7 +63,17 @@
                         <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>🔵 Basse</option>
                     </select>
                 </div>
-
+                <!-- 🔗 LIEN DU DOCUMENT (COURS OU EMPLOI DU TEMPS) -->
+                <div class="space-y-1">
+                    <label for="document_link" class="block text-sm font-medium text-gray-700">
+                        🔗 Lien du document / cours (Google Drive, OneDrive, Image...)
+                    </label>
+                    <input type="url" name="document_link" id="document_link" 
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 text-sm" 
+                        placeholder="https://drive.google.com/file/d/..." 
+                        value="{{ old('document_link') }}">
+                    <p class="text-xs text-gray-400">Colle ici le lien vers ton PDF de cours ou l'image de ton emploi du temps hébergée en ligne.</p>
+                </div>
                 <!-- DATE PRÉVUE -->
                 <div>
                     <label for="date_prevue" class="block text-sm font-medium text-gray-700 mb-1">Date prévue (Optionnelle)</label>

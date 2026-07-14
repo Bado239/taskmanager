@@ -65,7 +65,19 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-gray-400 py-8">🎉 Aucune activité restante pour aujourd'hui !</td>
+                                <td class="py-3.5 px-4 font-medium text-gray-900">
+                                    <div class="flex items-center gap-2">
+                                        <span>{{ $task->title }}</span>
+                                        
+                                        @if($task->document_link)
+                                            <a href="{{ $task->document_link }}" target="_blank" 
+                                            class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded hover:bg-blue-100 transition font-semibold"
+                                            title="Ouvrir le document">
+                                                <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc
+                                            </a>
+                                        @endif
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
