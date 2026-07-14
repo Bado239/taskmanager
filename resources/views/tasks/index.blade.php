@@ -18,6 +18,9 @@
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">📅 Activités prévues pour aujourd'hui</h3>
+                <a href="{{ route('tasks.create') }}" class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
+                    ➕ Ajouter une activité
+                </a>
             </div>
 
             <div class="overflow-x-auto">
@@ -35,7 +38,20 @@
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse($todayTasks as $task)
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3.5 px-4 font-medium text-gray-900">{{ $task->title }}</td>
+                                <!-- Colonne Titre + Bouton du lien vers le cours/document -->
+                                <td class="py-3.5 px-4 font-medium text-gray-900">
+                                    <div class="flex items-center gap-2">
+                                        <span>{{ $task->title }}</span>
+                                        
+                                        @if($task->document_link)
+                                            <a href="{{ $task->document_link }}" target="_blank" 
+                                               class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded hover:bg-blue-100 transition font-semibold"
+                                               title="Ouvrir le document">
+                                                <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc
+                                            </a>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="py-3.5 px-4">
                                     <span class="inline-block bg-green-50 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">
                                         {{ $task->category->name ?? '-' }}
@@ -64,20 +80,9 @@
                                 </td>
                             </tr>
                         @empty
+                            <!-- Bloc vide sans référence à $task -->
                             <tr>
-                                <td class="py-3.5 px-4 font-medium text-gray-900">
-                                    <div class="flex items-center gap-2">
-                                        <span>{{ $task->title }}</span>
-                                        
-                                        @if($task->document_link)
-                                            <a href="{{ $task->document_link }}" target="_blank" 
-                                            class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded hover:bg-blue-100 transition font-semibold"
-                                            title="Ouvrir le document">
-                                                <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
+                                <td colspan="6" class="text-center text-gray-400 py-8">🎉 Aucune activité restante pour aujourd'hui !</td>
                             </tr>
                         @endforelse
                     </tbody>
