@@ -18,6 +18,7 @@ Route::get('/tasks/dashboard', [TaskController::class, 'dashboard'])->name('task
 // 📋 CRUD des tâches (index, create, store, edit, update, destroy)
 Route::resource('tasks', TaskController::class);
 
+// 📰 Page de Veille Technologique
 Route::get('/veille-tech', [TaskController::class, 'veilleTech'])->name('tasks.veille');
 
 
@@ -36,41 +37,33 @@ Route::get('/force-clean-db', function () {
     }
 });
 
-// 🚀 ROUTE DE MIGRATION DE BASE DE DONNÉES ET CRÉATION DU DOSSIER DE STOCKAGE PUBLIC
+// 🚀 ROUTE DE MIGRATION DE BASE DE DONNÉES
 Route::get('/run-migration-bado', function () {
     try {
         // Exécute les nouvelles tables (dont 'schedules')
         Artisan::call('migrate', ['--force' => true]);
         $migrationOutput = Artisan::output();
 
-        // Crée le lien symbolique vers le stockage public indispensable pour Render !
-        Artisan::call('storage:link');
-        $storageOutput = Artisan::output();
-
-        return "<h3>Migration et liaison de stockage réussies !</h3>
+        return "<h3>Migration réussie !</h3>
                 <p>Résultat des migrations :</p>
-                <pre>" . $migrationOutput . "</pre>
-                <p>Résultat du stockage :</p>
-                <pre>" . ($storageOutput ?: 'Lien de stockage déjà existant ou lié.') . "</pre>";
+                <pre>" . $migrationOutput . "</pre>";
     } catch (\Exception $e) {
         return "Erreur lors de la maintenance : " . $e->getMessage();
     }
 });
 
 
-// 🖼️ Enregistrement de l'emploi du temps
+// 🖼️ Enregistrement du lien de l'emploi du temps (Compatible Render Gratuit ☁️)
 Route::post('/schedule-upload', function (Request $request) {
+    // On valide que l'entrée est bien une URL valide
     $request->validate([
-        'schedule_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        'schedule_url' => 'required|url',
     ]);
 
-    if ($request->hasFile('schedule_file')) {
-        // Sauvegarde physique de l'image
-        $path = $request->file('schedule_file')->store('schedules', 'public');
-        
-        // On enregistre le nouveau chemin en base de données
-        Schedule::create(['file_path' => $path]);
-    }
+    // On enregistre simplement l'adresse URL externe de l'image
+    Schedule::create([
+        'file_path' => $request->schedule_url
+    ]);
 
     return back()->with('success', 'Emploi du temps mis à jour avec succès !');
 })->name('schedule.upload');
