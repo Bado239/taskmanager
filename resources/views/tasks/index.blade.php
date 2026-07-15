@@ -14,6 +14,37 @@
         @endif
 
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                📅 Mon Emploi du Temps du Semestre
+            </h3>
+
+            @if($currentSchedule)
+                <div class="relative border border-gray-200 rounded-lg overflow-hidden bg-gray-50 max-h-96 flex justify-center items-center group">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($currentSchedule->file_path) }}" alt="Emploi du temps" class="object-contain max-h-96 w-full transition duration-300 group-hover:opacity-95">
+                    
+                    <div class="absolute bottom-4 right-4">
+                        <a href="{{ \Illuminate\Support\Facades\Storage::url($currentSchedule->file_path) }}" target="_blank" class="bg-gray-900 bg-opacity-75 hover:bg-opacity-90 text-white text-xs font-semibold py-2 px-3 rounded-md transition shadow flex items-center gap-1">
+                            <i class="fa-solid fa-expand"></i> Voir en grand / Imprimer
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
+                    📸 Aucun emploi du temps n'a encore été téléversé pour ce semestre.
+                </div>
+            @endif
+
+            <form action="{{ route('schedule.upload') }}" method="POST" enctype="multipart/form-data" class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
+                @csrf
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Mettre à jour la photo :</label>
+                <input type="file" name="schedule_file" accept="image/*,application/pdf" required class="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-1.5 px-3 rounded text-xs transition shadow-sm">
+                    💾 Sauvegarder
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">📅 Activités prévues pour aujourd'hui</h3>
                 <a href="{{ route('tasks.create') }}" class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
@@ -50,47 +81,12 @@
                                             @endif
 
                                             @if($task->file_path)
-                                                <a href="{{ asset('storage/' . $task->file_path) }}" target="_blank" 
+                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($task->file_path) }}" target="_blank" 
                                                    class="inline-flex items-center text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded hover:bg-green-100 transition font-semibold"
                                                    title="Ouvrir le fichier local">
                                                     <i class="fa-solid fa-folder-open mr-1"></i> Voir le document
                                                 </a>
                                             @endif
-                                            <!-- 🖼️ BLOC EMPLOI DU TEMPS -->
-                                            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                                                <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                                    📅 Mon Emploi du Temps du Semestre
-                                                </h3>
-
-                                                @if($currentSchedule)
-                                                    <!-- Liseuse d'image -->
-                                                    <div class="relative border border-gray-200 rounded-lg overflow-hidden bg-gray-50 max-h-96 flex justify-center items-center group">
-                                                        <img src="{{ asset('storage/' . $currentSchedule->file_path) }}" alt="Emploi du temps" class="object-contain max-h-96 w-full transition duration-300 group-hover:opacity-95">
-                                                        
-                                                        <!-- Bouton plein écran -->
-                                                        <div class="absolute bottom-4 right-4">
-                                                            <a href="{{ asset('storage/' . $currentSchedule->file_path) }}" target="_blank" class="bg-gray-900 bg-opacity-75 hover:bg-opacity-90 text-white text-xs font-semibold py-2 px-3 rounded-md transition shadow flex items-center gap-1">
-                                                                <i class="fa-solid fa-expand"></i> Voir en grand / Imprimer
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                @else
-                                                    <!-- Message si aucun emploi du temps n'est configuré -->
-                                                    <div class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
-                                                        📸 Aucun emploi du temps n'a encore été téléversé pour ce semestre.
-                                                    </div>
-                                                @endif
-
-                                                <!-- Petit formulaire rapide pour mettre à jour l'image en un clic -->
-                                                <form action="{{ route('schedule.upload') }}" method="POST" enctype="multipart/form-data" class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
-                                                    @csrf
-                                                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Mettre à jour la photo :</label>
-                                                    <input type="file" name="schedule_file" accept="image/*,application/pdf" required class="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                                                    <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-1.5 px-3 rounded text-xs transition shadow-sm">
-                                                        💾 Sauvegarder
-                                                    </button>
-                                                </form>
-                                            </div>
                                         </div>
                                     </div>
                                 </td>
