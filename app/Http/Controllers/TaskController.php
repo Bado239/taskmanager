@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -13,16 +14,17 @@ use Illuminate\Support\Str;
 class TaskController extends Controller
 {
     /**
-     * Affiche uniquement les tâches d'aujourd'hui
+     * Affiche uniquement les tâches d'aujourd'hui et l'emploi du temps
      */
     public function index()
     {
         // Heure et date du Sénégal
-        $today = \Carbon\Carbon::today('Africa/Dakar')->toDateString();
-        $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
+        $today = Carbon::today('Africa/Dakar')->toDateString();
+        $now = Carbon::now('Africa/Dakar')->format('H:i:s');
 
         // On affiche les tâches d'aujourd'hui en cours OU à venir (heure de fin non dépassée ou non définie)
-        $todayTasks = \App\Models\Task::whereDate('date_prevue', $today)
+        $todayTasks = Task::with(['category', 'project'])
+            ->whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
                 $query->where('heure_fin', '>=', $now)
                       ->orWhereNull('heure_fin');
@@ -30,19 +32,22 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-        return view('tasks.index', compact('todayTasks'));
+        // 🖼️ On récupère le dernier emploi du temps téléversé
+        $currentSchedule = Schedule::latest()->first();
+
+        return view('tasks.index', compact('todayTasks', 'currentSchedule'));
     }
 
     /**
      * Tableau de bord avec indicateurs
      */
-    public function dashboard(\Illuminate\Http\Request $request)
+    public function dashboard(Request $request)
     {
-        $today = \Carbon\Carbon::today('Africa/Dakar')->toDateString();
-        $now = \Carbon\Carbon::now('Africa/Dakar')->format('H:i:s');
+        $today = Carbon::today('Africa/Dakar')->toDateString();
+        $now = Carbon::now('Africa/Dakar')->format('H:i:s');
         $filter = $request->query('filter');
 
-        $lateQuery = \App\Models\Task::where(function($query) use ($today, $now) {
+        $lateQuery = Task::where(function($query) use ($today, $now) {
             $query->whereDate('date_prevue', '<', $today)
                 ->orWhere(function($q) use ($today, $now) {
                     $q->whereDate('date_prevue', $today)
@@ -51,16 +56,16 @@ class TaskController extends Controller
         });
 
         $countLate = $lateQuery->count();
-        $countFuture = \App\Models\Task::whereDate('date_prevue', '>', $today)->count();
-        $countNoDate = \App\Models\Task::whereNull('date_prevue')->count();
+        $countFuture = Task::whereDate('date_prevue', '>', $today)->count();
+        $countNoDate = Task::whereNull('date_prevue')->count();
 
         $tasks = collect();
         if ($filter === 'late') {
             $tasks = $lateQuery->orderBy('date_prevue', 'desc')->orderBy('heure_fin', 'desc')->get();
         } elseif ($filter === 'future') {
-            $tasks = \App\Models\Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->get();
+            $tasks = Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->get();
         } elseif ($filter === 'nodate') {
-            $tasks = \App\Models\Task::whereNull('date_prevue')->get();
+            $tasks = Task::whereNull('date_prevue')->get();
         }
 
         return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
@@ -103,8 +108,8 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
-        $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
+        $categories = Category::orderBy('name')->get()->unique('name');
+        $projects = Project::orderBy('title')->get()->unique('title');
 
         // Permet de pré-remplir le titre si on vient de la page Veille Tech
         $prefilledTitle = $request->query('title', '');
@@ -117,16 +122,16 @@ class TaskController extends Controller
      */
     public function edit($id)
     {
-        $task = \App\Models\Task::findOrFail($id);
+        $task = Task::findOrFail($id);
         
-        $categories = \App\Models\Category::orderBy('name')->get()->unique('name');
-        $projects = \App\Models\Project::orderBy('title')->get()->unique('title');
+        $categories = Category::orderBy('name')->get()->unique('name');
+        $projects = Project::orderBy('title')->get()->unique('title');
 
         return view('tasks.edit', compact('task', 'categories', 'projects'));
     }
 
     /**
-     * Enregistrement d'une nouvelle tâche
+     * Enregistrement d'une nouvelle tâche (avec gestion de fichier)
      */
     public function store(Request $request)
     {
@@ -138,20 +143,27 @@ class TaskController extends Controller
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
-            'document_link' => 'nullable|url', // ✅ Ajouté à la validation
+            'document_link' => 'nullable|url',
+            'file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120', // Max 5 Mo
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
 
+        // Gestion de l'upload du fichier (cours ou autre)
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('tasks_files', 'public');
+            $validated['file_path'] = $path;
+        }
+
         $validated['progress'] = 0;
 
-        \App\Models\Task::create($validated);
+        Task::create($validated);
 
         return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès !');
     }
 
     /**
-     * Mise à jour d'une tâche existante
+     * Mise à jour d'une tâche existante (avec gestion de fichier)
      */
     public function update(Request $request, $id)
     {
@@ -163,7 +175,8 @@ class TaskController extends Controller
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
-            'document_link' => 'nullable|url', // ✅ Ajouté à la validation
+            'document_link' => 'nullable|url',
+            'file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120', // Max 5 Mo
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -173,7 +186,7 @@ class TaskController extends Controller
             $progress = $request->progress ?? 0;
             $status = $progress == 100 ? 'done' : ($progress > 0 ? 'doing' : 'todo');
 
-            $task->update([
+            $data = [
                 'title' => $request->title,
                 'category_id' => $request->category_id,
                 'project_id' => $request->project_id ?: null,
@@ -181,10 +194,18 @@ class TaskController extends Controller
                 'date_prevue' => $request->date_prevue,
                 'heure_debut' => $request->heure_debut,
                 'heure_fin' => $request->heure_fin,
-                'document_link' => $request->document_link, // ✅ Enregistré ici aussi
+                'document_link' => $request->document_link,
                 'progress' => $progress,
                 'status' => $status,
-            ]);
+            ];
+
+            // Si un nouveau fichier physique est déposé
+            if ($request->hasFile('file')) {
+                $path = $request->file('file')->store('tasks_files', 'public');
+                $data['file_path'] = $path;
+            }
+
+            $task->update($data);
         } catch (\Exception $e) {
             return redirect()->route('tasks.index')->with('success', 'Erreur lors de la modification : ' . $e->getMessage());
         }

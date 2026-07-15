@@ -41,3 +41,21 @@ Route::get('/run-migration-bado', function () {
         return "Erreur lors de la migration : " . $e->getMessage();
     }
 });
+
+use App\Models\Schedule;
+use Illuminate\Http\Request;
+
+Route::post('/schedule-upload', function (Request $request) {
+    $request->validate([
+        'schedule_file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+    ]);
+
+    if ($request->hasFile('schedule_file')) {
+        $path = $request->schedule_file->store('schedules', 'public');
+        
+        // On enregistre le nouveau chemin
+        Schedule::create(['file_path' => $path]);
+    }
+
+    return back()->with('success', 'Emploi du temps mis à jour avec succès !');
+})->name('schedule.upload');
