@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\Category;
 use App\Models\Project;
 use App\Models\Schedule;
+use App\Models\ExamPrep; // Ajout du modèle d'examen
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -14,7 +15,7 @@ use Illuminate\Support\Str;
 class TaskController extends Controller
 {
     /**
-     * Affiche uniquement les tâches d'aujourd'hui et l'emploi du temps
+     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
      */
     public function index()
     {
@@ -22,8 +23,12 @@ class TaskController extends Controller
         $today = Carbon::today('Africa/Dakar')->toDateString();
         $now = Carbon::now('Africa/Dakar')->format('H:i:s');
 
-        // On affiche les tâches d'aujourd'hui en cours OU à venir (heure de fin non dépassée ou non définie)
-        $todayTasks = Task::with(['category', 'project'])
+        // Récupération du mode utilisateur actif (par défaut 'office')
+        $currentMode = session('user_mode', 'office');
+
+        // On affiche les tâches d'aujourd'hui filtrées par le mode (Master ou Bureau)
+        $todayTasks = Task::with(['category', 'project', 'examPrep'])
+            ->where('type', $currentMode)
             ->whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
                 $query->where('heure_fin', '>=', $now)
@@ -32,22 +37,78 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-        // 🖼️ On récupère le dernier emploi du temps téléversé
+        // Si on est en mode Master, on calcule l'état global de préparation aux examens de la journée
+        $examStats = null;
+        if ($currentMode === 'master') {
+            $totalSubjects = $todayTasks->count();
+            if ($totalSubjects > 0) {
+                $reviewed = $todayTasks->where('examPrep.course_reviewed', true)->count();
+                $summaries = $todayTasks->where('examPrep.summary_done', true)->count();
+                $exercises = $todayTasks->where('examPrep.exercises_done', true)->count();
+                $papers = $todayTasks->where('examPrep.past_papers_done', true)->count();
+
+                $globalProgress = (($reviewed + $summaries + $exercises + $papers) / ($totalSubjects * 4)) * 100;
+                $examStats = [
+                    'global_progress' => round($globalProgress),
+                    'reviewed' => $reviewed,
+                    'summaries' => $summaries,
+                    'exercises' => $exercises,
+                    'papers' => $papers,
+                    'total' => $totalSubjects
+                ];
+            }
+        }
+
+        // 🖼️ On récupère le dernier emploi du temps
         $currentSchedule = Schedule::latest()->first();
 
-        return view('tasks.index', compact('todayTasks', 'currentSchedule'));
+        return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats'));
     }
 
     /**
-     * Tableau de bord avec indicateurs
+     * Bascule entre le mode Bureau (office) et le mode Master (master)
+     */
+    public function switchMode($mode)
+    {
+        if (in_array($mode, ['master', 'office'])) {
+            session(['user_mode' => $mode]);
+        }
+        return redirect()->route('tasks.index');
+    }
+
+    /**
+     * Met à jour les étapes de révision d'un cours spécifique (Master)
+     */
+    public function updateExamPrep(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+        
+        $prep = ExamPrep::firstOrCreate(['task_id' => $task->id]);
+
+        $prep->update([
+            'course_reviewed' => $request->has('course_reviewed'),
+            'summary_done' => $request->has('summary_done'),
+            'exercises_done' => $request->has('exercises_done'),
+            'past_papers_done' => $request->has('past_papers_done'),
+        ]);
+
+        return back()->with('success', 'Suivi de révision mis à jour avec succès !');
+    }
+
+    /**
+     * Tableau de bord avec indicateurs filtrés selon le mode actif
      */
     public function dashboard(Request $request)
     {
         $today = Carbon::today('Africa/Dakar')->toDateString();
         $now = Carbon::now('Africa/Dakar')->format('H:i:s');
         $filter = $request->query('filter');
+        $currentMode = session('user_mode', 'office');
 
-        $lateQuery = Task::where(function($query) use ($today, $now) {
+        // Requête de base filtrée par le type de cockpit actif (Master ou Bureau)
+        $baseQuery = Task::where('type', $currentMode);
+
+        $lateQuery = (clone $baseQuery)->where(function($query) use ($today, $now) {
             $query->whereDate('date_prevue', '<', $today)
                 ->orWhere(function($q) use ($today, $now) {
                     $q->whereDate('date_prevue', $today)
@@ -56,27 +117,26 @@ class TaskController extends Controller
         });
 
         $countLate = $lateQuery->count();
-        $countFuture = Task::whereDate('date_prevue', '>', $today)->count();
-        $countNoDate = Task::whereNull('date_prevue')->count();
+        $countFuture = (clone $baseQuery)->whereDate('date_prevue', '>', $today)->count();
+        $countNoDate = (clone $baseQuery)->whereNull('date_prevue')->count();
 
         $tasks = collect();
         if ($filter === 'late') {
             $tasks = $lateQuery->orderBy('date_prevue', 'desc')->orderBy('heure_fin', 'desc')->get();
         } elseif ($filter === 'future') {
-            $tasks = Task::whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->get();
+            $tasks = (clone $baseQuery)->whereDate('date_prevue', '>', $today)->orderBy('date_prevue', 'asc')->get();
         } elseif ($filter === 'nodate') {
-            $tasks = Task::whereNull('date_prevue')->get();
+            $tasks = (clone $baseQuery)->whereNull('date_prevue')->get();
         }
 
-        return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now'));
+        return view('tasks.dashboard', compact('countLate', 'countFuture', 'countNoDate', 'filter', 'tasks', 'now', 'currentMode'));
     }
 
     /**
-     * Page de Veille Technologique (Scraping via flux RSS)
+     * Page de Veille Technologique
      */
     public function veilleTech()
     {
-        // URL du flux RSS de TechCrunch
         $url = "https://techcrunch.com/feed/";
         $articles = [];
         
@@ -110,11 +170,10 @@ class TaskController extends Controller
     {
         $categories = Category::orderBy('name')->get()->unique('name');
         $projects = Project::orderBy('title')->get()->unique('title');
-
-        // Permet de pré-remplir le titre si on vient de la page Veille Tech
         $prefilledTitle = $request->query('title', '');
+        $currentMode = session('user_mode', 'office');
 
-        return view('tasks.create', compact('categories', 'projects', 'prefilledTitle'));
+        return view('tasks.create', compact('categories', 'projects', 'prefilledTitle', 'currentMode'));
     }
 
     /**
@@ -123,15 +182,15 @@ class TaskController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-        
         $categories = Category::orderBy('name')->get()->unique('name');
         $projects = Project::orderBy('title')->get()->unique('title');
+        $currentMode = session('user_mode', 'office');
 
-        return view('tasks.edit', compact('task', 'categories', 'projects'));
+        return view('tasks.edit', compact('task', 'categories', 'projects', 'currentMode'));
     }
 
     /**
-     * Enregistrement d'une nouvelle tâche (avec gestion de fichier)
+     * Enregistrement d'une nouvelle tâche (Utilise les nouveaux attributs document_status et type)
      */
     public function store(Request $request)
     {
@@ -144,26 +203,28 @@ class TaskController extends Controller
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
             'document_link' => 'nullable|url',
-            'file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120', // Max 5 Mo
+            'type' => 'required|in:master,office',
+            'document_status' => 'required|in:none,todo,in_progress,done',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
 
-        // Gestion de l'upload du fichier (cours ou autre)
-        if ($request->hasFile('file')) {
-            $path = $request->file('file')->store('tasks_files', 'public');
-            $validated['file_path'] = $path;
-        }
-
         $validated['progress'] = 0;
 
-        Task::create($validated);
+        $task = Task::create($validated);
+
+        // Si c'est une tâche Master, on initialise automatiquement sa fiche de préparation aux examens
+        if ($task->type === 'master') {
+            ExamPrep::create([
+                'task_id' => $task->id,
+            ]);
+        }
 
         return redirect()->route('tasks.index')->with('success', 'Activité créée avec succès !');
     }
 
     /**
-     * Mise à jour d'une tâche existante (avec gestion de fichier)
+     * Mise à jour d'une tâche existante
      */
     public function update(Request $request, $id)
     {
@@ -176,7 +237,8 @@ class TaskController extends Controller
             'heure_debut' => 'nullable',
             'heure_fin' => 'nullable|after:heure_debut',
             'document_link' => 'nullable|url',
-            'file' => 'nullable|file|mimes:pdf,png,jpg,jpeg|max:5120', // Max 5 Mo
+            'type' => 'required|in:master,office',
+            'document_status' => 'required|in:none,todo,in_progress,done',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -186,7 +248,7 @@ class TaskController extends Controller
             $progress = $request->progress ?? 0;
             $status = $progress == 100 ? 'done' : ($progress > 0 ? 'doing' : 'todo');
 
-            $data = [
+            $task->update([
                 'title' => $request->title,
                 'category_id' => $request->category_id,
                 'project_id' => $request->project_id ?: null,
@@ -195,17 +257,11 @@ class TaskController extends Controller
                 'heure_debut' => $request->heure_debut,
                 'heure_fin' => $request->heure_fin,
                 'document_link' => $request->document_link,
+                'type' => $request->type,
+                'document_status' => $request->document_status,
                 'progress' => $progress,
                 'status' => $status,
-            ];
-
-            // Si un nouveau fichier physique est déposé
-            if ($request->hasFile('file')) {
-                $path = $request->file('file')->store('tasks_files', 'public');
-                $data['file_path'] = $path;
-            }
-
-            $task->update($data);
+            ]);
         } catch (\Exception $e) {
             return redirect()->route('tasks.index')->with('success', 'Erreur lors de la modification : ' . $e->getMessage());
         }

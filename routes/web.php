@@ -67,3 +67,9 @@ Route::post('/schedule-upload', function (Request $request) {
 
     return back()->with('success', 'Emploi du temps mis à jour avec succès !');
 })->name('schedule.upload');
+
+// Bascule entre Mode Bureau et Mode Master
+Route::get('/switch-mode/{mode}', [TaskController::class, 'switchMode'])->name('mode.switch');
+
+// Sauvegarde des étapes de révision d'un cours
+Route::post('/tasks/{task}/update-exam-prep', [TaskController::class, 'updateExamPrep'])->name('tasks.updatePrep');

@@ -1,130 +1,176 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Focus du Jour') }}
-        </h2>
-    </x-slot>
+    @php
+        $isMaster = $currentMode === 'master';
+        $themeBg = $isMaster ? 'bg-purple-50' : 'bg-slate-50';
+        $themeText = $isMaster ? 'text-purple-900' : 'text-slate-900';
+        $themeBtn = $isMaster ? 'bg-purple-600 hover:bg-purple-700' : 'bg-blue-600 hover:bg-blue-700';
+        $themeCardHeader = $isMaster ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800';
+    @endphp
 
-    <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-        
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-        @endif
+    <div class="py-6 {{ $themeBg }} min-h-screen">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                📅 Mon Emploi du Temps du Semestre
-            </h3>
-
-            @if($currentSchedule)
-                <div class="relative border border-gray-200 rounded-lg overflow-hidden bg-gray-50 max-h-96 flex justify-center items-center group">
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($currentSchedule->file_path) }}" alt="Emploi du temps" class="object-contain max-h-96 w-full transition duration-300 group-hover:opacity-95">
-                    
-                    <div class="absolute bottom-4 right-4">
-                        <a href="{{ \Illuminate\Support\Facades\Storage::url($currentSchedule->file_path) }}" target="_blank" class="bg-gray-900 bg-opacity-75 hover:bg-opacity-90 text-white text-xs font-semibold py-2 px-3 rounded-md transition shadow flex items-center gap-1">
-                            <i class="fa-solid fa-expand"></i> Voir en grand / Imprimer
-                        </a>
-                    </div>
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div>
+                    <h1 class="text-xl font-extrabold tracking-tight {{ $themeText }}">
+                        {!! $isMaster ? '🎓 Master Academy <span class="text-sm font-normal text-purple-500">(Préparation Examens)</span>' : '💼 Office Cockpit <span class="text-sm font-normal text-slate-500">(Gestion de Projets & Livrables)</span>' !!}
+                    </h1>
                 </div>
-            @else
-                <div class="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 text-sm">
-                    📸 Aucun emploi du temps n'a encore été téléversé pour ce semestre.
+                
+                <div class="flex bg-gray-100 p-1 rounded-lg">
+                    <a href="{{ route('mode.switch', 'office') }}" 
+                       class="px-4 py-2 rounded-md text-xs font-bold transition flex items-center gap-1.5 {{ !$isMaster ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-800' }}">
+                        💼 Bureau
+                    </a>
+                    <a href="{{ route('mode.switch', 'master') }}" 
+                       class="px-4 py-2 rounded-md text-xs font-bold transition flex items-center gap-1.5 {{ $isMaster ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-800' }}">
+                        🎓 Master
+                    </a>
+                </div>
+            </div>
+
+            @if($isMaster && $examStats)
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-purple-100">
+                    <h2 class="text-sm font-bold text-purple-800 mb-3">🔥 Progression globale de tes révisions de semestre</h2>
+                    <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden mb-2">
+                        <div class="bg-purple-600 h-4 rounded-full transition-all duration-500" style="width: {{ $examStats['global_progress'] }}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs font-bold text-gray-500">
+                        <span>{{ $examStats['global_progress'] }}% de préparation globale</span>
+                        <span>{{ $examStats['total'] }} matière(s) suivie(s)</span>
+                    </div>
                 </div>
             @endif
 
-            <form action="{{ route('schedule.upload') }}" method="POST" enctype="multipart/form-data" class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-3">
-                @csrf
-                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Mettre à jour la photo :</label>
-                <input type="file" name="schedule_file" accept="image/*,application/pdf" required class="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white font-medium py-1.5 px-3 rounded text-xs transition shadow-sm">
-                    💾 Sauvegarder
-                </button>
-            </form>
-        </div>
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 class="text-md font-bold text-gray-800 mb-4">➕ Enregistrer une nouvelle activité</h3>
+                <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    @csrf
+                    <input type="hidden" name="type" value="{{ $currentMode }}">
 
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-gray-800">📅 Activités prévues pour aujourd'hui</h3>
-                <a href="{{ route('tasks.create') }}" class="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded shadow transition text-sm">
-                    ➕ Ajouter une activité
-                </a>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom de l'activité ou matière</label>
+                        <input type="text" name="title" required class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500" placeholder="{{ $isMaster ? 'Ex: Calcul Stochastique' : 'Ex: Migration Render du TaskManager' }}">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lien du Document (URL)</label>
+                        <input type="url" name="document_link" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500" placeholder="Lien Google Drive, Notion, etc.">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Statut du Document / Livrable</label>
+                        <select name="document_status" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
+                            <option value="none">Pas de document requis</option>
+                            <option value="todo">🔴 À rédiger / À lire</option>
+                            <option value="in_progress">🟡 En cours d'analyse / Rédaction</option>
+                            <option value="done">🟢 Validé et classé</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priorité</label>
+                        <select name="priority" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
+                            <option value="high">Haute</option>
+                            <option value="medium" selected>Moyenne</option>
+                            <option value="low">Basse</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date limite / Examen</label>
+                        <input type="date" name="date_prevue" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
+                    </div>
+
+                    <button type="submit" class="w-full py-2 px-4 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
+                        Enregistrer
+                    </button>
+                </form>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-gray-200 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                            <th class="py-3 px-4">Titre</th>
-                            <th class="py-3 px-4">Catégorie</th>
-                            <th class="py-3 px-4">Projet</th>
-                            <th class="py-3 px-4">Début</th>
-                            <th class="py-3 px-4">Fin</th>
-                            <th class="py-3 px-4 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm">
-                        @forelse($todayTasks as $task)
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="py-3.5 px-4 font-medium text-gray-900">
-                                    <div class="flex flex-col gap-1">
-                                        <span>{{ $task->title }}</span>
-                                        
-                                        <div class="flex flex-wrap gap-2 mt-1">
-                                            @if($task->document_link)
-                                                <a href="{{ $task->document_link }}" target="_blank" 
-                                                   class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded hover:bg-blue-100 transition font-semibold"
-                                                   title="Ouvrir le document externe">
-                                                    <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc (Lien)
-                                                </a>
-                                            @endif
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse($tasks as $task)
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between">
+                        
+                        <div class="p-4 {{ $themeCardHeader }} flex justify-between items-center">
+                            <span class="text-xs font-extrabold uppercase tracking-wider">
+                                {{ $task->priority === 'high' ? '🚨 Priorité Haute' : ($task->priority === 'medium' ? '⚡ Priorité Moyenne' : '🟢 Priorité Basse') }}
+                            </span>
+                            @if($task->date_prevue)
+                                <span class="text-xs opacity-75 font-medium">🎯 {{ \Carbon\Carbon::parse($task->date_prevue)->format('d M') }}</span>
+                            @endif
+                        </div>
 
-                                            @if($task->file_path)
-                                                <a href="{{ \Illuminate\Support\Facades\Storage::url($task->file_path) }}" target="_blank" 
-                                                   class="inline-flex items-center text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded hover:bg-green-100 transition font-semibold"
-                                                   title="Ouvrir le fichier local">
-                                                    <i class="fa-solid fa-folder-open mr-1"></i> Voir le document
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3.5 px-4">
-                                    <span class="inline-block bg-green-50 text-green-700 text-xs px-2.5 py-1 rounded-full font-semibold">
-                                        {{ $task->category->name ?? '-' }}
-                                    </span>
-                                </td>
-                                <td class="py-3.5 px-4 text-gray-500">{{ $task->project->title ?? '-' }}</td>
-                                <td class="py-3.5 px-4 text-gray-600">
-                                    {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '-' }}
-                                </td>
-                                <td class="py-3.5 px-4 text-gray-600">
-                                    {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '-' }}
-                                </td>
-                                <td class="py-3.5 px-4 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <a href="{{ route('tasks.edit', $task->id) }}" class="text-blue-600 hover:text-blue-800 p-1">
-                                            <i class="fa-solid fa-pen"></i>
-                                        </a>
-                                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Supprimer définitivement ?');" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-800 p-1">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center text-gray-400 py-8">🎉 Aucune activité restante pour aujourd'hui !</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        <div class="p-5 flex-1">
+                            <h4 class="text-md font-bold text-gray-800 mb-3">{{ $task->title }}</h4>
+
+                            <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">📁 Document & Livrables</span>
+                                @if($task->document_link)
+                                    <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-blue-600 hover:underline font-semibold block mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
+                                        🔗 Ouvrir le document externe
+                                    </a>
+                                @else
+                                    <span class="text-xs text-gray-400 italic block mb-2">Aucun document lié</span>
+                                @endif
+
+                                <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase
+                                    {{ $task->document_status === 'done' ? 'bg-green-100 text-green-700' : ($task->document_status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : ($task->document_status === 'todo' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500')) }}">
+                                    {{ $task->document_status === 'done' ? '🟢 Validé / Prêt' : ($task->document_status === 'in_progress' ? '🟡 En rédaction / Lecture' : ($task->document_status === 'todo' ? '🔴 À traiter' : 'Aucun requis')) }}
+                                </span>
+                            </div>
+
+                            @if($isMaster)
+                                <form action="{{ route('tasks.updatePrep', $task->id) }}" method="POST" class="space-y-2 mt-4 pt-3 border-t border-gray-100">
+                                    @csrf
+                                    <span class="text-[10px] font-bold text-purple-400 uppercase block mb-2">🧠 Progression révision</span>
+                                    
+                                    @php $prep = $task->examPrep; @endphp
+                                    <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="course_reviewed" onchange="this.form.submit()" {{ $prep && $prep->course_reviewed ? 'checked' : '' }} class="rounded text-purple-600 focus:ring-purple-500">
+                                        <span>📖 Cours assimilé & relu</span>
+                                    </label>
+
+                                    <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="summary_done" onchange="this.form.submit()" {{ $prep && $prep->summary_done ? 'checked' : '' }} class="rounded text-purple-600 focus:ring-purple-500">
+                                        <span>📝 Fiche de révision rédigée</span>
+                                    </label>
+
+                                    <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="exercises_done" onchange="this.form.submit()" {{ $prep && $prep->exercises_done ? 'checked' : '' }} class="rounded text-purple-600 focus:ring-purple-500">
+                                        <span>📐 Exercices & TD pratiqués</span>
+                                    </label>
+
+                                    <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                                        <input type="checkbox" name="past_papers_done" onchange="this.form.submit()" {{ $prep && $prep->past_papers_done ? 'checked' : '' }} class="rounded text-purple-600 focus:ring-purple-500">
+                                        <span>📚 Annales d'examens validées</span>
+                                    </label>
+                                </form>
+                            @endif
+                        </div>
+
+                        <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                            @if($isMaster)
+                                <a href="{{ route('flashcards.show', $task->id) }}" class="text-xs text-purple-700 hover:text-purple-900 font-extrabold flex items-center gap-1">
+                                    🧠 Réviser (Flashcards IA)
+                                </a>
+                            @endif
+
+                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Supprimer cette activité ?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs text-red-500 hover:text-red-700 font-bold">🗑️ Supprimer</button>
+                            </form>
+                        </div>
+
+                    </div>
+                @empty
+                    <div class="col-span-full bg-white p-12 text-center rounded-xl shadow-sm border border-gray-100">
+                        <p class="text-gray-400 text-sm font-medium">Aucune activité enregistrée pour ce mode pour le moment. Commencez par en ajouter une ! 🚀</p>
+                    </div>
+                @endforelse
             </div>
+
         </div>
     </div>
 </x-app-layout>
