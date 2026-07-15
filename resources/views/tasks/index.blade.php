@@ -7,14 +7,12 @@
 
     <div class="py-6 max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
         
-        <!-- Messages de succès -->
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
                 <span class="block sm:inline">{{ session('success') }}</span>
             </div>
         @endif
 
-        <!-- BLOC DU TABLEAU DES TÂCHES -->
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">📅 Activités prévues pour aujourd'hui</h3>
@@ -38,18 +36,27 @@
                     <tbody class="divide-y divide-gray-100 text-sm">
                         @forelse($todayTasks as $task)
                             <tr class="hover:bg-gray-50 transition">
-                                <!-- Colonne Titre + Bouton du lien vers le cours/document -->
                                 <td class="py-3.5 px-4 font-medium text-gray-900">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex flex-col gap-1">
                                         <span>{{ $task->title }}</span>
                                         
-                                        @if($task->document_link)
-                                            <a href="{{ $task->document_link }}" target="_blank" 
-                                               class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded hover:bg-blue-100 transition font-semibold"
-                                               title="Ouvrir le document">
-                                                <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc
-                                            </a>
-                                        @endif
+                                        <div class="flex flex-wrap gap-2 mt-1">
+                                            @if($task->document_link)
+                                                <a href="{{ $task->document_link }}" target="_blank" 
+                                                   class="inline-flex items-center text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded hover:bg-blue-100 transition font-semibold"
+                                                   title="Ouvrir le document externe">
+                                                    <i class="fa-solid fa-file-pdf mr-1"></i> Cours / Doc (Lien)
+                                                </a>
+                                            @endif
+
+                                            @if($task->file_path)
+                                                <a href="{{ asset('storage/' . $task->file_path) }}" target="_blank" 
+                                                   class="inline-flex items-center text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded hover:bg-green-100 transition font-semibold"
+                                                   title="Ouvrir le fichier local">
+                                                    <i class="fa-solid fa-folder-open mr-1"></i> Voir le document
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-3.5 px-4">
@@ -80,7 +87,6 @@
                                 </td>
                             </tr>
                         @empty
-                            <!-- Bloc vide sans référence à $task -->
                             <tr>
                                 <td colspan="6" class="text-center text-gray-400 py-8">🎉 Aucune activité restante pour aujourd'hui !</td>
                             </tr>
