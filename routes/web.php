@@ -32,3 +32,12 @@ Route::get('/force-clean-db', function () {
         return "Erreur lors de la réinitialisation : " . $e->getMessage();
     }
 });
+// 🚀 ROUTE TEMPORAIRE DE MIGRATION DE BASE DE DONNÉES
+Route::get('/run-migration-bado', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        return "Migration réussie ! Le résultat de la console : <br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Erreur lors de la migration : " . $e->getMessage();
+    }
+});
