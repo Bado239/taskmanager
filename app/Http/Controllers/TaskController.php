@@ -18,19 +18,7 @@ class TaskController extends Controller
     /**
      * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
      */
-/**
-     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
-     */
-/**
-     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
-     */
-/**
-     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
-     */
-/**
-     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
-     */
-public function index()
+    public function index()
     {
         // Heure et date du Sénégal
         $today = Carbon::today('Africa/Dakar')->toDateString();
@@ -78,13 +66,13 @@ public function index()
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
         $projects = Project::with('steps')->orderBy('title')->get();
 
-        // ✨ FIX : On récupère les catégories pour alimenter la vue index
-        $categories = Category::orderBy('title')->get()->unique('title');
+        // ✨ FIX : On récupère les catégories en les classant par 'name' pour la page index
+        $categories = Category::orderBy('name')->get()->unique('name');
 
-        // ✨ FIX : Ajout de 'categories' dans le compact
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects', 'categories'));
     }
-                        /**
+
+    /**
      * Bascule entre le mode Bureau (office) et le mode Master (master)
      */
     public function switchMode($mode)
@@ -187,7 +175,8 @@ public function index()
      */
     public function create(Request $request)
     {
-        $categories = Category::orderBy('title')->get()->unique('title');
+        // ✨ FIX : Tri des catégories par 'name'
+        $categories = Category::orderBy('name')->get()->unique('name');
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
@@ -203,7 +192,8 @@ public function index()
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-        $categories = Category::orderBy('title')->get()->unique('title');
+        // ✨ FIX : Tri des catégories par 'name'
+        $categories = Category::orderBy('name')->get()->unique('name');
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
@@ -241,6 +231,7 @@ public function index()
         // Création à la volée uniquement si on est en mode Bureau
         if ($request->type === 'office') {
             if ($projectId === 'new' && $request->filled('new_project_name')) {
+                // ✨ FIX : Utilisation de la colonne 'title' au lieu de 'name'
                 $project = Project::create([
                     'title' => $request->new_project_name
                 ]);
@@ -319,6 +310,7 @@ public function index()
 
             if ($request->type === 'office') {
                 if ($projectId === 'new' && $request->filled('new_project_name')) {
+                    // ✨ FIX : Utilisation de la colonne 'title' au lieu de 'name'
                     $project = Project::create([
                         'title' => $request->new_project_name
                     ]);
