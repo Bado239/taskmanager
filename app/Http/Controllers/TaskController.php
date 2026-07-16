@@ -30,7 +30,7 @@ class TaskController extends Controller
 /**
      * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
      */
-    public function index()
+public function index()
     {
         // Heure et date du Sénégal
         $today = Carbon::today('Africa/Dakar')->toDateString();
@@ -78,9 +78,13 @@ class TaskController extends Controller
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
         $projects = Project::with('steps')->orderBy('title')->get();
 
-        return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
+        // ✨ FIX : On récupère les catégories pour alimenter la vue index
+        $categories = Category::orderBy('title')->get()->unique('title');
+
+        // ✨ FIX : Ajout de 'categories' dans le compact
+        return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects', 'categories'));
     }
-                    /**
+                        /**
      * Bascule entre le mode Bureau (office) et le mode Master (master)
      */
     public function switchMode($mode)
