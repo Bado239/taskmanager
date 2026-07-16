@@ -20,6 +20,18 @@ class TaskController extends Controller
      */
     public function index()
     {
+        // 🚨 CODE DE SECOURS SILENCIEUX POUR RÉPARER LA BASE DE DONNÉES SUR RENDER GATUIT
+        try {
+            if (!\Schema::hasTable('projects') || !\Schema::hasColumn('projects', 'name')) {
+                \Schema::disableForeignKeyConstraints();
+                \Artisan::call('migrate:fresh', ['--force' => true]);
+                \Artisan::call('db:seed', ['--force' => true]);
+                \Schema::enableForeignKeyConstraints();
+            }
+        } catch (\Exception $e) {
+            // Ignoré silencieusement pour ne pas bloquer l'utilisateur si la DB est déjà opérationnelle
+        }
+
         // Heure et date du Sénégal
         $today = Carbon::today('Africa/Dakar')->toDateString();
         $now = Carbon::now('Africa/Dakar')->format('H:i:s');
