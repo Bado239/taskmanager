@@ -21,17 +21,14 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('cascade');
 
-            // Projet / Étude lié (Déjà présent, parfait)
+            // Projet / Étude lié
             $table->foreignId('project_id')
                 ->nullable()
                 ->constrained()
                 ->onDelete('set null');
 
-            // ⭐ NOUVEAU : Étape spécifique liée à ce projet
-            $table->foreignId('project_step_id')
-                ->nullable()
-                ->constrained()
-                ->onDelete('set null');
+            // ⭐ MODIFIÉ : On crée la colonne simplement, sans contrainte 'constrained()' immédiate
+            $table->unsignedBigInteger('project_step_id')->nullable();
 
             $table->enum('status', ['todo', 'doing', 'done'])->default('todo');
 

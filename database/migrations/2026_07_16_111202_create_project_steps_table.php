@@ -14,11 +14,19 @@ return new class extends Migration
         if (!Schema::hasTable('project_steps')) {
             Schema::create('project_steps', function (Blueprint $table) {
                 $table->id();
-                // Crée la relation clé étrangère : une étape appartient à un projet
                 $table->foreignId('project_id')->constrained()->onDelete('cascade');
-                // Nom de l'étape (ex: "Cadrage", "Développement", "Tests")
                 $table->string('name');
                 $table->timestamps();
+            });
+        }
+
+        // Ajout sécurisé de la clé étrangère sur tasks
+        if (Schema::hasTable('tasks') && Schema::hasColumn('tasks', 'project_step_id')) {
+            Schema::table('tasks', function (Blueprint $table) {
+                $table->foreign('project_step_id')
+                      ->references('id')
+                      ->on('project_steps')
+                      ->onDelete('set null');
             });
         }
     }
@@ -28,6 +36,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasTable('tasks') && Schema::hasColumn('tasks', 'project_step_id')) {
+            Schema::table('tasks', function (Blueprint $table) {
+                $table->dropForeign(['project_step_id']);
+            });
+        }
+
         Schema::dropIfExists('project_steps');
     }
 };
