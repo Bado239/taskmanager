@@ -89,7 +89,7 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($tasks as $task)
+                @forelse($todayTasks as $task)
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col justify-between">
                         
                         <div class="p-4 {{ $themeCardHeader }} flex justify-between items-center">
