@@ -25,14 +25,21 @@ Route::get('/veille-tech', [TaskController::class, 'veilleTech'])->name('tasks.v
 // 🧰 Outils de Maintenance / Réinitialisation
 Route::get('/force-clean-db', function () {
     try {
-        // 1. Force la réinitialisation complète des tables
+        // 1. Désactiver temporairement les contraintes de clé étrangère
+        Schema::disableForeignKeyConstraints();
+
+        // 2. Force la réinitialisation complète des tables
         Artisan::call('migrate:fresh', ['--force' => true]);
 
-        // 2. Force l'exécution du DatabaseSeeder avec les nouvelles modalités
+        // 3. Force l'exécution du DatabaseSeeder avec les nouvelles modalités
         Artisan::call('db:seed', ['--force' => true]);
+
+        // 4. Réactiver les contraintes de clé étrangère
+        Schema::enableForeignKeyConstraints();
 
         return "Base de données réinitialisée et repeuplée avec succès !";
     } catch (\Exception $e) {
+        Schema::enableForeignKeyConstraints();
         return "Erreur lors de la réinitialisation : " . $e->getMessage();
     }
 });
@@ -40,7 +47,7 @@ Route::get('/force-clean-db', function () {
 // 🚀 ROUTE DE MIGRATION DE BASE DE DONNÉES
 Route::get('/run-migration-bado', function () {
     try {
-        // Exécute les nouvelles tables (dont 'schedules')
+        // Exécute les nouvelles migrations
         Artisan::call('migrate', ['--force' => true]);
         $migrationOutput = Artisan::output();
 
