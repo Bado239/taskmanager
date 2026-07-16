@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB; // Apport crucial pour gérer les transactions
 use App\Models\Schedule;
 use Illuminate\Http\Request;
 
@@ -25,16 +26,21 @@ Route::get('/veille-tech', [TaskController::class, 'veilleTech'])->name('tasks.v
 // 🧰 Outils de Maintenance / Réinitialisation
 Route::get('/force-clean-db', function () {
     try {
-        // 1. Désactiver temporairement les contraintes de clé étrangère
+        // 1. On annule toutes les transactions SQL bloquées
+        while (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+
+        // 2. Désactiver temporairement les contraintes de clé étrangère
         Schema::disableForeignKeyConstraints();
 
-        // 2. Force la réinitialisation complète des tables
+        // 3. Force la réinitialisation complète des tables
         Artisan::call('migrate:fresh', ['--force' => true]);
 
-        // 3. Force l'exécution du DatabaseSeeder avec les nouvelles modalités
+        // 4. Force l'exécution du DatabaseSeeder avec les nouvelles modalités
         Artisan::call('db:seed', ['--force' => true]);
 
-        // 4. Réactiver les contraintes de clé étrangère
+        // 5. Réactiver les contraintes de clé étrangère
         Schema::enableForeignKeyConstraints();
 
         return "Base de données réinitialisée et repeuplée avec succès !";
@@ -44,17 +50,27 @@ Route::get('/force-clean-db', function () {
     }
 });
 
-// 🚀 ROUTE DE MIGRATION DE BASE DE DONNÉES
+// 🚀 ROUTE DE MIGRATION DE BASE DE DONNÉES (Sécurisée contre les blocages)
 Route::get('/run-migration-bado', function () {
     try {
+        // 1. On nettoie les transactions PostgreSQL fantômes avant de lancer les migrations
+        while (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+
+        Schema::disableForeignKeyConstraints();
+
         // Exécute les nouvelles migrations
         Artisan::call('migrate', ['--force' => true]);
         $migrationOutput = Artisan::output();
+
+        Schema::enableForeignKeyConstraints();
 
         return "<h3>Migration réussie !</h3>
                 <p>Résultat des migrations :</p>
                 <pre>" . $migrationOutput . "</pre>";
     } catch (\Exception $e) {
+        Schema::enableForeignKeyConstraints();
         return "Erreur lors de la maintenance : " . $e->getMessage();
     }
 });
