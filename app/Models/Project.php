@@ -1,13 +1,11 @@
-<?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    // On met 'name' dans le fillable puisque notre migration utilise $table->string('name')
-    protected $fillable = ['name', 'description'];
+    // On met 'title' dans le fillable puisque notre table PostgreSQL utilise la colonne 'title'
+    protected $fillable = ['title', 'description'];
 
     /**
      * Un projet possède plusieurs étapes.
