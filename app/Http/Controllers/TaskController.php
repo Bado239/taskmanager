@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\ProjectStep;
 use App\Models\Schedule;
 use App\Models\ExamPrep; // Ajout du modèle d'examen
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class TaskController extends Controller
         $currentMode = session('user_mode', 'office');
 
         // On affiche les tâches d'aujourd'hui filtrées par le mode (Master ou Bureau)
-        $todayTasks = Task::with(['category', 'project', 'examPrep'])
+        $todayTasks = Task::with(['category', 'project', 'step', 'examPrep'])
             ->where('type', $currentMode)
             ->whereDate('date_prevue', $today)
             ->where(function($query) use ($now) {
@@ -62,7 +63,10 @@ class TaskController extends Controller
         // 🖼️ On récupère le dernier emploi du temps
         $currentSchedule = Schedule::latest()->first();
 
-        return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats'));
+        // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
+        $projects = Project::with('steps')->orderBy('name')->get();
+
+        return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
     }
 
     /**
@@ -169,7 +173,7 @@ class TaskController extends Controller
     public function create(Request $request)
     {
         $categories = Category::orderBy('name')->get()->unique('name');
-        $projects = Project::orderBy('title')->get()->unique('title');
+        $projects = Project::with('steps')->orderBy('name')->get();
         $prefilledTitle = $request->query('title', '');
         $currentMode = session('user_mode', 'office');
 
@@ -183,21 +187,22 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
         $categories = Category::orderBy('name')->get()->unique('name');
-        $projects = Project::orderBy('title')->get()->unique('title');
+        $projects = Project::with('steps')->orderBy('name')->get();
         $currentMode = session('user_mode', 'office');
 
         return view('tasks.edit', compact('task', 'categories', 'projects', 'currentMode'));
     }
 
     /**
-     * Enregistrement d'une nouvelle tâche (Utilise les nouveaux attributs document_status et type)
+     * Enregistrement d'une nouvelle tâche
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'project_id' => 'nullable|exists:projects,id',
+            'project_id' => 'nullable', // Sera géré manuellement pour valider si 'new' ou ID numérique
+            'project_step_id' => 'nullable', // Sera géré manuellement pour valider si 'new' ou ID numérique
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
@@ -205,13 +210,52 @@ class TaskController extends Controller
             'document_link' => 'nullable|url',
             'type' => 'required|in:master,office',
             'document_status' => 'required|in:none,todo,in_progress,done',
+            'new_project_name' => 'nullable|required_if:project_id,new|string|max:255',
+            'new_step_name' => 'nullable|required_if:project_step_id,new|string|max:255',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
 
-        $validated['progress'] = 0;
+        $projectId = $request->project_id;
+        $stepId = $request->project_step_id;
 
-        $task = Task::create($validated);
+        // Création à la volée uniquement si on est en mode Bureau
+        if ($request->type === 'office') {
+            if ($projectId === 'new' && $request->filled('new_project_name')) {
+                $project = Project::create([
+                    'name' => $request->new_project_name
+                ]);
+                $projectId = $project->id;
+            }
+
+            if (($stepId === 'new' || $request->filled('new_step_name')) && $projectId) {
+                $step = ProjectStep::create([
+                    'project_id' => $projectId,
+                    'name' => $request->new_step_name
+                ]);
+                $stepId = $step->id;
+            }
+        }
+
+        // Si ce ne sont pas de nouvelles valeurs créées à la volée, on s'assure de les repasser à null si vides
+        $projectId = is_numeric($projectId) ? $projectId : null;
+        $stepId = is_numeric($stepId) ? $stepId : null;
+
+        $task = Task::create([
+            'title' => $request->title,
+            'category_id' => $request->category_id,
+            'project_id' => $projectId,
+            'project_step_id' => $stepId,
+            'priority' => $request->priority,
+            'date_prevue' => $request->date_prevue,
+            'heure_debut' => $request->heure_debut,
+            'heure_fin' => $request->heure_fin,
+            'document_link' => $request->document_link,
+            'type' => $request->type,
+            'document_status' => $request->document_status,
+            'progress' => 0,
+            'status' => 'todo'
+        ]);
 
         // Si c'est une tâche Master, on initialise automatiquement sa fiche de préparation aux examens
         if ($task->type === 'master') {
@@ -231,7 +275,8 @@ class TaskController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'project_id' => 'nullable|exists:projects,id',
+            'project_id' => 'nullable',
+            'project_step_id' => 'nullable',
             'priority' => 'required|in:high,medium,low',
             'date_prevue' => 'nullable|date',
             'heure_debut' => 'nullable',
@@ -239,6 +284,8 @@ class TaskController extends Controller
             'document_link' => 'nullable|url',
             'type' => 'required|in:master,office',
             'document_status' => 'required|in:none,todo,in_progress,done',
+            'new_project_name' => 'nullable|required_if:project_id,new|string|max:255',
+            'new_step_name' => 'nullable|required_if:project_step_id,new|string|max:255',
         ], [
             'heure_fin.after' => 'L\'heure de fin doit obligatoirement être supérieure à l\'heure de début.',
         ]);
@@ -248,10 +295,34 @@ class TaskController extends Controller
             $progress = $request->progress ?? 0;
             $status = $progress == 100 ? 'done' : ($progress > 0 ? 'doing' : 'todo');
 
+            $projectId = $request->project_id;
+            $stepId = $request->project_step_id;
+
+            if ($request->type === 'office') {
+                if ($projectId === 'new' && $request->filled('new_project_name')) {
+                    $project = Project::create([
+                        'name' => $request->new_project_name
+                    ]);
+                    $projectId = $project->id;
+                }
+
+                if (($stepId === 'new' || $request->filled('new_step_name')) && $projectId) {
+                    $step = ProjectStep::create([
+                        'project_id' => $projectId,
+                        'name' => $request->new_step_name
+                    ]);
+                    $stepId = $step->id;
+                }
+            }
+
+            $projectId = is_numeric($projectId) ? $projectId : null;
+            $stepId = is_numeric($stepId) ? $stepId : null;
+
             $task->update([
                 'title' => $request->title,
                 'category_id' => $request->category_id,
-                'project_id' => $request->project_id ?: null,
+                'project_id' => $projectId,
+                'project_step_id' => $stepId,
                 'priority' => $request->priority,
                 'date_prevue' => $request->date_prevue,
                 'heure_debut' => $request->heure_debut,

@@ -6,6 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('tasks', function (Blueprint $table) {
@@ -18,7 +21,14 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('cascade');
 
+            // Projet / Étude lié (Déjà présent, parfait)
             $table->foreignId('project_id')
+                ->nullable()
+                ->constrained()
+                ->onDelete('set null');
+
+            // ⭐ NOUVEAU : Étape spécifique liée à ce projet
+            $table->foreignId('project_step_id')
                 ->nullable()
                 ->constrained()
                 ->onDelete('set null');
@@ -39,6 +49,9 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('tasks');

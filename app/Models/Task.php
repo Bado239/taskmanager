@@ -10,25 +10,28 @@ class Task extends Model
      * Les attributs qui sont assignables en masse.
      */
     protected $fillable = [
-    'title', 
-    'category_id', 
-    'project_id', 
-    'priority', 
-    'date_prevue', 
-    'heure_debut', 
-    'heure_fin', 
-    'document_link', 
-    'progress', 
-    'status',
-    'type',              // Ajouté
-    'document_status',   // Ajouté
-];
+        'title', 
+        'category_id', 
+        'project_id', 
+        'project_step_id',   // ⭐ Ajouté : Étape liée au projet
+        'priority', 
+        'date_prevue', 
+        'heure_debut', 
+        'heure_fin', 
+        'document_link', 
+        'progress', 
+        'status',
+        'type',              // Mode de l'application (master ou office)
+        'document_status',   // Statut du livrable
+    ];
 
-// Relation avec le suivi d'examen (Master)
-public function examPrep()
-{
-    return $this->hasOne(ExamPrep::class);
-}
+    /**
+     * Relation avec le suivi d'examen (Master)
+     */
+    public function examPrep()
+    {
+        return $this->hasOne(ExamPrep::class);
+    }
 
     /**
      * Catégorie de la tâche
@@ -44,5 +47,13 @@ public function examPrep()
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * ⭐ Étape de projet associée
+     */
+    public function step()
+    {
+        return $this->belongsTo(ProjectStep::class, 'project_step_id');
     }
 }

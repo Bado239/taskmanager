@@ -47,46 +47,99 @@
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                 @if(!$isMaster)
                     <h3 class="text-md font-bold text-slate-800 mb-4">💼 Créer une nouvelle tâche de projet</h3>
-                    <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <form action="{{ route('tasks.store') }}" method="POST" class="space-y-4">
                         @csrf
                         <input type="hidden" name="type" value="office">
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom de la tâche / Livrable</label>
-                            <input type="text" name="title" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Rédaction du rapport d'avancement">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom de la tâche / Livrable</label>
+                                <input type="text" name="title" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Rédaction du rapport d'avancement">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lien vers le document de travail</label>
+                                <input type="url" name="document_link" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Lien Drive, OneDrive, GitHub, etc.">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Catégorie</label>
+                                <select name="category_id" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lien vers le document de travail</label>
-                            <input type="url" name="document_link" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Lien Drive, OneDrive, GitHub, etc.">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Associer à un projet</label>
+                                    <select name="project_id" id="project_select" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                        <option value="">-- Aucun projet --</option>
+                                        @foreach($projects as $project)
+                                            <option value="{{ $project->id }}">{{ $project->name }}</option>
+                                        @endforeach
+                                        <option value="new" class="text-blue-600 font-bold">+ Créer un nouveau projet...</option>
+                                    </select>
+                                </div>
+                                <div id="new_project_field" class="hidden">
+                                    <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Nom du nouveau projet</label>
+                                    <input type="text" name="new_project_name" id="new_project_name" class="w-full text-sm border-blue-300 rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Étude d'impact environnemental">
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Étape du projet</label>
+                                    <select name="project_step_id" id="step_select" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                        <option value="" data-project="">-- Choisis d'abord un projet --</option>
+                                        @foreach($projects as $project)
+                                            @foreach($project->steps as $step)
+                                                <option value="{{ $step->id }}" data-project="{{ $project->id }}" class="hidden">{{ $step->name }}</option>
+                                            @endforeach
+                                        @endforeach
+                                        <option value="new" id="option_new_step" class="hidden text-blue-600 font-bold">+ Créer une nouvelle étape...</option>
+                                    </select>
+                                </div>
+                                <div id="new_step_field" class="hidden">
+                                    <label class="block text-xs font-bold text-blue-600 uppercase mb-1">Nom de la nouvelle étape</label>
+                                    <input type="text" name="new_step_name" id="new_step_name" class="w-full text-sm border-blue-300 rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Phase d'analyse des données">
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Étape de l'étude / Projet</label>
-                            <select name="document_status" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
-                                <option value="todo">🔴 Phase 1 : Cadrage & Rédaction (À traiter)</option>
-                                <option value="in_progress">🟡 Phase 2 : Analyse & Revue en cours</option>
-                                <option value="done">🟢 Phase 3 : Validé et Classé</option>
-                            </select>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Statut Initial du Livrable</label>
+                                <select name="document_status" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                    <option value="todo">🔴 Phase 1 : Cadrage & Rédaction (À traiter)</option>
+                                    <option value="in_progress">🟡 Phase 2 : Analyse & Revue en cours</option>
+                                    <option value="done">🟢 Phase 3 : Validé et Classé</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priorité</label>
+                                <select name="priority" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                    <option value="high">Haute</option>
+                                    <option value="medium" selected>Moyenne</option>
+                                    <option value="low">Basse</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date limite de livraison</label>
+                                <input type="date" name="date_prevue" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                            </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priorité</label>
-                            <select name="priority" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
-                                <option value="high">Haute</option>
-                                <option value="medium" selected>Moyenne</option>
-                                <option value="low">Basse</option>
-                            </select>
+                        <div class="flex justify-end pt-2">
+                            <button type="submit" class="w-full md:w-auto py-2.5 px-6 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
+                                Enregistrer au Bureau
+                            </button>
                         </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date limite de livraison</label>
-                            <input type="date" name="date_prevue" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
-                        </div>
-
-                        <button type="submit" class="w-full py-2 px-4 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
-                            Enregistrer au Bureau
-                        </button>
                     </form>
                 @else
                     <h3 class="text-md font-bold text-purple-800 mb-4">🎓 Planifier une Matière / Préparation d'Examen</h3>
@@ -109,7 +162,16 @@
                             <input type="date" name="date_prevue" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div>
+                            <label class="block text-xs font-bold text-purple-500 uppercase mb-1">Catégorie</label>
+                            <select name="category_id" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 flex items-center">
                             <span class="text-[11px] text-purple-400 italic">💡 L'ajout d'un document URL te permettra de générer des quiz et examens blancs d'entraînement via notre module IA.</span>
                         </div>
 
@@ -134,7 +196,20 @@
                         </div>
 
                         <div class="p-5 flex-1">
-                            <h4 class="text-md font-bold text-gray-800 mb-3">{{ $task->title }}</h4>
+                            <h4 class="text-md font-bold text-gray-800 mb-1">{{ $task->title }}</h4>
+
+                            @if(!$isMaster && $task->project)
+                                <div class="mb-3 flex flex-wrap gap-1 items-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+                                        📁 Projet : {{ $task->project->name }}
+                                    </span>
+                                    @if($task->step)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                                            📍 Étape : {{ $task->step->name }}
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
 
                             <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">
@@ -222,4 +297,84 @@
 
         </div>
     </div>
+
+    @if(!$isMaster)
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const projectSelect = document.getElementById('project_select');
+            const stepSelect = document.getElementById('step_select');
+            const newProjectField = document.getElementById('new_project_field');
+            const newStepField = document.getElementById('new_step_field');
+            const newProjectInput = document.getElementById('new_project_name');
+            const newStepInput = document.getElementById('new_step_name');
+            const optionNewStep = document.getElementById('option_new_step');
+
+            function updateSteps() {
+                const selectedProjectVal = projectSelect.value;
+                
+                // Réinitialise l'affichage du champ "Nouveau projet"
+                if (selectedProjectVal === 'new') {
+                    newProjectField.classList.remove('hidden');
+                    newProjectInput.required = true;
+                } else {
+                    newProjectField.classList.add('hidden');
+                    newProjectInput.required = false;
+                    newProjectInput.value = '';
+                }
+
+                // Masque toutes les options d'étape initialement
+                const options = stepSelect.querySelectorAll('option');
+                let visibleStepsCount = 0;
+
+                options.forEach(opt => {
+                    const parentProjId = opt.getAttribute('data-project');
+                    if (parentProjId) {
+                        if (selectedProjectVal && parentProjId === selectedProjectVal) {
+                            opt.classList.remove('hidden');
+                            visibleStepsCount++;
+                        } else {
+                            opt.classList.add('hidden');
+                        }
+                    }
+                });
+
+                // Gère l'affichage de l'option d'ajout d'une nouvelle étape
+                if (selectedProjectVal && selectedProjectVal !== 'new') {
+                    optionNewStep.classList.remove('hidden');
+                } else if (selectedProjectVal === 'new') {
+                    // Si nouveau projet, on doit pouvoir lui assigner une première étape directement
+                    optionNewStep.classList.remove('hidden');
+                } else {
+                    optionNewStep.classList.add('hidden');
+                }
+
+                // Force le select à revenir à l'option vide si la sélection actuelle n'est plus valable
+                const currentSelectedOpt = stepSelect.options[stepSelect.selectedIndex];
+                if (currentSelectedOpt && currentSelectedOpt.getAttribute('data-project') && currentSelectedOpt.getAttribute('data-project') !== selectedProjectVal) {
+                    stepSelect.value = '';
+                }
+
+                updateStepField();
+            }
+
+            function updateStepField() {
+                if (stepSelect.value === 'new') {
+                    newStepField.classList.remove('hidden');
+                    newStepInput.required = true;
+                } else {
+                    newStepField.classList.add('hidden');
+                    newStepInput.required = false;
+                    newStepInput.value = '';
+                }
+            }
+
+            // Écouteurs d'événements
+            projectSelect.addEventListener('change', updateSteps);
+            stepSelect.addEventListener('change', updateStepField);
+
+            // Initialisation au chargement
+            updateSteps();
+        });
+    </script>
+    @endif
 </x-app-layout>
