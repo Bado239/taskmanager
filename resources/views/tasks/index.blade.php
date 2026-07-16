@@ -3,8 +3,10 @@
         $isMaster = $currentMode === 'master';
         $themeBg = $isMaster ? 'bg-purple-50' : 'bg-slate-50';
         $themeText = $isMaster ? 'text-purple-900' : 'text-slate-900';
-        $themeBtn = $isMaster ? 'bg-purple-600 hover:bg-purple-700' : 'bg-blue-600 hover:bg-blue-700';
+        $themeBtn = $isMaster ? 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-500' : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
         $themeCardHeader = $isMaster ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-800';
+        $themeFocus = $isMaster ? 'focus:border-purple-500 focus:ring-purple-500' : 'focus:border-blue-500 focus:ring-blue-500';
+        $themeBorder = $isMaster ? 'border-purple-300' : 'border-gray-300';
     @endphp
 
     <div class="py-6 {{ $themeBg }} min-h-screen">
@@ -43,49 +45,79 @@
             @endif
 
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h3 class="text-md font-bold text-gray-800 mb-4">➕ Enregistrer une nouvelle activité</h3>
-                <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    @csrf
-                    <input type="hidden" name="type" value="{{ $currentMode }}">
+                @if(!$isMaster)
+                    <h3 class="text-md font-bold text-slate-800 mb-4">💼 Créer une nouvelle tâche de projet</h3>
+                    <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        @csrf
+                        <input type="hidden" name="type" value="office">
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom de l'activité ou matière</label>
-                        <input type="text" name="title" required class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500" placeholder="{{ $isMaster ? 'Ex: Calcul Stochastique' : 'Ex: Migration Render du TaskManager' }}">
-                    </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nom de la tâche / Livrable</label>
+                            <input type="text" name="title" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Rédaction du rapport d'avancement">
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lien du Document (URL)</label>
-                        <input type="url" name="document_link" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500" placeholder="Lien Google Drive, Notion, etc.">
-                    </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Lien vers le document de travail</label>
+                            <input type="url" name="document_link" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Lien Drive, OneDrive, GitHub, etc.">
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Statut du Document / Livrable</label>
-                        <select name="document_status" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
-                            <option value="none">Pas de document requis</option>
-                            <option value="todo">🔴 À rédiger / À lire</option>
-                            <option value="in_progress">🟡 En cours d'analyse / Rédaction</option>
-                            <option value="done">🟢 Validé et classé</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Étape de l'étude / Projet</label>
+                            <select name="document_status" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                <option value="todo">🔴 Phase 1 : Cadrage & Rédaction (À traiter)</option>
+                                <option value="in_progress">🟡 Phase 2 : Analyse & Revue en cours</option>
+                                <option value="done">🟢 Phase 3 : Validé et Classé</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priorité</label>
-                        <select name="priority" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
-                            <option value="high">Haute</option>
-                            <option value="medium" selected>Moyenne</option>
-                            <option value="low">Basse</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Priorité</label>
+                            <select name="priority" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                                <option value="high">Haute</option>
+                                <option value="medium" selected>Moyenne</option>
+                                <option value="low">Basse</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date limite / Examen</label>
-                        <input type="date" name="date_prevue" class="w-full text-sm border-gray-300 rounded shadow-sm focus:border-blue-500">
-                    </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date limite de livraison</label>
+                            <input type="date" name="date_prevue" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                        </div>
 
-                    <button type="submit" class="w-full py-2 px-4 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
-                        Enregistrer
-                    </button>
-                </form>
+                        <button type="submit" class="w-full py-2 px-4 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
+                            Enregistrer au Bureau
+                        </button>
+                    </form>
+                @else
+                    <h3 class="text-md font-bold text-purple-800 mb-4">🎓 Planifier une Matière / Préparation d'Examen</h3>
+                    <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        @csrf
+                        <input type="hidden" name="type" value="master">
+
+                        <div>
+                            <label class="block text-xs font-bold text-purple-500 uppercase mb-1">Nom de la matière ou leçon</label>
+                            <input type="text" name="title" required class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Ex: Calcul Stochastique">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-purple-500 uppercase mb-1">Supports de cours / Drives / TD (URL)</label>
+                            <input type="url" name="document_link" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}" placeholder="Lien vers tes cours PDF, exercices, etc.">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-purple-500 uppercase mb-1">Date de l'examen</label>
+                            <input type="date" name="date_prevue" class="w-full text-sm {{ $themeBorder }} rounded shadow-sm {{ $themeFocus }}">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <span class="text-[11px] text-purple-400 italic">💡 L'ajout d'un document URL te permettra de générer des quiz et examens blancs d'entraînement via notre module IA.</span>
+                        </div>
+
+                        <button type="submit" class="w-full py-2 px-4 rounded font-bold text-xs text-white {{ $themeBtn }} transition">
+                            Ajouter la Matière
+                        </button>
+                    </form>
+                @endif
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -105,25 +137,29 @@
                             <h4 class="text-md font-bold text-gray-800 mb-3">{{ $task->title }}</h4>
 
                             <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">📁 Document & Livrables</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase block mb-1">
+                                    {{ $isMaster ? '📚 Supports & Ressources' : '📁 Livrable & Document' }}
+                                </span>
                                 @if($task->document_link)
                                     <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-blue-600 hover:underline font-semibold block mb-2 overflow-hidden text-ellipsis whitespace-nowrap">
-                                        🔗 Ouvrir le document externe
+                                        🔗 Consulter les ressources externes
                                     </a>
                                 @else
-                                    <span class="text-xs text-gray-400 italic block mb-2">Aucun document lié</span>
+                                    <span class="text-xs text-gray-400 italic block mb-2">Aucun document joint</span>
                                 @endif
 
-                                <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase
-                                    {{ $task->document_status === 'done' ? 'bg-green-100 text-green-700' : ($task->document_status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : ($task->document_status === 'todo' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500')) }}">
-                                    {{ $task->document_status === 'done' ? '🟢 Validé / Prêt' : ($task->document_status === 'in_progress' ? '🟡 En rédaction / Lecture' : ($task->document_status === 'todo' ? '🔴 À traiter' : 'Aucun requis')) }}
-                                </span>
+                                @if(!$isMaster)
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold uppercase
+                                        {{ $task->document_status === 'done' ? 'bg-green-100 text-green-700' : ($task->document_status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' : ($task->document_status === 'todo' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500')) }}">
+                                        {{ $task->document_status === 'done' ? '🟢 Validé / Livré' : ($task->document_status === 'in_progress' ? '🟡 Phase de Revue' : ($task->document_status === 'todo' ? '🔴 Phase de Cadrage' : 'Non spécifié')) }}
+                                    </span>
+                                @endif
                             </div>
 
                             @if($isMaster)
                                 <form action="{{ route('tasks.updatePrep', $task->id) }}" method="POST" class="space-y-2 mt-4 pt-3 border-t border-gray-100">
                                     @csrf
-                                    <span class="text-[10px] font-bold text-purple-400 uppercase block mb-2">🧠 Progression révision</span>
+                                    <span class="text-[10px] font-bold text-purple-400 uppercase block mb-2">🧠 Progression de Révision</span>
                                     
                                     @php $prep = $task->examPrep; @endphp
                                     <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
@@ -146,6 +182,17 @@
                                         <span>📚 Annales d'examens validées</span>
                                     </label>
                                 </form>
+
+                                <div class="mt-4 pt-3 border-t border-dashed border-purple-100">
+                                    <span class="text-[10px] font-bold text-purple-500 uppercase block mb-1.5">🎯 Entraînement IA</span>
+                                    @if($task->document_link)
+                                        <a href="#" class="inline-flex items-center justify-center w-full py-2 px-3 rounded text-[11px] font-extrabold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition gap-1">
+                                            📝 Générer des propositions d'examen
+                                        </a>
+                                    @else
+                                        <span class="text-[10px] text-gray-400 italic">Renseigne un lien de cours (Drive/PDF) ci-dessus pour générer des évaluations par IA.</span>
+                                    @endif
+                                </div>
                             @endif
                         </div>
 
@@ -154,6 +201,8 @@
                                 <a href="{{ route('flashcards.show', $task->id) }}" class="text-xs text-purple-700 hover:text-purple-900 font-extrabold flex items-center gap-1">
                                     🧠 Réviser (Flashcards IA)
                                 </a>
+                            @else
+                                <span class="text-xs text-gray-400 italic">Espace Collaboratif</span>
                             @endif
 
                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Supprimer cette activité ?')">
