@@ -66,8 +66,11 @@ class TaskController extends Controller
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
         $projects = Project::with('steps')->orderBy('title')->get();
 
-        // ✨ FIX : On filtre les doublons directement via SQL pour optimiser la requête
-        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
+        // ✨ FIX : Agrégation SQL pour être compatible PostgreSQL (Supabase)
+        $categories = Category::selectRaw('MIN(id) as id, name')
+            ->groupBy('name')
+            ->orderBy('name')
+            ->get();
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects', 'categories'));
     }
@@ -175,8 +178,12 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        // ✨ FIX : Tri et dédoublonnement SQL direct
-        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
+        // ✨ FIX : Agrégation SQL pour être compatible PostgreSQL (Supabase)
+        $categories = Category::selectRaw('MIN(id) as id, name')
+            ->groupBy('name')
+            ->orderBy('name')
+            ->get();
+            
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
@@ -192,8 +199,13 @@ class TaskController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-        // ✨ FIX : Tri et dédoublonnement SQL direct
-        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
+        
+        // ✨ FIX : Agrégation SQL pour être compatible PostgreSQL (Supabase)
+        $categories = Category::selectRaw('MIN(id) as id, name')
+            ->groupBy('name')
+            ->orderBy('name')
+            ->get();
+            
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
