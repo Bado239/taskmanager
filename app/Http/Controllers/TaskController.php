@@ -24,17 +24,14 @@ class TaskController extends Controller
 /**
      * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
      */
+/**
+     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
+     */
+/**
+     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
+     */
     public function index()
     {
-        // 🛡️ VERROU DE SÉCURITÉ : Si la table tasks ou projects est en cours de création, on évite le crash 500
-        if (!\Schema::hasTable('tasks') || !\Schema::hasTable('projects')) {
-            return response("<div style='text-align:center;font-family:sans-serif;margin-top:10%;'>
-                <h2>Initialisation du Cockpit en cours... 🚀</h2>
-                <p>La base de données se configure automatiquement. Veuillez patienter.</p>
-                <script>setTimeout(function(){ window.location.reload(); }, 5000);</script>
-            </div>", 200)->header('Content-Type', 'text/html');
-        }
-
         // Heure et date du Sénégal
         $today = Carbon::today('Africa/Dakar')->toDateString();
         $now = Carbon::now('Africa/Dakar')->format('H:i:s');
@@ -83,7 +80,7 @@ class TaskController extends Controller
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
     }
-            /**
+                    /**
      * Bascule entre le mode Bureau (office) et le mode Master (master)
      */
     public function switchMode($mode)
