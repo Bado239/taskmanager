@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('project_steps', function (Blueprint $table) {
-            $table->id();
-            // Crée la relation clé étrangère : une étape appartient à un projet
-            $table->foreignId('project_id')->constrained()->onDelete('cascade');
-            // Nom de l'étape (ex: "Cadrage", "Développement", "Tests")
-            $table->string('name');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('project_steps')) {
+            Schema::create('project_steps', function (Blueprint $table) {
+                $table->id();
+                // Crée la relation clé étrangère : une étape appartient à un projet
+                $table->foreignId('project_id')->constrained()->onDelete('cascade');
+                // Nom de l'étape (ex: "Cadrage", "Développement", "Tests")
+                $table->string('name');
+                $table->timestamps();
+            });
+        }
     }
 
     /**
