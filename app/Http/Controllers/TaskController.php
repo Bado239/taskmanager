@@ -64,7 +64,9 @@ class TaskController extends Controller
         $currentSchedule = Schedule::latest()->first();
 
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
-        $projects = Project::with('steps')->orderBy('name')->get();
+        $projects = \Schema::hasTable('projects') 
+            ? Project::with('steps')->orderBy('name')->get() 
+            : collect();
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
     }
@@ -173,7 +175,9 @@ class TaskController extends Controller
     public function create(Request $request)
     {
         $categories = Category::orderBy('name')->get()->unique('name');
-        $projects = Project::with('steps')->orderBy('name')->get();
+        $projects = \Schema::hasTable('projects') 
+            ? Project::with('steps')->orderBy('name')->get() 
+            : collect();
         $prefilledTitle = $request->query('title', '');
         $currentMode = session('user_mode', 'office');
 
@@ -187,7 +191,9 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
         $categories = Category::orderBy('name')->get()->unique('name');
-        $projects = Project::with('steps')->orderBy('name')->get();
+        $projects = \Schema::hasTable('projects') 
+            ? Project::with('steps')->orderBy('name')->get() 
+            : collect();
         $currentMode = session('user_mode', 'office');
 
         return view('tasks.edit', compact('task', 'categories', 'projects', 'currentMode'));
