@@ -66,8 +66,8 @@ class TaskController extends Controller
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
         $projects = Project::with('steps')->orderBy('title')->get();
 
-        // ✨ FIX : On récupère les catégories en les classant par 'name' pour la page index
-        $categories = Category::orderBy('name')->get()->unique('name');
+        // ✨ FIX : On filtre les doublons directement via SQL pour optimiser la requête
+        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects', 'categories'));
     }
@@ -175,8 +175,8 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        // ✨ FIX : Tri des catégories par 'name'
-        $categories = Category::orderBy('name')->get()->unique('name');
+        // ✨ FIX : Tri et dédoublonnement SQL direct
+        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
@@ -192,8 +192,8 @@ class TaskController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-        // ✨ FIX : Tri des catégories par 'name'
-        $categories = Category::orderBy('name')->get()->unique('name');
+        // ✨ FIX : Tri et dédoublonnement SQL direct
+        $categories = Category::select('id', 'name')->groupBy('name')->orderBy('name')->get();
         $projects = \Schema::hasTable('projects') 
             ? Project::with('steps')->orderBy('title')->get() 
             : collect();
