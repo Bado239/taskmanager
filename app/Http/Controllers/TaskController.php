@@ -76,7 +76,7 @@ class TaskController extends Controller
         $currentSchedule = Schedule::latest()->first();
 
         // On récupère tous les projets et leurs étapes pour alimenter les listes déroulantes
-        $projects = Project::with('steps')->orderBy('name')->get();
+        $projects = Project::with('steps')->orderBy('title')->get();
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
     }
@@ -183,9 +183,9 @@ class TaskController extends Controller
      */
     public function create(Request $request)
     {
-        $categories = Category::orderBy('name')->get()->unique('name');
+        $categories = Category::orderBy('title')->get()->unique('title');
         $projects = \Schema::hasTable('projects') 
-            ? Project::with('steps')->orderBy('name')->get() 
+            ? Project::with('steps')->orderBy('title')->get() 
             : collect();
         $prefilledTitle = $request->query('title', '');
         $currentMode = session('user_mode', 'office');
@@ -199,9 +199,9 @@ class TaskController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-        $categories = Category::orderBy('name')->get()->unique('name');
+        $categories = Category::orderBy('title')->get()->unique('title');
         $projects = \Schema::hasTable('projects') 
-            ? Project::with('steps')->orderBy('name')->get() 
+            ? Project::with('steps')->orderBy('title')->get() 
             : collect();
         $currentMode = session('user_mode', 'office');
 
@@ -238,7 +238,7 @@ class TaskController extends Controller
         if ($request->type === 'office') {
             if ($projectId === 'new' && $request->filled('new_project_name')) {
                 $project = Project::create([
-                    'name' => $request->new_project_name
+                    'title' => $request->new_project_name
                 ]);
                 $projectId = $project->id;
             }
@@ -246,7 +246,7 @@ class TaskController extends Controller
             if (($stepId === 'new' || $request->filled('new_step_name')) && $projectId) {
                 $step = ProjectStep::create([
                     'project_id' => $projectId,
-                    'name' => $request->new_step_name
+                    'title' => $request->new_step_name
                 ]);
                 $stepId = $step->id;
             }
@@ -316,7 +316,7 @@ class TaskController extends Controller
             if ($request->type === 'office') {
                 if ($projectId === 'new' && $request->filled('new_project_name')) {
                     $project = Project::create([
-                        'name' => $request->new_project_name
+                        'title' => $request->new_project_name
                     ]);
                     $projectId = $project->id;
                 }
@@ -324,7 +324,7 @@ class TaskController extends Controller
                 if (($stepId === 'new' || $request->filled('new_step_name')) && $projectId) {
                     $step = ProjectStep::create([
                         'project_id' => $projectId,
-                        'name' => $request->new_step_name
+                        'title' => $request->new_step_name
                     ]);
                     $stepId = $step->id;
                 }
