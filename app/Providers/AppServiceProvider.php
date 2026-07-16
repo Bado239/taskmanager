@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,9 +22,27 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force le HTTPS sur Render en production pour activer les scripts des boutons
-        if (config('app.env') === 'production' || env('APP_ENV') === 'production') {
-            URL::forceScheme('https');
+        Schema::defaultStringLength(191);
+
+        // 🚨 SÉCURITÉ ABSOLUE : Force la migration avant le chargement de n'importe quelle page
+        // Si la table 'projects' est cassée ou inexistante, on réinstalle proprement.
+        try {
+            if (!Schema::hasTable('projects') || !Schema::hasColumn('projects', 'name')) {
+                // Annuler toute transaction résiduelle
+                while (DB::transactionLevel() > 0) {
+                    DB::rollBack();
+                }
+
+                Schema::disableForeignKeyConstraints();
+                
+                // On reconstruit tout à neuf de manière robuste
+                Artisan::call('migrate:fresh', ['--force' => true]);
+                Artisan::call('db:seed', ['--force' => true]);
+                
+                Schema::enableForeignKeyConstraints();
+            }
+        } catch (\Exception $e) {
+            // Évite de bloquer l'application si la DB n'est temporairement pas joignable
         }
     }
 }

@@ -18,20 +18,11 @@ class TaskController extends Controller
     /**
      * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
      */
+/**
+     * Affiche uniquement les tâches d'aujourd'hui filtrées par le mode actif (Master ou Bureau)
+     */
     public function index()
     {
-        // 🚨 CODE DE SECOURS SILENCIEUX POUR RÉPARER LA BASE DE DONNÉES SUR RENDER GATUIT
-        try {
-            if (!\Schema::hasTable('projects') || !\Schema::hasColumn('projects', 'name')) {
-                \Schema::disableForeignKeyConstraints();
-                \Artisan::call('migrate:fresh', ['--force' => true]);
-                \Artisan::call('db:seed', ['--force' => true]);
-                \Schema::enableForeignKeyConstraints();
-            }
-        } catch (\Exception $e) {
-            // Ignoré silencieusement pour ne pas bloquer l'utilisateur si la DB est déjà opérationnelle
-        }
-
         // Heure et date du Sénégal
         $today = Carbon::today('Africa/Dakar')->toDateString();
         $now = Carbon::now('Africa/Dakar')->format('H:i:s');
@@ -82,8 +73,7 @@ class TaskController extends Controller
 
         return view('tasks.index', compact('todayTasks', 'currentSchedule', 'currentMode', 'examStats', 'projects'));
     }
-
-    /**
+        /**
      * Bascule entre le mode Bureau (office) et le mode Master (master)
      */
     public function switchMode($mode)
