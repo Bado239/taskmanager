@@ -1,139 +1,163 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-        <!-- Balise de validation Google Search Console -->
-        <meta name="google-site-verification" content="bufHsOhARrgBcSxf5jl2TSo8QZHds4glU1Om2XAHZ0c" />
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google-site-verification" content="bufHsOhARrgBcSxf5jl2TSo8QZHds4glU1Om2XAHZ0c" />
 
-        <title>Gestionnaire de tâches</title>
-        <!-- Fonts & FontAwesome pour les icônes -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet" />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>TaskManager — Console v1.0</title>
 
-        <style>
-            body {
-                font-family: 'Figtree', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
-            }
-        </style>
-        <!-- Scripts (Tailwind est chargé ici) -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    @php
-        $currentMode = session('user_mode', 'office');
-        $isMaster = $currentMode === 'master';
-    @endphp
-    <body class="font-sans antialiased bg-[#f4f5f8] text-[#1e293b]">
-        <div class="flex h-screen overflow-hidden" id="wrapper">
-            
-            <!-- ─── 1. BARRE VERTICALE À GAUCHE (SIDEBAR STYLE SIMILARWEB) ─── -->
-            <aside id="sidebar-wrapper" class="w-64 bg-white border-r border-gray-200/80 text-[#1e293b] flex flex-col transition-all duration-300 fixed inset-y-0 left-0 z-50 md:static md:translate-x-0 shadow-sm transform -translate-x-full">
-                
-                <!-- Logo & Titre -->
-                <div class="p-5 border-b border-gray-100 flex items-center gap-3 bg-white shrink-0">
-                    <span class="text-2xl">📋</span>
-                    <div>
-                        <h2 class="text-sm font-black tracking-tight text-[#0f172a] uppercase">TaskManager</h2>
-                        <span class="text-[10px] font-bold text-gray-400 tracking-widest uppercase">Console v1.0</span>
-                    </div>
-                </div>
-                
-                <!-- Liens de Navigation -->
-                <nav class="flex-grow px-3 py-4 space-y-1 bg-white overflow-y-auto">
-                    <!-- 📅 FEUILLE AUJOURD'HUI -->
-                    <a href="{{ route('tasks.index') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all {{ request()->routeIs('tasks.index') ? 'bg-blue-50 text-[#1862ff] border border-blue-100/50' : 'text-gray-600 hover:text-[#1862ff] hover:bg-gray-50' }}">
-                        <span class="text-lg">📅</span>
-                        <span>Aujourd'hui</span>
-                    </a>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800,900&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-                    <!-- 📊 FEUILLE DASHBOARD -->
-                    <a href="{{ route('tasks.dashboard') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('tasks.dashboard') ? 'bg-blue-50 text-[#1862ff] border border-blue-100/50' : 'text-gray-600 hover:text-[#1862ff] hover:bg-gray-50' }}">
-                        <span class="text-lg">📊</span>
-                        <span>Dashboard</span>
-                    </a>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-                    <!-- 🌐 FEUILLE VEILLE TECH -->
-                    <a href="{{ route('tasks.veille') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('tasks.veille') ? 'bg-blue-50 text-[#1862ff] border border-blue-100/50' : 'text-gray-600 hover:text-[#1862ff] hover:bg-gray-50' }}">
-                        <span class="text-lg">📡</span>
-                        <span>Veille Tech</span>
-                    </a>
+@php
+    $currentMode = session('user_mode', 'office');
+    $isMaster = $currentMode === 'master';
+@endphp
 
-                    <!-- ➕ FEUILLE AJOUTER UNE TACHE -->
-                    <a href="{{ route('tasks.create') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('tasks.create') ? 'bg-blue-50 text-[#1862ff] border border-blue-100/50' : 'text-gray-600 hover:text-[#1862ff] hover:bg-gray-50' }}">
-                        <span class="text-lg">➕</span>
-                        <span>Ajouter une activité</span>
-                    </a>
-                </nav>
+<body class="font-sans antialiased bg-gradient-to-br from-[#0f172a] via-[#0b1220] to-[#111827] text-slate-200">
 
-                <!-- Commutateur de Mode en bas de la Sidebar -->
-                <div class="p-4 border-t border-gray-100 bg-[#fafbfe] shrink-0">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Mode actif actuel</div>
-                    <div class="flex bg-gray-100 p-0.5 rounded-lg border border-gray-200">
-                        <a href="{{ route('mode.switch', 'office') }}" 
-                           class="flex-1 text-center py-1.5 rounded-md text-[10px] font-bold transition-all {{ !$isMaster ? 'bg-white shadow-sm text-[#1862ff]' : 'text-gray-500 hover:text-gray-800' }}">
-                            💼 Office
-                        </a>
-                        <a href="{{ route('mode.switch', 'master') }}" 
-                           class="flex-1 text-center py-1.5 rounded-md text-[10px] font-bold transition-all {{ $isMaster ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-800' }}">
-                            🎓 Master
-                        </a>
-                    </div>
-                </div>
-            </aside>
+<div class="flex h-screen overflow-hidden">
 
-            <!-- ─── 2. CONTENU À DROITE (DÉROULANT PROPREMENT) ─── -->
-            <div class="flex-grow flex flex-col overflow-y-auto min-w-0">
-                
-                <!-- En-tête supérieur de contrôle -->
-                <header class="bg-white border-b border-gray-200/80 h-16 flex items-center justify-between px-6 shadow-sm shrink-0">
-                    <button id="sidebarToggle" class="text-gray-500 hover:text-[#1862ff] focus:outline-none p-2 rounded-xl hover:bg-gray-50">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                    
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-gray-400 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-xl">
-                            🇸🇳 Dakar, Sénégal
-                        </span>
-                        @if(Auth::check())
-                            <span class="text-sm font-bold text-[#0f172a]">{{ Auth::user()->name }}</span>
-                        @endif
-                    </div>
-                </header>
+    <!-- SIDEBAR PREMIUM -->
+    <aside id="sidebar-wrapper"
+        class="w-64 bg-[#0f172a]/90 backdrop-blur-xl border-r border-white/5 text-slate-300 flex flex-col transition-all duration-300 fixed inset-y-0 left-0 z-50 md:static md:translate-x-0 shadow-2xl transform -translate-x-full">
 
-                <!-- Injection dynamique des pages -->
-                <main class="flex-grow">
-                    {{ $slot }}
-                </main>
+        <!-- LOGO -->
+        <div class="p-6 border-b border-white/5 flex items-center gap-3">
+            <span class="text-2xl">📋</span>
+            <div>
+                <h2 class="text-xs font-black tracking-widest text-white uppercase">TaskManager</h2>
+                <span class="text-[10px] font-bold text-blue-400 tracking-[0.2em] uppercase">
+                    Console v1.0
+                </span>
             </div>
-
         </div>
 
-        <!-- SCRIPT POUR LE TOGGLE MOBILE ET BUREAU -->
-        <script>
-            window.addEventListener('DOMContentLoaded', event => {
-                const sidebarToggle = document.body.querySelector('#sidebarToggle');
-                const sidebar = document.body.querySelector('#sidebar-wrapper');
-                
-                if (sidebarToggle && sidebar) {
-                    sidebarToggle.addEventListener('click', event => {
-                        event.preventDefault();
-                        
-                        if (window.innerWidth >= 768) {
-                            sidebar.classList.toggle('md:w-0');
-                            sidebar.classList.toggle('md:overflow-hidden');
-                            sidebar.classList.toggle('md:border-r-0');
-                        } else {
-                            sidebar.classList.toggle('-translate-x-full');
-                        }
-                    });
-                }
-            });
-        </script>
-    </body>
+        <!-- NAVIGATION -->
+        <nav class="flex-grow px-4 py-6 space-y-2 overflow-y-auto">
+
+            <a href="{{ route('tasks.index') }}"
+               class="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300
+               {{ request()->routeIs('tasks.index')
+               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
+               : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span>📅</span>
+                <span>Aujourd'hui</span>
+            </a>
+
+            <a href="{{ route('tasks.dashboard') }}"
+               class="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300
+               {{ request()->routeIs('tasks.dashboard')
+               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
+               : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span>📊</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('tasks.veille') }}"
+               class="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300
+               {{ request()->routeIs('tasks.veille')
+               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20'
+               : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span>📡</span>
+                <span>Veille Tech</span>
+            </a>
+
+            <a href="{{ route('tasks.create') }}"
+               class="group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300
+               {{ request()->routeIs('tasks.create')
+               ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20'
+               : 'text-slate-400 hover:text-white hover:bg-white/5' }}">
+                <span>➕</span>
+                <span>Ajouter une activité</span>
+            </a>
+
+        </nav>
+
+        <!-- MODE SWITCH -->
+        <div class="p-4 border-t border-white/5">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">
+                Mode actif
+            </div>
+
+            <div class="flex bg-white/5 p-1 rounded-lg">
+
+                <a href="{{ route('mode.switch', 'office') }}"
+                   class="flex-1 text-center py-2 rounded-md text-xs font-semibold transition-all
+                   {{ !$isMaster ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white' }}">
+                    💼 Bureau
+                </a>
+
+                <a href="{{ route('mode.switch', 'master') }}"
+                   class="flex-1 text-center py-2 rounded-md text-xs font-semibold transition-all
+                   {{ $isMaster ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white' }}">
+                    🎓 Master
+                </a>
+
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <div class="flex-grow flex flex-col overflow-y-auto min-w-0">
+
+        <!-- HEADER -->
+        <header class="bg-[#0f172a]/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-8">
+
+            <button id="sidebarToggle"
+                class="text-slate-400 hover:text-white focus:outline-none p-2 rounded-lg hover:bg-white/5">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-semibold text-blue-400 bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 rounded-full">
+                    🇸🇳 Dakar, Sénégal
+                </span>
+
+                @if(Auth::check())
+                    <span class="text-sm font-semibold text-white">
+                        {{ Auth::user()->name }}
+                    </span>
+                @endif
+            </div>
+
+        </header>
+
+        <!-- BREADCRUMB -->
+        <div class="px-8 py-4 text-sm text-slate-400 border-b border-white/5">
+            <span class="hover:text-white transition">Accueil</span>
+            <span class="mx-2">/</span>
+            <span class="text-white font-semibold">Cockpit d'analyse</span>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-grow p-8">
+            {{ $slot }}
+        </main>
+
+    </div>
+
+</div>
+
+<!-- SIDEBAR TOGGLE SCRIPT -->
+<script>
+    window.addEventListener('DOMContentLoaded', () => {
+        const toggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar-wrapper');
+
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+    });
+</script>
+
+</body>
 </html>
