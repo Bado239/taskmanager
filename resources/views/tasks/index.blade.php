@@ -1,9 +1,9 @@
 <x-app-layout>
     @php
         $isMaster = $currentMode === 'master';
-        $themeBg = 'bg-[#f4f5f8]'; // Le gris signature de Similarweb
+        $themeBg = 'bg-[#f4f5f8]'; // Le gris signature Similarweb
         $themeText = $isMaster ? 'text-purple-900' : 'text-[#1e293b]';
-        $themeBtn = $isMaster ? 'bg-purple-600 hover:bg-purple-700' : 'bg-[#1862ff] hover:bg-[#004be5]'; // Bleu électrique de Similarweb
+        $themeBtn = $isMaster ? 'bg-purple-600 hover:bg-purple-700' : 'bg-[#1862ff] hover:bg-[#004be5]'; // Bleu électrique Similarweb
         $themeFocus = $isMaster ? 'focus:ring-purple-500' : 'focus:ring-[#1862ff]';
         $themeBorder = 'border-gray-200';
     @endphp
@@ -23,7 +23,7 @@
                 </div>
             @endif
 
-            <!-- Similarweb style Header / Breadcrumb -->
+            <!-- Header / Breadcrumb -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm gap-4">
                 <div>
                     <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
@@ -34,7 +34,7 @@
                     </h1>
                 </div>
                 
-                <!-- Similarweb Toggle Button Design -->
+                <!-- Toggle Button Design -->
                 <div class="flex bg-gray-100 p-1 rounded-xl w-full md:w-auto border border-gray-200">
                     <a href="{{ route('mode.switch', 'office') }}" 
                        class="flex-1 md:flex-none text-center px-5 py-2 rounded-lg text-xs font-bold transition-all {{ !$isMaster ? 'bg-white shadow-sm text-[#1862ff]' : 'text-gray-500 hover:text-gray-800' }}">
@@ -47,8 +47,8 @@
                 </div>
             </div>
 
-            <!-- Stats d'examens (Similaire aux widgets de trafic Similarweb) -->
-            @if($isMaster && $examStats)
+            <!-- Stats d'examens (Mode Master) -->
+            @if($isMaster && isset($examStats) && $examStats)
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-sm col-span-1 md:col-span-2">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Progression Globale du Semestre</span>
@@ -70,10 +70,10 @@
                 </div>
             @endif
 
-            <!-- Layout principal : 2 Colonnes de style Analytique -->
+            <!-- Layout principal : 2 Colonnes -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 
-                <!-- Panneau de saisie rapide (Style Sidebar d'analyse) -->
+                <!-- Panneau de saisie rapide (Sidebar) -->
                 <div class="lg:col-span-1 bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-5">
                     <div class="border-b border-gray-100 pb-3">
                         <h3 class="text-sm font-extrabold text-[#0f172a] uppercase tracking-wider">⚙️ Panneau d'administration</h3>
@@ -81,6 +81,7 @@
                     </div>
 
                     @if(!$isMaster)
+                        <!-- Formulaire Office -->
                         <form action="{{ route('tasks.store') }}" method="POST" class="space-y-4">
                             @csrf
                             <input type="hidden" name="type" value="office">
@@ -208,7 +209,7 @@
                     @endif
                 </div>
 
-                <!-- Section de Droite : Leaderboard d'activités (Style Similarweb) -->
+                <!-- Section de Droite : Leaderboard d'activités -->
                 <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-[#fafbfe]">
                         <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">📊 Top Activités du jour</h2>
@@ -217,7 +218,7 @@
                         </span>
                     </div>
 
-                    <!-- En-tête du tableau Similarweb -->
+                    <!-- En-tête du tableau -->
                     <div class="grid grid-cols-12 px-6 py-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
                         <div class="col-span-1">Rang</div>
                         <div class="col-span-6 md:col-span-7">Détails de l'activité</div>
@@ -230,7 +231,7 @@
                         @forelse($todayTasks as $task)
                             <div class="grid grid-cols-12 px-6 py-4 items-center hover:bg-[#fafbfe] transition-all">
                                 
-                                <!-- Index / Rang (Similarweb-style) -->
+                                <!-- Index / Rang -->
                                 <div class="col-span-1">
                                     <span class="text-xs font-extrabold text-gray-300">#{{ $index++ }}</span>
                                 </div>
@@ -255,7 +256,7 @@
 
                                     <!-- Support de cours ou document lié -->
                                     @if($task->document_link)
-                                        <a href="{{ $task->document_link }}" target="_blank" class="text-[11px] text-[#1862ff] hover:underline inline-flex items-center gap-1 font-bold">
+                                        <a href="{{ $task->document_link }}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[#1862ff] hover:underline inline-flex items-center gap-1 font-bold">
                                             🔗 Ouvrir le document ressource
                                         </a>
                                     @endif
@@ -269,7 +270,7 @@
                                             {{ $task->document_status === 'done' ? 'Validé' : ($task->document_status === 'in_progress' ? 'En Revue' : 'À traiter') }}
                                         </span>
                                     @else
-                                        <!-- Master : Progression en cases à cocher miniatures -->
+                                        <!-- Master : Checkboxes de progression -->
                                         <form action="{{ route('tasks.updatePrep', $task->id) }}" method="POST" class="flex items-center gap-1">
                                             @csrf
                                             @php $prep = $task->examPrep; @endphp
@@ -323,62 +324,62 @@
             const newStepInput = document.getElementById('new_step_name');
             const optionNewStep = document.getElementById('option_new_step');
 
-            function updateSteps() {
-                const selectedProjectVal = projectSelect.value;
-                
-                if (selectedProjectVal === 'new') {
-                    newProjectField.classList.remove('hidden');
-                    newProjectInput.required = true;
-                } else {
-                    newProjectField.classList.add('hidden');
-                    newProjectInput.required = false;
-                    newProjectInput.value = '';
-                }
-
-                const options = stepSelect.querySelectorAll('option');
-
-                options.forEach(opt => {
-                    const parentProjId = opt.getAttribute('data-project');
-                    if (parentProjId) {
-                        if (selectedProjectVal && parentProjId === selectedProjectVal) {
-                            opt.classList.remove('hidden');
-                        } else {
-                            opt.classList.add('hidden');
-                        }
+            if (projectSelect && stepSelect) {
+                function updateSteps() {
+                    const selectedProjectVal = projectSelect.value;
+                    
+                    if (selectedProjectVal === 'new') {
+                        newProjectField.classList.remove('hidden');
+                        newProjectInput.required = true;
+                    } else {
+                        newProjectField.classList.add('hidden');
+                        newProjectInput.required = false;
+                        newProjectInput.value = '';
                     }
-                });
 
-                if (selectedProjectVal && selectedProjectVal !== 'new') {
-                    optionNewStep.classList.remove('hidden');
-                } else if (selectedProjectVal === 'new') {
-                    optionNewStep.classList.remove('hidden');
-                } else {
-                    optionNewStep.classList.add('hidden');
+                    const options = stepSelect.querySelectorAll('option');
+
+                    options.forEach(opt => {
+                        const parentProjId = opt.getAttribute('data-project');
+                        if (parentProjId) {
+                            if (selectedProjectVal && parentProjId === selectedProjectVal) {
+                                opt.classList.remove('hidden');
+                            } else {
+                                opt.classList.add('hidden');
+                            }
+                        }
+                    });
+
+                    if (selectedProjectVal) {
+                        optionNewStep.classList.remove('hidden');
+                    } else {
+                        optionNewStep.classList.add('hidden');
+                    }
+
+                    const currentSelectedOpt = stepSelect.options[stepSelect.selectedIndex];
+                    if (currentSelectedOpt && currentSelectedOpt.getAttribute('data-project') && currentSelectedOpt.getAttribute('data-project') !== selectedProjectVal) {
+                        stepSelect.value = '';
+                    }
+
+                    updateStepField();
                 }
 
-                const currentSelectedOpt = stepSelect.options[stepSelect.selectedIndex];
-                if (currentSelectedOpt && currentSelectedOpt.getAttribute('data-project') && currentSelectedOpt.getAttribute('data-project') !== selectedProjectVal) {
-                    stepSelect.value = '';
+                function updateStepField() {
+                    if (stepSelect.value === 'new') {
+                        newStepField.classList.remove('hidden');
+                        newStepInput.required = true;
+                    } else {
+                        newStepField.classList.add('hidden');
+                        newStepInput.required = false;
+                        newStepInput.value = '';
+                    }
                 }
 
-                updateStepField();
+                projectSelect.addEventListener('change', updateSteps);
+                stepSelect.addEventListener('change', updateStepField);
+
+                updateSteps();
             }
-
-            function updateStepField() {
-                if (stepSelect.value === 'new') {
-                    newStepField.classList.remove('hidden');
-                    newStepInput.required = true;
-                } else {
-                    newStepField.classList.add('hidden');
-                    newStepInput.required = false;
-                    newStepInput.value = '';
-                }
-            }
-
-            projectSelect.addEventListener('change', updateSteps);
-            stepSelect.addEventListener('change', updateStepField);
-
-            updateSteps();
         });
     </script>
     @endif
