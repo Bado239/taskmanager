@@ -1,44 +1,39 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# Installer les dépendances système, extensions PHP et Node.js/NPM requis
-RUN apk add --no-cache nginx wget git unzip openssl bash postgresql-dev nodejs npm \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
+# 1. Installation des dépendances système et Node.js
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
+    zip \
+    unzip \
+    nodejs \
+    npm
 
-# Installer Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# 2. Installation des extensions PHP (avec PostgreSQL)
+RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
 
-WORKDIR /var/www/html
+# 3. Dossier de travail
+WORKDIR /var/www
+
+# 4. Copie du projet
 COPY . .
 
-# Installer les dépendances du projet
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# 5. Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader
 
-# Installer et compiler les éléments du Dashboard (Vite/Tailwind)
-RUN npm install && npm run build
+# 6. COMPILATION DE TAILWIND CSS (Crucial pour ton design !)
+RUN npm install
+RUN npm run build
 
-# Ajuster les permissions pour Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# 7. Donner les permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Configurer Nginx pour écouter sur le port 10000
-RUN echo 'server { \
-    listen 10000; \
-    root /var/www/html/public; \
-    index index.php index.html; \
-    location / { \
-        try_files $uri $uri/ /index.php?$query_string; \
-    } \
-    location ~ \.php$ { \
-        try_files $uri =404; \
-        fastcgi_split_path_info ^(.+\.php)(/.+)$; \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_index index.php; \
-        include fastcgi_params; \
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
-        fastcgi_param PATH_INFO $fastcgi_path_info; \
-    } \
-}' > /etc/nginx/http.d/default.conf
+EXPOSE 8000
 
-EXPOSE 10000
-
-# Lancer les migrations en toute sécurité et démarrer les services
-CMD php artisan migrate --force && php-fpm -D && nginx -g "daemon off;"
+# 8. Commande de démarrage (remplace le port/command selon ton setup docker)
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
