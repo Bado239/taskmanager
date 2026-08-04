@@ -15,21 +15,18 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $currentMode = session('current_mode', 'office');
-        
-        // Mode 'kpi' configuré par défaut
-        $viewMode = $request->query('view', 'kpi');
 
         // Récupération des catégories et projets
         $categories = Category::all();
         $projects = Project::all();
 
-        // Calcul des métriques KPI selon le mode actif
+        // Calcul des métriques KPI filtrés EXCLUSIVEMENT par le mode actif
         $totalTasks = Task::where('type', $currentMode)->count();
         $todoTasks  = Task::where('type', $currentMode)->where('document_status', 'todo')->count();
         $doingTasks = Task::where('type', $currentMode)->where('document_status', 'in_progress')->count();
         $doneTasks  = Task::where('type', $currentMode)->where('document_status', 'done')->count();
 
-        // Tâches du jour
+        // Tâches filtrées uniquement pour le mode actif
         $todayTasks = Task::where('type', $currentMode)
                           ->with(['category', 'project'])
                           ->latest()
@@ -43,8 +40,7 @@ class TaskController extends Controller
             'todayTasks',
             'categories',
             'projects',
-            'currentMode',
-            'viewMode'
+            'currentMode'
         ));
     }
 
@@ -57,7 +53,7 @@ class TaskController extends Controller
             session(['current_mode' => $mode]);
         }
 
-        return redirect()->back();
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -86,10 +82,10 @@ class TaskController extends Controller
             'document_status' => $request->document_status ?? 'todo',
             'priority'        => $request->priority ?? 'medium',
             'due_date'        => $request->date_prevue,
-            'type'            => $request->type ?? 'office',
+            'type'            => $request->type ?? session('current_mode', 'office'),
         ]);
 
-        return redirect()->route('dashboard', ['view' => 'kpi'])->with('success', 'Livrable enregistré avec succès !');
+        return redirect()->route('dashboard')->with('success', 'Livrable enregistré avec succès !');
     }
 
     /**
