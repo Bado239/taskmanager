@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6" x-data="{ showForm: false }">
+<div class="space-y-6" x-data="{ showForm: false, selectedProject: '' }">
 
     <!-- BARRE DE NAVIGATION / BOUTONS DE COMMUTATION DE VUE -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -70,7 +70,7 @@
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
-                <select name="project_id" id="project_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <select name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Aucun projet --</option>
                     @foreach($projects as $project)
                         <option value="{{ $project->id }}">{{ $project->title }}</option>
@@ -79,7 +79,7 @@
                 </select>
             </div>
 
-            <div id="new_project_div" class="hidden">
+            <div x-show="selectedProject === 'new'" x-cloak>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Nouveau projet</label>
                 <input type="text" name="new_project_name" placeholder="Nom du projet..."
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -224,6 +224,7 @@
                             <th class="px-4 py-3">Rang</th>
                             <th class="px-4 py-3">Détails de l'activité</th>
                             <th class="px-4 py-3">Statut / Catégorie</th>
+                            <th class="px-4 py-3">Échéance</th>
                             <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -241,17 +242,27 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 space-y-1">
-                                    <div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <span class="bg-blue-50 text-[#0052cc] text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-100">
                                             {{ $task->category->title ?? $task->category->name ?? 'CGP' }}
                                         </span>
+                                        @if(($task->document_status ?? $task->status) === 'done')
+                                            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
+                                        @elseif(($task->document_status ?? $task->status) === 'in_progress')
+                                            <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
+                                        @else
+                                            <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-0.5 rounded border border-gray-200">🔴 Cadrage</span>
+                                        @endif
                                     </div>
                                     <div>
                                         <span class="text-xs font-medium px-2 py-0.5 rounded border 
                                             {{ $task->priority === 'high' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-100 text-gray-600 border-gray-200' }}">
-                                            {{ ucfirst($task->priority ?? 'Medium') }}
+                                            Priorité: {{ ucfirst($task->priority ?? 'Medium') }}
                                         </span>
                                     </div>
+                                </td>
+                                <td class="px-4 py-4 text-xs text-gray-500">
+                                    {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                 </td>
                                 <td class="px-4 py-4 text-right">
                                     <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
@@ -265,7 +276,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-400">
                                     <div class="font-semibold text-gray-600">Aucune activité enregistrée en Mode Office</div>
                                 </td>
                             </tr>
@@ -314,6 +325,7 @@
                             <th class="px-4 py-3">Rang</th>
                             <th class="px-4 py-3">Détails de l'activité</th>
                             <th class="px-4 py-3">Statut / Catégorie</th>
+                            <th class="px-4 py-3">Échéance</th>
                             <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -331,17 +343,27 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-4 space-y-1">
-                                    <div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <span class="bg-purple-50 text-purple-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-purple-100">
                                             {{ $task->category->title ?? $task->category->name ?? 'Master ISEF1' }}
                                         </span>
+                                        @if(($task->document_status ?? $task->status) === 'done')
+                                            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
+                                        @elseif(($task->document_status ?? $task->status) === 'in_progress')
+                                            <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
+                                        @else
+                                            <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-0.5 rounded border border-gray-200">🔴 Cadrage</span>
+                                        @endif
                                     </div>
                                     <div>
                                         <span class="text-xs font-medium px-2 py-0.5 rounded border 
                                             {{ $task->priority === 'high' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-gray-100 text-gray-600 border-gray-200' }}">
-                                            {{ ucfirst($task->priority ?? 'Medium') }}
+                                            Priorité: {{ ucfirst($task->priority ?? 'Medium') }}
                                         </span>
                                     </div>
+                                </td>
+                                <td class="px-4 py-4 text-xs text-gray-500">
+                                    {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                 </td>
                                 <td class="px-4 py-4 text-right">
                                     <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
@@ -355,7 +377,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-gray-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-400">
                                     <div class="font-semibold text-gray-600">Aucune activité enregistrée en Mode Master</div>
                                 </td>
                             </tr>
@@ -367,15 +389,4 @@
     @endif
 
 </div>
-
-<script>
-    document.getElementById('project_id')?.addEventListener('change', function() {
-        const div = document.getElementById('new_project_div');
-        if (this.value === 'new') {
-            div?.classList.remove('hidden');
-        } else {
-            div?.classList.add('hidden');
-        }
-    });
-</script>
 @endsection

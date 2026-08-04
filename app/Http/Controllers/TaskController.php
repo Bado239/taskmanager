@@ -10,14 +10,13 @@ use App\Models\Project;
 class TaskController extends Controller
 {
     /**
-     * Affiche le Tableau de bord avec séparation Dashboard / Office / Master
+     * Affiche le Tableau de bord avec indicateurs globaux et separation des vues
      */
     public function index(Request $request)
     {
-        // Récupère la vue demandée (dashboard par défaut, office, ou master)
+        // Récupère la vue demandée ('dashboard' par défaut, 'office', ou 'master')
         $view = $request->query('view', session('active_view', 'dashboard'));
         
-        // Si la vue est office ou master, on met à jour le mode courant en session
         if (in_array($view, ['office', 'master'])) {
             session(['current_mode' => $view]);
         }
@@ -29,13 +28,15 @@ class TaskController extends Controller
         $categories = Category::all();
         $projects = Project::all();
 
-        // KPIs pour le Dashboard (mode courant)
-        $totalTasks = Task::where('type', $currentMode)->count();
-        $todoTasks  = Task::where('type', $currentMode)->where('document_status', 'todo')->count();
-        $doingTasks = Task::where('type', $currentMode)->where('document_status', 'in_progress')->count();
-        $doneTasks  = Task::where('type', $currentMode)->where('document_status', 'done')->count();
+        // -------------------------------------------------------------
+        // INDICATEURS GLOBAUX (CUMUL OFFICE + MASTER)
+        // -------------------------------------------------------------
+        $totalTasks = Task::count();
+        $todoTasks  = Task::where('document_status', 'todo')->count();
+        $doingTasks = Task::where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('document_status', 'done')->count();
 
-        // Tâches Office et Master
+        // Récupération exclusive par mode pour les tableaux de détail
         $officeTasks = Task::where('type', 'office')
                            ->with(['category', 'project'])
                            ->latest()
@@ -61,7 +62,7 @@ class TaskController extends Controller
     }
 
     /**
-     * Bascule le mode courant
+     * Bascule le mode courant et redirige vers la vue correspondante
      */
     public function switchMode(Request $request, $mode)
     {

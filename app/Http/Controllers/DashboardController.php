@@ -14,24 +14,31 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        // Mode d'affichage actif : 'dashboard', 'office' ou 'master'
+        // Mode d'affichage actif : 'dashboard' (par défaut), 'office' ou 'master'
         $view = $request->get('view', 'dashboard');
 
-        // 📊 Indicateurs globaux (cumul Office + Master)
+        // 📊 Indicateurs globaux (Calculés sur TOUTES les tâches du système)
         $totalTasks = Task::count();
         $todoTasks  = Task::where('document_status', 'todo')->count();
         $doingTasks = Task::where('document_status', 'in_progress')->count();
         $doneTasks  = Task::where('document_status', 'done')->count();
 
-        // 💼 Tâches pour la vue Office
+        // Taux d'avancement global pour le Dashboard autonome
+        $completionRate = $totalTasks > 0 ? round(($doneTasks / $totalTasks) * 100) : 0;
+
+        // 💼 Tâches filtrées spécifiquement si l'utilisateur bascule sur un mode
         $officeTasks = Task::with(['project', 'category'])
             ->where('type', 'office')
             ->latest()
             ->get();
 
-        // 🎓 Tâches pour la vue Master
         $masterTasks = Task::with(['project', 'category'])
             ->where('type', 'master')
+            ->latest()
+            ->get();
+
+        // 📋 Liste complète des tâches pour la vue Dashboard indépendante
+        $allTasks = Task::with(['project', 'category'])
             ->latest()
             ->get();
 
@@ -54,7 +61,7 @@ class DashboardController extends Controller
         $totalMinutesToday = Task::whereDate('date_prevue', $today)
             ->sum('duree_estimee');
 
-        // Collections pour alimenter le formulaire d'ajout
+        // Collections pour alimenter les formulaires
         $categories = Category::all();
         $projects   = Project::all();
 
@@ -64,6 +71,8 @@ class DashboardController extends Controller
             'todoTasks',
             'doingTasks',
             'doneTasks',
+            'completionRate',
+            'allTasks',
             'officeTasks',
             'masterTasks',
             'tasksToday',
