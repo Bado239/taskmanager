@@ -119,7 +119,7 @@
     @endif
 
     <!-- ========================================== -->
-    <!-- VUE 1 : DASHBOARD (INDICATEURS UNIQUEMENT) -->
+    <!-- VUE 1 : DASHBOARD (INDICATEURS GLOBAUX)     -->
     <!-- ========================================== -->
     @if($view === 'dashboard')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
@@ -127,7 +127,7 @@
                 <span>Accueil</span> / <span class="text-gray-600 font-medium">Cockpit d'analyse</span>
             </div>
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-                🎓 MASTER Cockpit Livrables 
+                📊 Bilan Global - Cockpit Livrables 
                 <span class="text-xs bg-blue-50 text-[#0052cc] px-2.5 py-0.5 rounded-full font-semibold border border-blue-100">
                     🇸🇳 Dakar, Sénégal
                 </span>
@@ -135,21 +135,17 @@
 
             <div class="flex items-center justify-between border-t border-gray-100 pt-4">
                 <div class="flex items-center gap-2 text-xs text-gray-600">
-                    <span class="font-bold">Mode actif :</span>
-                    <a href="{{ route('dashboard', ['view' => 'office']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">💼 Bureau</a>
-                    <a href="{{ route('dashboard', ['view' => 'master']) }}" class="px-2.5 py-1 rounded bg-blue-50 text-[#0052cc] font-semibold border border-blue-100">🎓 Master</a>
+                    <span class="font-bold">Accès rapides :</span>
+                    <a href="{{ route('dashboard', ['view' => 'office']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">💼 Mode Office</a>
+                    <a href="{{ route('dashboard', ['view' => 'master']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">🎓 Mode Master</a>
                 </div>
-                
-                <a href="{{ route('dashboard', ['view' => 'master']) }}" class="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg hover:bg-emerald-700">
-                    + Nouvelle tâche Master
-                </a>
             </div>
         </div>
 
-        <!-- INDICATEURS GLOBAUX / KPI -->
+        <!-- INDICATEURS GLOBAUX / KPI (CUMUL OFFICE + MASTER) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-[#0052cc] text-white p-5 rounded-xl shadow-sm">
-                <span class="text-xs font-semibold uppercase opacity-80">📌 Total tâches (Master)</span>
+                <span class="text-xs font-semibold uppercase opacity-80">📌 Total tâches (Global)</span>
                 <div class="text-3xl font-bold mt-2">{{ $totalTasks }}</div>
             </div>
 
@@ -169,16 +165,16 @@
             </div>
         </div>
 
-        <!-- SUIVI ET TAUX D'AVANCEMENT -->
+        <!-- SUIVI ET TAUX D'AVANCEMENT GLOBAL -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                <h2 class="font-bold text-gray-900 text-base">🔥 Tâches activement suivies (Mode Master)</h2>
+                <h2 class="font-bold text-gray-900 text-base">🔥 Tâches activement suivies (Office + Master)</h2>
                 <p class="text-xs text-gray-500">Ensemble des tâches en cadrage ou en cours</p>
                 <div class="text-3xl font-bold text-gray-900 pt-2">{{ $todoTasks + $doingTasks }}</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-2">
-                <h2 class="font-bold text-gray-900 text-base">📈 Taux d’avancement Master</h2>
+                <h2 class="font-bold text-gray-900 text-base">📈 Taux d’avancement Global</h2>
                 @php
                     $rate = $totalTasks > 0 ? round(($doneTasks / $totalTasks) * 100) : 0;
                 @endphp
