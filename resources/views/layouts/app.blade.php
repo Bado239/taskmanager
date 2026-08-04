@@ -42,7 +42,7 @@
             </div>
         </header>
 
-        <!-- MAIN CONTENT (Remplacement de $slot par yield) -->
+        <!-- MAIN CONTENT -->
         <main class="flex-grow p-8">
             @yield('content')
         </main>
