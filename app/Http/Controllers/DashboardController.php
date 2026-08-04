@@ -5,56 +5,73 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Project;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $today = Carbon::today();
 
-        // 📅 Tâches du jour (planning réel)
+        // Mode d'affichage actif : 'dashboard', 'office' ou 'master'
+        $view = $request->get('view', 'dashboard');
+
+        // 📊 Indicateurs globaux (cumul Office + Master)
+        $totalTasks = Task::count();
+        $todoTasks  = Task::where('document_status', 'todo')->count();
+        $doingTasks = Task::where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('document_status', 'done')->count();
+
+        // 💼 Tâches pour la vue Office
+        $officeTasks = Task::with(['project', 'category'])
+            ->where('type', 'office')
+            ->latest()
+            ->get();
+
+        // 🎓 Tâches pour la vue Master
+        $masterTasks = Task::with(['project', 'category'])
+            ->where('type', 'master')
+            ->latest()
+            ->get();
+
+        // 📅 Métriques complémentaires
         $tasksToday = Task::with(['project', 'category'])
             ->whereDate('date_prevue', $today)
             ->orderBy('ordre')
             ->orderBy('heure_debut')
             ->get();
 
-        // 🔥 Tâches urgentes (non terminées)
         $urgentTasks = Task::where('priority', 'high')
-            ->where('status', '!=', 'done')
+            ->where('document_status', '!=', 'done')
             ->count();
 
-        // 📆 Semaine en cours
         $tasksWeek = Task::whereBetween('date_prevue', [
-                $today,
-                $today->copy()->addDays(7)
-            ])->count();
+            $today,
+            $today->copy()->addDays(7)
+        ])->count();
 
-        // ⏱ Temps total estimé aujourd’hui
         $totalMinutesToday = Task::whereDate('date_prevue', $today)
             ->sum('duree_estimee');
 
-        // 📊 Statistiques globales
-        $totalTasks = Task::count();
-        $todoTasks = Task::where('status', 'todo')->count();
-        $doingTasks = Task::where('status', 'doing')->count();
-        $doneTasks = Task::where('status', 'done')->count();
-
-        $totalProjects = Project::count();
-        $totalCategories = Category::count();
+        // Collections pour alimenter le formulaire d'ajout
+        $categories = Category::all();
+        $projects   = Project::all();
 
         return view('dashboard', compact(
-            'tasksToday',
-            'urgentTasks',
-            'tasksWeek',
-            'totalMinutesToday',
+            'view',
             'totalTasks',
             'todoTasks',
             'doingTasks',
             'doneTasks',
-            'totalProjects',
-            'totalCategories'
+            'officeTasks',
+            'masterTasks',
+            'tasksToday',
+            'urgentTasks',
+            'tasksWeek',
+            'totalMinutesToday',
+            'categories',
+            'projects'
         ));
     }
 }
