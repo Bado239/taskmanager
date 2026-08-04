@@ -10,50 +10,66 @@ use App\Models\Project;
 class TaskController extends Controller
 {
     /**
-     * Affiche le Tableau de bord avec l'analyse des KPI
+     * Affiche le Tableau de bord avec séparation Dashboard / Office / Master
      */
     public function index(Request $request)
     {
+        // Récupère la vue demandée (dashboard par défaut, office, ou master)
+        $view = $request->query('view', session('active_view', 'dashboard'));
+        
+        // Si la vue est office ou master, on met à jour le mode courant en session
+        if (in_array($view, ['office', 'master'])) {
+            session(['current_mode' => $view]);
+        }
+        
+        session(['active_view' => $view]);
         $currentMode = session('current_mode', 'office');
 
         // Récupération des catégories et projets
         $categories = Category::all();
         $projects = Project::all();
 
-        // Calcul des métriques KPI filtrés EXCLUSIVEMENT par le mode actif
+        // KPIs pour le Dashboard (mode courant)
         $totalTasks = Task::where('type', $currentMode)->count();
         $todoTasks  = Task::where('type', $currentMode)->where('document_status', 'todo')->count();
         $doingTasks = Task::where('type', $currentMode)->where('document_status', 'in_progress')->count();
         $doneTasks  = Task::where('type', $currentMode)->where('document_status', 'done')->count();
 
-        // Tâches filtrées uniquement pour le mode actif
-        $todayTasks = Task::where('type', $currentMode)
-                          ->with(['category', 'project'])
-                          ->latest()
-                          ->get();
+        // Tâches Office et Master
+        $officeTasks = Task::where('type', 'office')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
+
+        $masterTasks = Task::where('type', 'master')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
 
         return view('dashboard', compact(
+            'view',
+            'currentMode',
             'totalTasks',
             'todoTasks',
             'doingTasks',
             'doneTasks',
-            'todayTasks',
+            'officeTasks',
+            'masterTasks',
             'categories',
-            'projects',
-            'currentMode'
+            'projects'
         ));
     }
 
     /**
-     * Bascule le mode entre Office et Master
+     * Bascule le mode courant
      */
     public function switchMode(Request $request, $mode)
     {
         if (in_array($mode, ['office', 'master'])) {
-            session(['current_mode' => $mode]);
+            session(['current_mode' => $mode, 'active_view' => $mode]);
         }
 
-        return redirect()->route('dashboard');
+        return redirect()->route('dashboard', ['view' => $mode]);
     }
 
     /**
@@ -85,7 +101,7 @@ class TaskController extends Controller
             'type'            => $request->type ?? session('current_mode', 'office'),
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Livrable enregistré avec succès !');
+        return redirect()->route('dashboard', ['view' => $request->type])->with('success', 'Livrable enregistré avec succès !');
     }
 
     /**
