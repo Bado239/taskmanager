@@ -60,7 +60,7 @@
 
                     <!-- ACCÈS PRINCIPAUX -->
                     <nav class="space-y-1">
-                        <a href="{{ route('dashboard', ['view' => 'kpi']) }}" 
+                        <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-blue-50 text-[#0052cc]">
                             📊 <span>Dashboard</span>
                         </a>

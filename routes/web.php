@@ -3,17 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 
-// Redirection de la racine vers le dashboard
+// Redirection de la racine
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-// Affichage du Dashboard et filtrage des vues (Dashboard, Office, Master)
+// Routes d'affichage (acceptent la méthode GET)
 Route::get('/dashboard', [TaskController::class, 'index'])->name('dashboard');
+Route::get('/tasks', [TaskController::class, 'index']);
 
-// Enregistrement et suppression des tâches
+// Actions sur les tâches
 Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 
-// Changement rapide de mode (office / master)
+// Commutation de mode
 Route::get('/switch-mode/{mode}', [TaskController::class, 'switchMode'])->name('mode.switch');
