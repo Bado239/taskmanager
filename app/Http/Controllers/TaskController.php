@@ -20,13 +20,13 @@ class TaskController extends Controller
         $categories = Category::all();
         $projects = Project::all();
 
-        // Calcul des métriques KPI selon le mode actif (office / master)
+        // Calcul des métriques KPI selon le mode actif
         $totalTasks = Task::where('type', $currentMode)->count();
         $todoTasks  = Task::where('type', $currentMode)->where('document_status', 'todo')->count();
         $doingTasks = Task::where('type', $currentMode)->where('document_status', 'in_progress')->count();
         $doneTasks  = Task::where('type', $currentMode)->where('document_status', 'done')->count();
 
-        // Tâches du jour pour la liste
+        // Tâches enregistrées
         $todayTasks = Task::where('type', $currentMode)
                           ->with(['category', 'project'])
                           ->latest()
@@ -66,11 +66,10 @@ class TaskController extends Controller
             'type'  => 'required|string',
         ]);
 
-        // Gestion de la création rapide d'un projet
+        // Création rapide du projet avec la colonne 'title'
         $projectId = $request->project_id;
         if ($request->project_id === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
-                'name'  => $request->new_project_name,
                 'title' => $request->new_project_name,
             ]);
             $projectId = $newProject->id;

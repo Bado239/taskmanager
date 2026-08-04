@@ -109,7 +109,7 @@
                     <select name="category_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Sélectionner une catégorie --</option>
                         @foreach($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}">{{ $category->title ?? $category->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -120,7 +120,7 @@
                     <select name="project_id" id="project_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Aucun projet --</option>
                         @foreach($projects as $project)
-                            <option value="{{ $project->id }}">{{ $project->name }}</option>
+                            <option value="{{ $project->id }}">{{ $project->title }}</option>
                         @endforeach
                         <option value="new">+ Créer un nouveau projet...</option>
                     </select>
@@ -196,13 +196,13 @@
                                             <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline">🔗 Document de travail</a>
                                         @endif
                                         <div class="text-xs text-gray-400 mt-0.5">
-                                            Projet: {{ $task->project->name ?? 'Aucun' }}
+                                            Projet: {{ $task->project->title ?? 'Aucun' }}
                                         </div>
                                     </td>
                                     <td class="px-4 py-4 space-y-1">
                                         <div>
                                             <span class="bg-blue-50 text-[#0052cc] text-xs font-semibold px-2.5 py-0.5 rounded-full border border-blue-100">
-                                                {{ $task->category->name ?? 'Général' }}
+                                                {{ $task->category->title ?? $task->category->name ?? 'Général' }}
                                             </span>
                                         </div>
                                         <div>
