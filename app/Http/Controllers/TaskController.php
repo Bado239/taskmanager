@@ -16,8 +16,8 @@ class TaskController extends Controller
     {
         $currentMode = session('current_mode', 'office');
         
-        // Détecte le mode d'affichage ('kpi' ou 'full')
-        $viewMode = $request->query('view', 'full');
+        // Mode 'kpi' configuré par défaut
+        $viewMode = $request->query('view', 'kpi');
 
         // Récupération des catégories et projets
         $categories = Category::all();
@@ -89,7 +89,7 @@ class TaskController extends Controller
             'type'            => $request->type ?? 'office',
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Livrable enregistré avec succès !');
+        return redirect()->route('dashboard', ['view' => 'kpi'])->with('success', 'Livrable enregistré avec succès !');
     }
 
     /**
