@@ -66,11 +66,12 @@ class TaskController extends Controller
             'type'  => 'required|string',
         ]);
 
-        // Gestion de la création rapide d'un projet si sélectionné
+        // Gestion de la création rapide d'un projet
         $projectId = $request->project_id;
         if ($request->project_id === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
-                'name' => $request->new_project_name
+                'name'  => $request->new_project_name,
+                'title' => $request->new_project_name,
             ]);
             $projectId = $newProject->id;
         }
@@ -86,7 +87,7 @@ class TaskController extends Controller
             'type'            => $request->type ?? 'office',
         ]);
 
-        return redirect()->back()->with('success', 'Livrable enregistré avec succès !');
+        return redirect()->route('dashboard')->with('success', 'Livrable enregistré avec succès !');
     }
 
     /**
