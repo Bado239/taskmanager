@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <!-- KPI PRINCIPAUX -->
+    <!-- INDICATEURS GLOBAUX / KPI PRINCIPAUX -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-[#0052cc] text-white p-5 rounded-xl shadow-sm">
             <span class="text-xs font-semibold uppercase opacity-80">📌 Total tâches</span>
@@ -75,7 +75,8 @@
         </div>
     </div>
 
-    <!-- MAIN SECTION: FORMULAIRE + TABLEAU -->
+    {{-- CETTE SECTION SERA MASQUÉE EN MODE KPI UNIQUEMENT --}}
+    @if($viewMode !== 'kpi')
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         <!-- PANNEAU D'ADMINISTRATION : FORMULAIRE DE SAISIE -->
@@ -89,21 +90,18 @@
                 @csrf
                 <input type="hidden" name="type" value="{{ $currentMode }}">
 
-                <!-- Nom du Livrable -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Livrable *</label>
                     <input type="text" name="title" required placeholder="Ex: Rapport d'analyse économétrique"
                            class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
 
-                <!-- Lien de travail -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Lien de Travail</label>
                     <input type="url" name="document_link" placeholder="https://..."
                            class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
 
-                <!-- Catégorie -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
                     <select name="category_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -114,7 +112,6 @@
                     </select>
                 </div>
 
-                <!-- Projet -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
                     <select name="project_id" id="project_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -126,14 +123,12 @@
                     </select>
                 </div>
 
-                <!-- Nouveau projet input -->
                 <div id="new_project_div" class="hidden">
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Nouveau projet</label>
                     <input type="text" name="new_project_name" placeholder="Nom du projet..."
                            class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
 
-                <!-- État / Phase -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">État du Livrable</label>
                     <select name="document_status" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -143,7 +138,6 @@
                     </select>
                 </div>
 
-                <!-- Urgence -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Urgence</label>
                     <select name="priority" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -153,7 +147,6 @@
                     </select>
                 </div>
 
-                <!-- Échéance -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
                     <input type="date" name="date_prevue" 
@@ -227,7 +220,6 @@
                                     <td colspan="4" class="px-6 py-12 text-center text-gray-400">
                                         <div class="text-3xl mb-2">📈</div>
                                         <div class="font-semibold text-gray-600">Aucun trafic d'activités enregistré</div>
-                                        <p class="text-xs text-gray-400 mt-1">Saisis tes tâches quotidiennes sur le panneau latéral pour commencer le suivi.</p>
                                     </td>
                                 </tr>
                             @endforelse
@@ -238,16 +230,6 @@
         </div>
 
     </div>
+    @endif
 </div>
-
-<script>
-    document.getElementById('project_id')?.addEventListener('change', function() {
-        const div = document.getElementById('new_project_div');
-        if (this.value === 'new') {
-            div?.classList.remove('hidden');
-        } else {
-            div?.classList.add('hidden');
-        }
-    });
-</script>
 @endsection

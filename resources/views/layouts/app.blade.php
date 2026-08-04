@@ -60,9 +60,13 @@
 
                     <!-- ACCÈS PRINCIPAUX -->
                     <nav class="space-y-1">
+                        <a href="{{ route('dashboard', ['view' => 'kpi']) }}" 
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold {{ request('view') === 'kpi' ? 'bg-blue-50 text-[#0052cc]' : 'text-gray-600 hover:bg-gray-50' }}">
+                            📊 <span>Dashboard (KPIs)</span>
+                        </a>
                         <a href="{{ route('dashboard') }}" 
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold bg-blue-50 text-[#0052cc]">
-                            📊 <span>Dashboard</span>
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold {{ request('view') !== 'kpi' ? 'bg-blue-50 text-[#0052cc]' : 'text-gray-600 hover:bg-gray-50' }}">
+                            ⚙️ <span>Gestion & Saisie</span>
                         </a>
                     </nav>
 

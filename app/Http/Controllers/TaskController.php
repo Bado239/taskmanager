@@ -15,6 +15,9 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $currentMode = session('current_mode', 'office');
+        
+        // Détecte le mode d'affichage ('kpi' ou 'full')
+        $viewMode = $request->query('view', 'full');
 
         // Récupération des catégories et projets
         $categories = Category::all();
@@ -26,7 +29,7 @@ class TaskController extends Controller
         $doingTasks = Task::where('type', $currentMode)->where('document_status', 'in_progress')->count();
         $doneTasks  = Task::where('type', $currentMode)->where('document_status', 'done')->count();
 
-        // Tâches enregistrées
+        // Tâches du jour
         $todayTasks = Task::where('type', $currentMode)
                           ->with(['category', 'project'])
                           ->latest()
@@ -40,14 +43,15 @@ class TaskController extends Controller
             'todayTasks',
             'categories',
             'projects',
-            'currentMode'
+            'currentMode',
+            'viewMode'
         ));
     }
 
     /**
      * Bascule le mode entre Office et Master
      */
-    public function switchMode($mode)
+    public function switchMode(Request $request, $mode)
     {
         if (in_array($mode, ['office', 'master'])) {
             session(['current_mode' => $mode]);
@@ -66,7 +70,6 @@ class TaskController extends Controller
             'type'  => 'required|string',
         ]);
 
-        // Création rapide du projet avec la colonne 'title'
         $projectId = $request->project_id;
         if ($request->project_id === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
