@@ -75,6 +75,7 @@ class TaskController extends Controller
         $validator = \Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'type'  => 'required|string|in:office,master',
+            'new_project_name' => 'nullable|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -84,13 +85,15 @@ class TaskController extends Controller
                 ->withInput();
         }
 
+        // Gestion de l'association ou de la création dynamique d'un projet
         $projectId = $request->project_id;
-        if ($request->filled('new_project_name')) {
+
+        if ($projectId === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
                 'title' => $request->new_project_name,
             ]);
             $projectId = $newProject->id;
-        } elseif (empty($projectId)) {
+        } elseif (empty($projectId) || $projectId === 'new') {
             $projectId = null;
         }
 
