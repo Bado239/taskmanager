@@ -38,11 +38,9 @@
                 });
 
                 if (response.ok) {
-                    // Supprimer l'option du select sans recharger la page
                     const optionToRemove = selectElement.querySelector(`option[value=\"${this.selectedProject}\"]`);
                     if (optionToRemove) optionToRemove.remove();
 
-                    // Réinitialiser la sélection
                     this.selectedProject = '';
                 } else {
                     alert('Erreur lors de la suppression du projet.');
@@ -72,7 +70,7 @@
             </a>
         </div>
 
-        {{-- ACTION BOUTON : DASHBOARD --}}
+        {{-- ACTION BOUTON : DASHBOARD (DROPDOWN DE CHOIX) --}}
         @if($view === 'dashboard')
             <div class="relative inline-block text-left">
                 <button @click="dropdownOpen = !dropdownOpen" 
@@ -114,38 +112,43 @@
         @endif
     </div>
 
-    <!-- FORMULAIRE D'AJOUT RAPIDE -->
+    <!-- FORMULAIRE DE CRÉATION DE TÂCHE COMPLET -->
     <div x-show="showForm" 
          x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
          x-transition:enter-end="opacity-100 translate-y-0"
          class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md">
+        
         <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
             <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
                 ➕ Enregistrer une tâche en 
-                <span class="text-[#0052cc]" x-text="'Mode ' + formType.charAt(0).toUpperCase() + formType.slice(1)"></span>
+                <span class="text-[#0052cc]" x-text="'Mode ' + formType.toUpperCase()"></span>
             </h2>
-            <button @click="showForm = false" class="text-xs text-gray-400 hover:text-gray-600">✕ Fermer</button>
+            <button @click="showForm = false" type="button" class="text-xs text-gray-400 hover:text-gray-600">✕ Fermer</button>
         </div>
 
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @csrf
+            
+            {{-- Type de tâche synchronisé (office ou master) --}}
             <input type="hidden" name="type" :value="formType">
 
+            {{-- Intitulé du livrable --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Livrable *</label>
-                <input type="text" name="title" required placeholder="Ex: Analyse de données"
+                <input type="text" name="title" required placeholder="Ex: Rapport d'analyse"
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
+            {{-- Lien du document --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Lien de Travail</label>
                 <input type="url" name="document_link" placeholder="https://..."
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            <!-- CATÉGORIE -->
+            {{-- Catégorie --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
                 <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -156,7 +159,7 @@
                 </select>
             </div>
 
-            <!-- PROJET (AVEC SUPPRESSION AJAX SANS RECHARGEMENT) -->
+            {{-- Sélection de projet + option de suppression en ligne --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
                 <div class="flex items-center gap-2">
@@ -178,12 +181,14 @@
                 </div>
             </div>
 
+            {{-- Champ qui apparaît si on sélectionne "Créer un nouveau projet" --}}
             <div x-show="selectedProject === 'new'" x-cloak>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Nouveau projet</label>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Nouveau projet *</label>
                 <input type="text" name="new_project_name" placeholder="Nom du projet..."
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
+            {{-- État initial --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">État du Livrable</label>
                 <select name="document_status" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -193,6 +198,7 @@
                 </select>
             </div>
 
+            {{-- Priorité --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Urgence</label>
                 <select name="priority" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -202,12 +208,14 @@
                 </select>
             </div>
 
+            {{-- Échéance --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
                 <input type="date" name="date_prevue" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
+            {{-- Soumission --}}
             <div class="md:col-span-3 pt-2">
                 <button type="submit" class="bg-[#0052cc] hover:bg-[#003d99] text-white font-bold text-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm">
                     💾 Valider et Enregistrer la tâche <span x-text="formType.toUpperCase()"></span>
