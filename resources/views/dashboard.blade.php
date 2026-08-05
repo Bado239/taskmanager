@@ -19,6 +19,16 @@
         } else if(type === 'master') {
             this.selectedCategory = '{{ $defaultCatMaster }}';
         }
+    },
+    deleteSelectedProject() {
+        if (!this.selectedProject || this.selectedProject === 'new') return;
+        
+        if (confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+            const form = document.getElementById('delete-project-form-' + this.selectedProject);
+            if (form) {
+                form.submit();
+            }
+        }
     }
 }">
 
@@ -123,25 +133,27 @@
                 </select>
             </div>
 
-            <!-- PROJET -->
+            <!-- PROJET (AVEC BOUTON DE SUPPRESSION FLOTTANT ET CLAIR) -->
             <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-xs font-semibold text-gray-700">Associer à un projet</label>
-                    <template x-if="selectedProject && selectedProject !== 'new'">
-                        <button type="button" 
-                                @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-form-' + selectedProject).submit(); }"
-                                class="text-[10px] text-red-500 hover:underline font-semibold">
-                            🗑️ Supprimer projet
-                        </button>
-                    </template>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
+                <div class="flex items-center gap-2">
+                    <select name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                        <option value="">-- Aucun projet --</option>
+                        @foreach($projects as $project)
+                            <option value="{{ $project->id }}">{{ $project->title }}</option>
+                        @endforeach
+                        <option value="new">+ Créer un nouveau projet...</option>
+                    </select>
+
+                    <!-- BOUTON SUPPRIMER PROJET -->
+                    <button type="button" 
+                            x-show="selectedProject && selectedProject !== 'new'"
+                            @click="deleteSelectedProject()"
+                            title="Supprimer le projet sélectionné"
+                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shrink-0">
+                        🗑️ <span class="hidden sm:inline">Supprimer</span>
+                    </button>
                 </div>
-                <select name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                    <option value="">-- Aucun projet --</option>
-                    @foreach($projects as $project)
-                        <option value="{{ $project->id }}">{{ $project->title }}</option>
-                    @endforeach
-                    <option value="new">+ Créer un nouveau projet...</option>
-                </select>
             </div>
 
             <div x-show="selectedProject === 'new'" x-cloak>
@@ -181,6 +193,7 @@
             </div>
         </form>
 
+        {{-- FORMULAIRES DE SUPPRESSION (GÉNÉRÉS POUR CHAQUE PROJET) --}}
         @foreach($projects as $project)
             <form id="delete-project-form-{{ $project->id }}" action="{{ route('projects.destroy', $project->id) }}" method="POST" class="hidden">
                 @csrf
@@ -401,7 +414,7 @@
                                             {{ $task->category->title ?? $task->category->name ?? 'Master ISEF1' }}
                                         </span>
                                         @if(($task->document_status ?? $task->status) === 'done')
-                                            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
+                                            <span class="bg-[#e6f4ea] text-[#137333] text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
                                         @elseif(($task->document_status ?? $task->status) === 'in_progress')
                                             <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
                                         @else
