@@ -15,10 +15,9 @@ class Task extends Model
         'project_id', 
         'project_step_id',   // Étape liée au projet
         'priority', 
-        'date_prevue', 
-        'execution_date',    // ⭐ Remplacé pour correspondre au formulaire
-        'start_time',        // ⭐ Remplacé pour correspondre au formulaire
-        'end_time',          // ⭐ Remplacé pour correspondre au formulaire
+        'date_prevue',       // Correspond à la date en base de données
+        'heure_debut',       // Correspond à l'heure de début en base de données
+        'heure_fin',         // Correspond à l'heure de fin en base de données
         'document_link', 
         'progress', 
         'status',
