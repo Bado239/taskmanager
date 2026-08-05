@@ -10,7 +10,7 @@
     showForm: false, 
     formType: '{{ $view === 'dashboard' ? 'office' : $view }}', 
     selectedProject: '', 
-    selectedCategory: '{{ $view === 'office' ? $defaultCatOffice : ($view === 'master' ? $defaultCatMaster : '') }}',
+    selectedCategory: '{{ $view === 'office' ? $defaultCatOffice : ($view === 'master' ? $defaultCatMaster : $defaultCatOffice) }}',
     dropdownOpen: false,
     setFormType(type) {
         this.formType = type;
@@ -22,7 +22,7 @@
     }
 }">
 
-    <!-- BARRE DE NAVIGATION / BOUTONS DE COMMUTATION DE VUE -->
+    <!-- BARRE DE NAVIGATION / SWITCH DE VUES -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div class="flex items-center gap-2">
             <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
@@ -39,7 +39,7 @@
             </a>
         </div>
 
-        {{-- ACTION BOUTON : MODE DASHBOARD --}}
+        {{-- ACTION BOUTON : DASHBOARD --}}
         @if($view === 'dashboard')
             <div class="relative inline-block text-left">
                 <button @click="dropdownOpen = !dropdownOpen" 
@@ -73,7 +73,7 @@
                 </div>
             </div>
         @else
-            {{-- ACTION BOUTON : MODES OFFICE ET MASTER DIRECTS --}}
+            {{-- ACTION BOUTON : MODES OFFICE / MASTER DIRECTS --}}
             <button @click="showForm = !showForm; setFormType('{{ $view }}')" 
                     class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
                 <span x-text="showForm ? '✕ Fermer' : '+ Nouvelle tâche {{ ucfirst($view) }}'"></span>
@@ -112,7 +112,7 @@
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            <!-- CATÉGORIE PRÉ-SÉLECTIONNÉE PAR ID -->
+            <!-- CATÉGORIE -->
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
                 <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -123,7 +123,7 @@
                 </select>
             </div>
 
-            <!-- ASSOCIER À UN PROJET -->
+            <!-- PROJET -->
             <div>
                 <div class="flex items-center justify-between mb-1">
                     <label class="block text-xs font-semibold text-gray-700">Associer à un projet</label>
