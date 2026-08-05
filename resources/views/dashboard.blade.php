@@ -107,7 +107,7 @@
                 </div>
             </div>
 
-            {{-- 2. ÉTAPE (CATÉGORIE) - Même fonctionnalité que le projet --}}
+            {{-- 2. ÉTAPE (CATÉGORIE) --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">2. Étape (Catégorie) *</label>
                 <select name="category_id" x-model="selectedCategory" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -309,18 +309,21 @@
                                                 </span>
                                             </div>
                                         </td>
+                                        
+                                        {{-- CORRECTION DE L'AFFICHAGE DE LA PLANIFICATION --}}
                                         <td class="px-4 py-4 text-xs text-gray-600">
                                             <div class="font-medium">
-                                                📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}
+                                                📅 {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : 'Non planifié' }}
                                             </div>
-                                            @if($task->start_time || $task->end_time)
+                                            @if($task->heure_debut || $task->heure_fin)
                                                 <div class="text-gray-500 mt-0.5 font-semibold">
-                                                    ⏰ {{ $task->start_time ? \Carbon\Carbon::parse($task->start_time)->format('H:i') : '--:--' }} à {{ $task->end_time ? \Carbon\Carbon::parse($task->end_time)->format('H:i') : '--:--' }}
+                                                    ⏰ {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}
                                                 </div>
                                             @else
                                                 <div class="text-gray-400 mt-0.5">⏰ Aucune heure définie</div>
                                             @endif
                                         </td>
+
                                         <td class="px-4 py-4 text-xs text-gray-500">
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
