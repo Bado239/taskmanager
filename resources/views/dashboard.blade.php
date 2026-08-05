@@ -1,18 +1,23 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $defaultCatOffice = $categories->firstWhere('title', 'CGP')?->id ?? $categories->firstWhere('name', 'CGP')?->id ?? '';
+    $defaultCatMaster = $categories->firstWhere('title', 'Master ISEF1')?->id ?? $categories->firstWhere('name', 'Master ISEF1')?->id ?? '';
+@endphp
+
 <div class="space-y-6" x-data="{ 
     showForm: false, 
     formType: '{{ $view === 'dashboard' ? 'office' : $view }}', 
     selectedProject: '', 
-    selectedCategory: '{{ $view === 'office' ? 'CGP' : ($view === 'master' ? 'Master ISEF1' : '') }}',
+    selectedCategory: '{{ $view === 'office' ? $defaultCatOffice : ($view === 'master' ? $defaultCatMaster : '') }}',
     dropdownOpen: false,
     setFormType(type) {
         this.formType = type;
         if(type === 'office') {
-            this.selectedCategory = 'CGP';
+            this.selectedCategory = '{{ $defaultCatOffice }}';
         } else if(type === 'master') {
-            this.selectedCategory = 'Master ISEF1';
+            this.selectedCategory = '{{ $defaultCatMaster }}';
         }
     }
 }">
@@ -34,7 +39,7 @@
             </a>
         </div>
 
-        {{-- ACTION BOUTON : MODE DASHBOARD (MENU DÉROULANT) --}}
+        {{-- ACTION BOUTON : MODE DASHBOARD --}}
         @if($view === 'dashboard')
             <div class="relative inline-block text-left">
                 <button @click="dropdownOpen = !dropdownOpen" 
@@ -93,7 +98,6 @@
 
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @csrf
-            <!-- Champ dynamique (office ou master) -->
             <input type="hidden" name="type" :value="formType">
 
             <div>
@@ -108,19 +112,18 @@
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            <!-- CATÉGORIE PRÉ-SÉLECTIONNÉE DYNAMISQUEMENT -->
+            <!-- CATÉGORIE PRÉ-SÉLECTIONNÉE PAR ID -->
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
                 <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
                     @foreach($categories as $category)
-                        @php $catName = $category->title ?? $category->name; @endphp
-                        <option value="{{ $category->id }}" :selected="selectedCategory === '{{ $catName }}'">{{ $catName }}</option>
+                        <option value="{{ $category->id }}">{{ $category->title ?? $category->name }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <!-- ASSOCIER À UN PROJET + BOUTON SUPPRIMER LE PROJET SELECTIONNÉ -->
+            <!-- ASSOCIER À UN PROJET -->
             <div>
                 <div class="flex items-center justify-between mb-1">
                     <label class="block text-xs font-semibold text-gray-700">Associer à un projet</label>
@@ -178,7 +181,6 @@
             </div>
         </form>
 
-        <!-- FORMS CACHÉS POUR LA SUPPRESSION DE PROJET -->
         @foreach($projects as $project)
             <form id="delete-project-form-{{ $project->id }}" action="{{ route('projects.destroy', $project->id) }}" method="POST" class="hidden">
                 @csrf
@@ -187,9 +189,7 @@
         @endforeach
     </div>
 
-    <!-- ========================================== -->
-    <!-- VUE 1 : DASHBOARD (INDICATEURS GLOBAUX)     -->
-    <!-- ========================================== -->
+    <!-- VUE 1 : DASHBOARD -->
     @if($view === 'dashboard')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
@@ -211,7 +211,6 @@
             </div>
         </div>
 
-        <!-- INDICATEURS GLOBAUX / KPI (CUMUL OFFICE + MASTER) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             <div class="bg-[#0052cc] text-white p-5 rounded-xl shadow-sm">
                 <span class="text-xs font-semibold uppercase opacity-80">📌 Total tâches (Global)</span>
@@ -234,7 +233,6 @@
             </div>
         </div>
 
-        <!-- SUIVI ET TAUX D'AVANCEMENT GLOBAL -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-2">
                 <h2 class="font-bold text-gray-900 text-base">🔥 Tâches activement suivies (Office + Master)</h2>
@@ -255,9 +253,7 @@
         </div>
     @endif
 
-    <!-- ========================================== -->
-    <!-- VUE 2 : MODE OFFICE (ACTIVITÉS OFFICE)     -->
-    <!-- ========================================== -->
+    <!-- VUE 2 : MODE OFFICE -->
     @if($view === 'office')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
@@ -351,9 +347,7 @@
         </div>
     @endif
 
-    <!-- ========================================== -->
-    <!-- VUE 3 : MODE MASTER (ACTIVITÉS MASTER)     -->
-    <!-- ========================================== -->
+    <!-- VUE 3 : MODE MASTER -->
     @if($view === 'master')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
