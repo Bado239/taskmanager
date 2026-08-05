@@ -21,24 +21,20 @@ class ProjetController extends Controller
 
     public function store(Request $request)
     {
-        Projet::create([
-            'nom' => $request->nom,
-            'description' => $request->description,
-            'date_debut' => $request->date_debut,
-            'date_fin' => $request->date_fin,
+        $validated = $request->validate([
+            'nom'         => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'date_debut'  => 'nullable|date',
+            'date_fin'    => 'nullable|date|after_or_equal:date_debut',
         ]);
 
-        return redirect('/projets');
+        Projet::create($validated);
+
+        return redirect()->route('projets.index')->with('success', 'Projet créé avec succès.');
     }
 
-    public function destroy($id)
+    public function destroy(Projet $projet)
     {
-        $projet = Projet::find($id);
-
-        if (!$projet) {
-            return redirect()->route('dashboard')->with('error', 'Projet introuvable ou déjà supprimé.');
-        }
-
         // Dissocier les tâches associées si la relation existe
         if (method_exists($projet, 'tasks')) {
             $projet->tasks()->update(['project_id' => null]);
@@ -46,6 +42,6 @@ class ProjetController extends Controller
 
         $projet->delete();
 
-        return redirect()->route('dashboard')->with('success', 'Projet supprimé avec succès.');
+        return redirect()->back()->with('success', 'Projet supprimé avec succès.');
     }
 }
