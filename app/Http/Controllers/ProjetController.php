@@ -30,4 +30,14 @@ class ProjetController extends Controller
 
         return redirect('/projets');
     }
+
+    public function destroy(Project $project)
+    {
+        // Réaffecter les tâches associées à null avant suppression (optionnel)
+        $project->tasks()->update(['project_id' => null]);
+
+        $project->delete();
+
+        return redirect()->back()->with('success', 'Projet supprimé avec succès.');
+    }
 }
