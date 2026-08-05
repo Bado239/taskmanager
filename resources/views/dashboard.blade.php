@@ -6,52 +6,7 @@
     $defaultCatMaster = $categories->firstWhere('title', 'Master ISEF1')?->id ?? $categories->firstWhere('name', 'Master ISEF1')?->id ?? '';
 @endphp
 
-<div class="space-y-6" x-data="{ 
-    showForm: false, 
-    formType: '{{ $view === 'dashboard' ? 'office' : $view }}', 
-    selectedProject: '', 
-    selectedCategory: '{{ $view === 'office' ? $defaultCatOffice : ($view === 'master' ? $defaultCatMaster : $defaultCatOffice) }}',
-    dropdownOpen: false,
-    setFormType(type) {
-        this.formType = type;
-        if(type === 'office') {
-            this.selectedCategory = '{{ $defaultCatOffice }}';
-        } else if(type === 'master') {
-            this.selectedCategory = '{{ $defaultCatMaster }}';
-        }
-    },
-    async deleteProject() {
-        if (!this.selectedProject || this.selectedProject === 'new') return;
-
-        const selectElement = document.getElementById('project_id_select');
-        const projectName = selectElement.options[selectElement.selectedIndex].text;
-
-        if (confirm(`Voulez-vous vraiment supprimer définitivement le projet \"${projectName}\" ?`)) {
-            try {
-                const response = await fetch(`/projects/${this.selectedProject}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (response.ok) {
-                    const optionToRemove = selectElement.querySelector(`option[value=\"${this.selectedProject}\"]`);
-                    if (optionToRemove) optionToRemove.remove();
-
-                    this.selectedProject = '';
-                } else {
-                    alert('Erreur lors de la suppression du projet.');
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Une erreur réseau est survenue.');
-            }
-        }
-    }
-}">
+<div class="space-y-6">
 
     <!-- BARRE DE NAVIGATION / SWITCH DE VUES -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -69,70 +24,22 @@
                 🎓 Mode Master
             </a>
         </div>
-
-        {{-- ACTION BOUTON : DASHBOARD (DROPDOWN DE CHOIX) --}}
-        @if($view === 'dashboard')
-            <div class="relative inline-block text-left">
-                <button @click="dropdownOpen = !dropdownOpen" 
-                        @click.outside="dropdownOpen = false"
-                        type="button" 
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-                    <span>+ Nouvelle tâche</span>
-                    <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': dropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </button>
-
-                <div x-show="dropdownOpen" 
-                     x-cloak 
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="transform opacity-0 scale-95"
-                     x-transition:enter-end="transform opacity-100 scale-100"
-                     class="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
-                    
-                    <button @click="setFormType('office'); showForm = true; dropdownOpen = false" 
-                            class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
-                        <span>💼</span> + Nouvelle tâche Office
-                    </button>
-
-                    <div class="border-t border-gray-100 my-1"></div>
-
-                    <button @click="setFormType('master'); showForm = true; dropdownOpen = false" 
-                            class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
-                        <span>🎓</span> + Nouvelle tâche Master
-                    </button>
-                </div>
-            </div>
-        @else
-            {{-- ACTION BOUTON : MODES OFFICE / MASTER DIRECTS --}}
-            <button @click="showForm = !showForm; setFormType('{{ $view }}')" 
-                    class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-                <span x-text="showForm ? '✕ Fermer' : '+ Nouvelle tâche {{ ucfirst($view) }}'"></span>
-            </button>
-        @endif
     </div>
 
-    <!-- FORMULAIRE DE CRÉATION DE TÂCHE COMPLET -->
-    <div x-show="showForm" 
-         x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md">
+    <!-- FORMULAIRE DE CRÉATION DE TÂCHE COMPLET (SANS ALPINE) -->
+    <div class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md">
         
-        <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+        <div class="mb-4 pb-2 border-b border-gray-100">
             <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
                 ➕ Enregistrer une tâche en 
-                <span class="text-[#0052cc]" x-text="'Mode ' + formType.toUpperCase()"></span>
+                <span class="text-[#0052cc]">Mode {{ strtoupper($view === 'dashboard' ? 'office' : $view) }}</span>
             </h2>
-            <button @click="showForm = false" type="button" class="text-xs text-gray-400 hover:text-gray-600">✕ Fermer</button>
         </div>
 
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @csrf
             
-            {{-- Type de tâche synchronisé (office ou master) --}}
-            <input type="hidden" name="type" :value="formType">
+            <input type="hidden" name="type" value="{{ $view === 'dashboard' ? 'office' : $view }}">
 
             {{-- Intitulé du livrable --}}
             <div>
@@ -151,40 +58,32 @@
             {{-- Catégorie --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
-                <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <select name="category_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
                     @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->title ?? $category->name }}</option>
+                        <option value="{{ $category->id }}" 
+                            {{ ($view === 'office' && $category->id == $defaultCatOffice) || ($view === 'master' && $category->id == $defaultCatMaster) ? 'selected' : '' }}>
+                            {{ $category->title ?? $category->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
-            {{-- Sélection de projet + option de suppression en ligne --}}
+            {{-- Sélection de projet --}}
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
-                <div class="flex items-center gap-2">
-                    <select id="project_id_select" name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                        <option value="">-- Aucun projet --</option>
-                        @foreach($projects as $project)
-                            <option value="{{ $project->id }}">{{ $project->title }}</option>
-                        @endforeach
-                        <option value="new">+ Créer un nouveau projet...</option>
-                    </select>
-
-                    <button type="button" 
-                            x-show="selectedProject && selectedProject !== 'new'"
-                            @click="deleteProject()"
-                            title="Supprimer ce projet de la base de données"
-                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shrink-0">
-                        🗑️ <span class="hidden sm:inline">Supprimer</span>
-                    </button>
-                </div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet existant</label>
+                <select name="project_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <option value="">-- Aucun projet --</option>
+                    @foreach($projects as $project)
+                        <option value="{{ $project->id }}">{{ $project->title }}</option>
+                    @endforeach
+                </select>
             </div>
 
-            {{-- Champ qui apparaît si on sélectionne "Créer un nouveau projet" --}}
-            <div x-show="selectedProject === 'new'" x-cloak>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Nouveau projet *</label>
-                <input type="text" name="new_project_name" placeholder="Nom du projet..."
+            {{-- Champ pour ajouter un nouveau projet --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Ou créer un nouveau projet</label>
+                <input type="text" name="new_project_name" placeholder="Nom du nouveau projet..."
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
@@ -218,7 +117,7 @@
             {{-- Soumission --}}
             <div class="md:col-span-3 pt-2">
                 <button type="submit" class="bg-[#0052cc] hover:bg-[#003d99] text-white font-bold text-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm">
-                    💾 Valider et Enregistrer la tâche <span x-text="formType.toUpperCase()"></span>
+                    💾 Valider et Enregistrer la tâche
                 </button>
             </div>
         </form>
