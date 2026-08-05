@@ -5,7 +5,16 @@
     showForm: false, 
     formType: '{{ $view === 'dashboard' ? 'office' : $view }}', 
     selectedProject: '', 
-    dropdownOpen: false 
+    selectedCategory: '{{ $view === 'office' ? 'CGP' : ($view === 'master' ? 'Master ISEF1' : '') }}',
+    dropdownOpen: false,
+    setFormType(type) {
+        this.formType = type;
+        if(type === 'office') {
+            this.selectedCategory = 'CGP';
+        } else if(type === 'master') {
+            this.selectedCategory = 'Master ISEF1';
+        }
+    }
 }">
 
     <!-- BARRE DE NAVIGATION / BOUTONS DE COMMUTATION DE VUE -->
@@ -45,14 +54,14 @@
                      x-transition:enter-end="transform opacity-100 scale-100"
                      class="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
                     
-                    <button @click="formType = 'office'; showForm = true; dropdownOpen = false" 
+                    <button @click="setFormType('office'); showForm = true; dropdownOpen = false" 
                             class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
                         <span>💼</span> + Nouvelle tâche Office
                     </button>
 
                     <div class="border-t border-gray-100 my-1"></div>
 
-                    <button @click="formType = 'master'; showForm = true; dropdownOpen = false" 
+                    <button @click="setFormType('master'); showForm = true; dropdownOpen = false" 
                             class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
                         <span>🎓</span> + Nouvelle tâche Master
                     </button>
@@ -60,7 +69,7 @@
             </div>
         @else
             {{-- ACTION BOUTON : MODES OFFICE ET MASTER DIRECTS --}}
-            <button @click="showForm = !showForm; formType = '{{ $view }}'" 
+            <button @click="showForm = !showForm; setFormType('{{ $view }}')" 
                     class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
                 <span x-text="showForm ? '✕ Fermer' : '+ Nouvelle tâche {{ ucfirst($view) }}'"></span>
             </button>
@@ -99,18 +108,30 @@
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
+            <!-- CATÉGORIE PRÉ-SÉLECTIONNÉE DYNAMISQUEMENT -->
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Catégorie</label>
-                <select name="category_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
                     @foreach($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->title ?? $category->name }}</option>
+                        @php $catName = $category->title ?? $category->name; @endphp
+                        <option value="{{ $category->id }}" :selected="selectedCategory === '{{ $catName }}'">{{ $catName }}</option>
                     @endforeach
                 </select>
             </div>
 
+            <!-- ASSOCIER À UN PROJET + BOUTON SUPPRIMER LE PROJET SELECTIONNÉ -->
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-gray-700">Associer à un projet</label>
+                    <template x-if="selectedProject && selectedProject !== 'new'">
+                        <button type="button" 
+                                @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-form-' + selectedProject).submit(); }"
+                                class="text-[10px] text-red-500 hover:underline font-semibold">
+                            🗑️ Supprimer projet
+                        </button>
+                    </template>
+                </div>
                 <select name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Aucun projet --</option>
                     @foreach($projects as $project)
@@ -156,6 +177,14 @@
                 </button>
             </div>
         </form>
+
+        <!-- FORMS CACHÉS POUR LA SUPPRESSION DE PROJET -->
+        @foreach($projects as $project)
+            <form id="delete-project-form-{{ $project->id }}" action="{{ route('projects.destroy', $project->id) }}" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
+        @endforeach
     </div>
 
     <!-- ========================================== -->
