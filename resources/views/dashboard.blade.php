@@ -4,6 +4,9 @@
 @php
     $defaultCatOffice = $categories->firstWhere('title', 'CGP')?->id ?? $categories->firstWhere('name', 'CGP')?->id ?? '';
     $defaultCatMaster = $categories->firstWhere('title', 'Master ISEF1')?->id ?? $categories->firstWhere('name', 'Master ISEF1')?->id ?? '';
+    
+    // Détermination du libellé et de la valeur par défaut pour le type de tâche
+    $currentType = $view === 'dashboard' ? 'office' : $view;
 @endphp
 
 <div class="space-y-6">
@@ -27,7 +30,12 @@
 
         <!-- BOUTON D'OUVERTURE DU FORMULAIRE EN HAUT -->
         <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
-            <span>+ Nouvelle tâche</span>
+            <span>+ Nouvelle tâche 
+                @if($view === 'office') (Mode Office)
+                @elseif($view === 'master') (Mode Master)
+                @else (Global)
+                @endif
+            </span>
         </button>
     </div>
 
@@ -36,8 +44,12 @@
         
         <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
             <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                ➕ Enregistrer une tâche en 
-                <span class="text-[#0052cc]">Mode {{ strtoupper($view === 'dashboard' ? 'office' : $view) }}</span>
+                ➕ Enregistrer une tâche 
+                <span id="formTitleContext" class="text-[#0052cc]">
+                    @if($view === 'dashboard') en Mode Global (Sélectionnez le type ci-dessous)
+                    @else en Mode {{ strtoupper($view) }}
+                    @endif
+                </span>
             </h2>
             <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
         </div>
@@ -45,10 +57,21 @@
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @csrf
             
-            <input type="hidden" name="type" value="{{ $view === 'dashboard' ? 'office' : $view }}">
+            <!-- Si on est sur Dashboard, on met un sélecteur de type. Sinon, un input hidden fixe. -->
+            @if($view === 'dashboard')
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Destination de la Tâche *</label>
+                <select name="type" required class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <option value="office">💼 Mode Office</option>
+                    <option value="master">🎓 Mode Master</option>
+                </select>
+            </div>
+            @else
+                <input type="hidden" name="type" value="{{ $view }}">
+            @endif
 
             {{-- Intitulé du livrable --}}
-            <div>
+            <div class="{{ $view === 'dashboard' ? '' : 'md:col-span-1' }}">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Livrable *</label>
                 <input type="text" name="title" required placeholder="Ex: Rapport d'analyse"
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -134,13 +157,18 @@
         function toggleTaskForm() {
             const formContainer = document.getElementById('taskFormContainer');
             const btn = document.getElementById('btnToggleForm');
+            const currentView = "{{ $view }}";
+            let labelText = "+ Nouvelle tâche";
+            if (currentView === 'office') labelText += " (Mode Office)";
+            else if (currentView === 'master') labelText += " (Mode Master)";
+
             if (formContainer.style.display === 'none') {
                 formContainer.style.display = 'block';
                 btn.innerHTML = '<span>✕ Fermer</span>';
                 formContainer.scrollIntoView({ behavior: 'smooth' });
             } else {
                 formContainer.style.display = 'none';
-                btn.innerHTML = '<span>+ Nouvelle tâche</span>';
+                btn.innerHTML = '<span>' + labelText + '</span>';
             }
         }
     </script>
