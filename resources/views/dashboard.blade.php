@@ -107,10 +107,10 @@
                 </div>
             </div>
 
-            {{-- 2. ÉTAPE (CATÉGORIE) - Même comportement dynamique --}}
+            {{-- 2. ÉTAPE (CATÉGORIE) - Même fonctionnalité que le projet --}}
             <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">2. Étape (Catégorie)</label>
-                <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <label class="block text-xs font-semibold text-gray-700 mb-1">2. Étape (Catégorie) *</label>
+                <select name="category_id" x-model="selectedCategory" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner une étape --</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}">
