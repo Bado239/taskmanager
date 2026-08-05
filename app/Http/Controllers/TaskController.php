@@ -100,13 +100,14 @@ class TaskController extends Controller
             // Gestion de l'étape (catégorie)
             $categoryId = $request->category_id;
             if ($categoryId === 'new' && $request->filled('new_category_name')) {
+                $newCategoryName = $request->new_category_name;
                 $newCategory = Category::create([
-                    'title' => $request->new_category_name,
+                    'name'  => $newCategoryName,
+                    'title' => $newCategoryName,
                 ]);
                 $categoryId = $newCategory->id;
             } else {
                 if (empty($categoryId) || $categoryId === 'new') {
-                    // S'il n'y a pas de catégorie valide, on prend la première disponible ou on gère selon votre base
                     $defaultCategory = Category::first();
                     $categoryId = $defaultCategory ? $defaultCategory->id : null;
                 }
