@@ -4,35 +4,106 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
-use App\Models\Project;
 use App\Models\Category;
+use App\Models\Project;
 
 class TaskController extends Controller
 {
-    // ... vos autres méthodes ...
+    /**
+     * Affiche le Tableau de bord avec indicateurs globaux et séparation des vues
+     */
+    public function index(Request $request)
+    {
+        $view = $request->query('view', session('active_view', 'dashboard'));
+        
+        if (in_array($view, ['office', 'master'])) {
+            session(['current_mode' => $view]);
+        }
+        
+        session(['active_view' => $view]);
+        $currentMode = session('current_mode', 'office');
 
+        $categories = Category::all();
+        $projects = Project::all();
+
+        $totalTasks = Task::count();
+        $todoTasks  = Task::where('document_status', 'todo')->count();
+        $doingTasks = Task::where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('document_status', 'done')->count();
+
+        $officeTasks = Task::where('type', 'office')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
+
+        $masterTasks = Task::where('type', 'master')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
+
+        return view('dashboard', compact(
+            'view',
+            'currentMode',
+            'totalTasks',
+            'todoTasks',
+            'doingTasks',
+            'doneTasks',
+            'officeTasks',
+            'masterTasks',
+            'categories',
+            'projects'
+        ));
+    }
+
+    /**
+     * Bascule le mode courant et redirige vers la vue correspondante
+     */
+    public function switchMode(Request $request, $mode)
+    {
+        if (in_array($mode, ['office', 'master'])) {
+            session(['current_mode' => $mode, 'active_view' => $mode]);
+        }
+
+        return redirect()->route('dashboard', ['view' => $mode]);
+    }
+
+    /**
+     * Enregistre une nouvelle tâche / livrable
+     */
     public function store(Request $request)
     {
+        $validator = \Validator::make($request->all(), [
+            'title' => 'required|string|max:255',
+            'type'  => 'required|string|in:office,master',
+            'new_project_name' => 'nullable|string|max:255',
+            'new_category_name' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
+            return redirect()->route('dashboard', ['view' => $targetView])
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        // Gestion de l'association ou de la création dynamique d'un projet
         $projectId = $request->project_id;
 
-        // Gestion du nouveau projet
-        if ($projectId === 'new' && !empty($request->new_project_name)) {
+        if ($projectId === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
                 'title' => $request->new_project_name,
-                'user_id' => auth()->id() ?? null, // Ajustez selon votre gestion d'utilisateurs
             ]);
             $projectId = $newProject->id;
         } elseif (empty($projectId) || $projectId === 'new') {
             $projectId = null;
         }
 
+        // Gestion de l'association ou de la création dynamique d'une étape (catégorie)
         $categoryId = $request->category_id;
 
-        // Gestion de la nouvelle étape (catégorie)
-        if ($categoryId === 'new' && !empty($request->new_category_name)) {
+        if ($categoryId === 'new' && $request->filled('new_category_name')) {
             $newCategory = Category::create([
                 'title' => $request->new_category_name,
-                // Ajoutez d'autres champs si votre modèle Category en a besoin (ex: type)
             ]);
             $categoryId = $newCategory->id;
         } elseif (empty($categoryId) || $categoryId === 'new') {
@@ -56,8 +127,39 @@ class TaskController extends Controller
         $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
 
         return redirect()->route('dashboard', ['view' => $targetView])
-                         ->with('success', 'Tâche créée avec succès !');
+            ->with('success', 'Livrable enregistré avec succès !');
     }
 
-    // ...
+    /**
+     * Supprime une tâche
+     */
+    public function destroy($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->delete();
+
+        return redirect()->back()->with('success', 'Tâche supprimée avec succès !');
+    }
+
+    /**
+     * Supprime un projet existant
+     */
+    public function destroyProject($id)
+    {
+        $project = Project::findOrFail($id);
+        $project->delete();
+
+        return redirect()->back()->with('success', 'Projet supprimé avec succès !');
+    }
+
+    /**
+     * Supprime une étape / catégorie existante
+     */
+    public function destroyCategory($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->delete();
+
+        return redirect()->back()->with('success', 'Étape supprimée avec succès !');
+    }
 }
