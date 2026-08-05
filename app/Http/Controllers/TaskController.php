@@ -1,13 +1,20 @@
 public function store(Request $request)
     {
-        $request->validate([
+        // Validation avec gestion propre pour éviter les redirections brutes vers /tasks
+        $validator = \Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'type'  => 'required|string|in:office,master',
         ]);
 
+        if ($validator->fails()) {
+            $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
+            return redirect()->route('dashboard', ['view' => $targetView])
+                .withErrors($validator)
+                .withInput();
+        }
+
         // Gestion de l'association ou création de projet
         $projectId = $request->project_id;
-        
         if ($request->filled('new_project_name')) {
             $newProject = Project::create([
                 'title' => $request->new_project_name,
@@ -29,7 +36,6 @@ public function store(Request $request)
             'type'            => $request->type,
         ]);
 
-        // Redirection vers le mode spécifique de la tâche créée
         $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
 
         return redirect()->route('dashboard', ['view' => $targetView])
