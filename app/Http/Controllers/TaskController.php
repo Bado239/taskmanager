@@ -89,6 +89,8 @@ class TaskController extends Controller
                 'title' => $request->new_project_name,
             ]);
             $projectId = $newProject->id;
+        } elseif ($request->project_id === 'new' || empty($request->project_id)) {
+            $projectId = null;
         }
 
         Task::create([
@@ -102,7 +104,8 @@ class TaskController extends Controller
             'type'            => $request->type ?? session('current_mode', 'office'),
         ]);
 
-        return redirect()->route('dashboard', ['view' => $request->type])->with('success', 'Livrable enregistré avec succès !');
+        return redirect()->route('dashboard', ['view' => $request->type])
+            ->with('success', 'Livrable enregistré avec succès !');
     }
 
     /**
