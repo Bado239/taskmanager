@@ -1,6 +1,77 @@
-public function store(Request $request)
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Task;
+use App\Models\Category;
+use App\Models\Project;
+
+class TaskController extends Controller
+{
+    /**
+     * Affiche le Tableau de bord avec indicateurs globaux et séparation des vues
+     */
+    public function index(Request $request)
     {
-        // Validation avec gestion propre pour éviter les redirections brutes vers /tasks
+        $view = $request->query('view', session('active_view', 'dashboard'));
+        
+        if (in_array($view, ['office', 'master'])) {
+            session(['current_mode' => $view]);
+        }
+        
+        session(['active_view' => $view]);
+        $currentMode = session('current_mode', 'office');
+
+        $categories = Category::all();
+        $projects = Project::all();
+
+        $totalTasks = Task::count();
+        $todoTasks  = Task::where('document_status', 'todo')->count();
+        $doingTasks = Task::where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('document_status', 'done')->count();
+
+        $officeTasks = Task::where('type', 'office')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
+
+        $masterTasks = Task::where('type', 'master')
+                           ->with(['category', 'project'])
+                           ->latest()
+                           ->get();
+
+        return view('dashboard', compact(
+            'view',
+            'currentMode',
+            'totalTasks',
+            'todoTasks',
+            'doingTasks',
+            'doneTasks',
+            'officeTasks',
+            'masterTasks',
+            'categories',
+            'projects'
+        ));
+    }
+
+    /**
+     * Bascule le mode courant et redirige vers la vue correspondante
+     */
+    public function switchMode(Request $request, $mode)
+    {
+        if (in_array($mode, ['office', 'master'])) {
+            session(['current_mode' => $mode, 'active_view' => $mode]);
+        }
+
+        return redirect()->route('dashboard', ['view' => $mode]);
+    }
+
+    /**
+     * Enregistre une nouvelle tâche / livrable
+     */
+    public function store(Request $request)
+    {
         $validator = \Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'type'  => 'required|string|in:office,master',
@@ -9,11 +80,10 @@ public function store(Request $request)
         if ($validator->fails()) {
             $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
             return redirect()->route('dashboard', ['view' => $targetView])
-                .withErrors($validator)
-                .withInput();
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        // Gestion de l'association ou création de projet
         $projectId = $request->project_id;
         if ($request->filled('new_project_name')) {
             $newProject = Project::create([
@@ -24,7 +94,6 @@ public function store(Request $request)
             $projectId = null;
         }
 
-        // Création de la tâche
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
@@ -41,3 +110,15 @@ public function store(Request $request)
         return redirect()->route('dashboard', ['view' => $targetView])
             ->with('success', 'Livrable enregistré avec succès !');
     }
+
+    /**
+     * Supprime une tâche
+     */
+    public function destroy($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->delete();
+
+        return redirect()->back()->with('success', 'Tâche supprimée avec succès !');
+    }
+}
