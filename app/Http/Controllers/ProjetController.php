@@ -33,7 +33,7 @@ class ProjetController extends Controller
         return redirect()->route('projets.index')->with('success', 'Projet créé avec succès.');
     }
 
-    public function destroy(Projet $projet)
+    public function destroy(Request $request, Projet $projet)
     {
         // Dissocier les tâches associées si la relation existe
         if (method_exists($projet, 'tasks')) {
@@ -41,6 +41,14 @@ class ProjetController extends Controller
         }
 
         $projet->delete();
+
+        // Si la requête est envoyée via Fetch / AJAX
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Projet supprimé avec succès.'
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Projet supprimé avec succès.');
     }

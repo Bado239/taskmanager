@@ -20,13 +20,36 @@
             this.selectedCategory = '{{ $defaultCatMaster }}';
         }
     },
-    deleteSelectedProject() {
+    async deleteProject() {
         if (!this.selectedProject || this.selectedProject === 'new') return;
-        
-        if (confirm('Voulez-vous vraiment supprimer ce projet ?')) {
-            const form = document.getElementById('delete-project-form-' + this.selectedProject);
-            if (form) {
-                form.submit();
+
+        const selectElement = document.getElementById('project_id_select');
+        const projectName = selectElement.options[selectElement.selectedIndex].text;
+
+        if (confirm(`Voulez-vous vraiment supprimer définitivement le projet \"${projectName}\" ?`)) {
+            try {
+                const response = await fetch(`/projects/${this.selectedProject}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Supprimer l'option du select sans recharger la page
+                    const optionToRemove = selectElement.querySelector(`option[value=\"${this.selectedProject}\"]`);
+                    if (optionToRemove) optionToRemove.remove();
+
+                    // Réinitialiser la sélection
+                    this.selectedProject = '';
+                } else {
+                    alert('Erreur lors de la suppression du projet.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Une erreur réseau est survenue.');
             }
         }
     }
@@ -133,11 +156,11 @@
                 </select>
             </div>
 
-            <!-- PROJET (AVEC BOUTON DE SUPPRESSION FLOTTANT ET CLAIR) -->
+            <!-- PROJET (AVEC SUPPRESSION AJAX SANS RECHARGEMENT) -->
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Associer à un projet</label>
                 <div class="flex items-center gap-2">
-                    <select name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <select id="project_id_select" name="project_id" x-model="selectedProject" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Aucun projet --</option>
                         @foreach($projects as $project)
                             <option value="{{ $project->id }}">{{ $project->title }}</option>
@@ -145,11 +168,10 @@
                         <option value="new">+ Créer un nouveau projet...</option>
                     </select>
 
-                    <!-- BOUTON SUPPRIMER PROJET -->
                     <button type="button" 
                             x-show="selectedProject && selectedProject !== 'new'"
-                            @click="deleteSelectedProject()"
-                            title="Supprimer le projet sélectionné"
+                            @click="deleteProject()"
+                            title="Supprimer ce projet de la base de données"
                             class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shrink-0">
                         🗑️ <span class="hidden sm:inline">Supprimer</span>
                     </button>
@@ -192,14 +214,6 @@
                 </button>
             </div>
         </form>
-
-        {{-- FORMULAIRES DE SUPPRESSION (GÉNÉRÉS POUR CHAQUE PROJET) --}}
-        @foreach($projects as $project)
-            <form id="delete-project-form-{{ $project->id }}" action="{{ route('projects.destroy', $project->id) }}" method="POST" class="hidden">
-                @csrf
-                @method('DELETE')
-            </form>
-        @endforeach
     </div>
 
     <!-- VUE 1 : DASHBOARD -->
