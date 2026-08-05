@@ -1,7 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6" x-data="{ showForm: false, selectedProject: '' }">
+<div class="space-y-6" x-data="{ 
+    showForm: false, 
+    formType: '{{ $view === 'dashboard' ? 'office' : $view }}', 
+    selectedProject: '', 
+    dropdownOpen: false 
+}">
 
     <!-- BARRE DE NAVIGATION / BOUTONS DE COMMUTATION DE VUE -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -20,31 +25,67 @@
             </a>
         </div>
 
-        @if($view === 'office' || $view === 'master')
-            <button @click="showForm = !showForm" 
+        {{-- ACTION BOUTON : MODE DASHBOARD (MENU DÉROULANT) --}}
+        @if($view === 'dashboard')
+            <div class="relative inline-block text-left">
+                <button @click="dropdownOpen = !dropdownOpen" 
+                        @click.outside="dropdownOpen = false"
+                        type="button" 
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                    <span>+ Nouvelle tâche</span>
+                    <svg class="w-3.5 h-3.5 transition-transform" :class="{ 'rotate-180': dropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+
+                <div x-show="dropdownOpen" 
+                     x-cloak 
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     class="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+                    
+                    <button @click="formType = 'office'; showForm = true; dropdownOpen = false" 
+                            class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
+                        <span>💼</span> + Nouvelle tâche Office
+                    </button>
+
+                    <div class="border-t border-gray-100 my-1"></div>
+
+                    <button @click="formType = 'master'; showForm = true; dropdownOpen = false" 
+                            class="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-2">
+                        <span>🎓</span> + Nouvelle tâche Master
+                    </button>
+                </div>
+            </div>
+        @else
+            {{-- ACTION BOUTON : MODES OFFICE ET MASTER DIRECTS --}}
+            <button @click="showForm = !showForm; formType = '{{ $view }}'" 
                     class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
                 <span x-text="showForm ? '✕ Fermer' : '+ Nouvelle tâche {{ ucfirst($view) }}'"></span>
             </button>
         @endif
     </div>
 
-    <!-- FORMULAIRE D'AJOUT RAPIDE (Affiche si cliqué en mode Office ou Master) -->
-    @if($view === 'office' || $view === 'master')
+    <!-- FORMULAIRE D'AJOUT RAPIDE -->
     <div x-show="showForm" 
+         x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
          x-transition:enter-end="opacity-100 translate-y-0"
          class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md">
         <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
             <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                ➕ Enregistrer une tâche en <span class="text-[#0052cc]">Mode {{ ucfirst($view) }}</span>
+                ➕ Enregistrer une tâche en 
+                <span class="text-[#0052cc]" x-text="'Mode ' + formType.charAt(0).toUpperCase() + formType.slice(1)"></span>
             </h2>
-            <span class="text-xs text-gray-400">Renseigne les informations ci-dessous</span>
+            <button @click="showForm = false" class="text-xs text-gray-400 hover:text-gray-600">✕ Fermer</button>
         </div>
 
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @csrf
-            <input type="hidden" name="type" value="{{ $view }}">
+            <!-- Champ dynamique (office ou master) -->
+            <input type="hidden" name="type" :value="formType">
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du Livrable *</label>
@@ -111,12 +152,11 @@
 
             <div class="md:col-span-3 pt-2">
                 <button type="submit" class="bg-[#0052cc] hover:bg-[#003d99] text-white font-bold text-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm">
-                    💾 Valider et Enregistrer la tâche {{ ucfirst($view) }}
+                    💾 Valider et Enregistrer la tâche <span x-text="formType.toUpperCase()"></span>
                 </button>
             </div>
         </form>
     </div>
-    @endif
 
     <!-- ========================================== -->
     <!-- VUE 1 : DASHBOARD (INDICATEURS GLOBAUX)     -->
