@@ -8,7 +8,7 @@
 
 <div class="space-y-6">
 
-    <!-- BARRE DE NAVIGATION / SWITCH DE VUES -->
+    <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div class="flex items-center gap-2">
             <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
@@ -24,16 +24,22 @@
                 🎓 Mode Master
             </a>
         </div>
+
+        <!-- BOUTON D'OUVERTURE DU FORMULAIRE EN HAUT -->
+        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+            <span>+ Nouvelle tâche</span>
+        </button>
     </div>
 
-    <!-- FORMULAIRE DE CRÉATION DE TÂCHE COMPLET (SANS ALPINE) -->
-    <div class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md">
+    <!-- FORMULAIRE DE CRÉATION DE TÂCHE (CACHÉ PAR DÉFAUT) -->
+    <div id="taskFormContainer" class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md" style="display: none;">
         
-        <div class="mb-4 pb-2 border-b border-gray-100">
+        <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
             <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
                 ➕ Enregistrer une tâche en 
                 <span class="text-[#0052cc]">Mode {{ strtoupper($view === 'dashboard' ? 'office' : $view) }}</span>
             </h2>
+            <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
         </div>
 
         <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -122,6 +128,22 @@
             </div>
         </form>
     </div>
+
+    <!-- SCRIPT JAVASCRIPT POUR AFFICHER / MASQUER LE FORMULAIRE -->
+    <script>
+        function toggleTaskForm() {
+            const formContainer = document.getElementById('taskFormContainer');
+            const btn = document.getElementById('btnToggleForm');
+            if (formContainer.style.display === 'none') {
+                formContainer.style.display = 'block';
+                btn.innerHTML = '<span>✕ Fermer</span>';
+                formContainer.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                formContainer.style.display = 'none';
+                btn.innerHTML = '<span>+ Nouvelle tâche</span>';
+            }
+        }
+    </script>
 
     <!-- VUE 1 : DASHBOARD -->
     @if($view === 'dashboard')
