@@ -71,75 +71,76 @@ class TaskController extends Controller
      * Enregistre une nouvelle tâche / livrable
      */
     public function store(Request $request)
-    {
-        $validator = \Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
-            'type'  => 'required|string|in:office,master',
-            'new_project_name' => 'nullable|string|max:255',
-            'new_category_name' => 'nullable|string|max:255',
-        ]);
+        {
+            $validator = \Validator::make($request->all(), [
+                'title' => 'required|string|max:255',
+                'type'  => 'required|string|in:office,master',
+                'new_project_name' => 'nullable|string|max:255',
+                'new_category_name' => 'nullable|string|max:255',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
+                return redirect()->route('dashboard', ['view' => $targetView])
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Gestion du projet
+            $projectId = $request->project_id;
+            if ($projectId === 'new' && $request->filled('new_project_name')) {
+                $newProject = Project::create([
+                    'title' => $request->new_project_name,
+                ]);
+                $projectId = $newProject->id;
+            } elseif (empty($projectId) || $projectId === 'new') {
+                $projectId = null;
+            }
+
+            // Gestion de l'étape (catégorie)
+            $categoryId = $request->category_id;
+            if ($categoryId === 'new' && $request->filled('new_category_name')) {
+                $newCategory = Category::create([
+                    'title' => $request->new_category_name,
+                ]);
+                $categoryId = $newCategory->id;
+            } else {
+                if (empty($categoryId) || $categoryId === 'new') {
+                    // S'il n'y a pas de catégorie valide, on prend la première disponible ou on gère selon votre base
+                    $defaultCategory = Category::first();
+                    $categoryId = $defaultCategory ? $defaultCategory->id : null;
+                }
+            }
+
+            Task::create([
+                'title'           => $request->title,
+                'document_link'   => $request->document_link,
+                'category_id'     => $categoryId,
+                'project_id'      => $projectId,
+                'document_status' => $request->document_status ?? 'todo',
+                'priority'        => $request->priority ?? 'medium',
+                'date_prevue'     => $request->date_prevue,
+                'execution_date'  => $request->execution_date,
+                'start_time'      => $request->start_time,
+                'end_time'        => $request->end_time,
+                'type'            => $request->type,
+            ]);
+
             $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
+
             return redirect()->route('dashboard', ['view' => $targetView])
-                ->withErrors($validator)
-                ->withInput();
+                ->with('success', 'Livrable enregistré avec succès !');
         }
+        /**
+         * Supprime une tâche
+         */
+        public function destroy($id)
+        {
+            $task = Task::findOrFail($id);
+            $task->delete();
 
-        // Gestion de l'association ou de la création dynamique d'un projet
-        $projectId = $request->project_id;
-
-        if ($projectId === 'new' && $request->filled('new_project_name')) {
-            $newProject = Project::create([
-                'title' => $request->new_project_name,
-            ]);
-            $projectId = $newProject->id;
-        } elseif (empty($projectId) || $projectId === 'new') {
-            $projectId = null;
+            return redirect()->back()->with('success', 'Tâche supprimée avec succès !');
         }
-
-        // Gestion de l'association ou de la création dynamique d'une étape (catégorie)
-        $categoryId = $request->category_id;
-
-        if ($categoryId === 'new' && $request->filled('new_category_name')) {
-            $newCategory = Category::create([
-                'title' => $request->new_category_name,
-            ]);
-            $categoryId = $newCategory->id;
-        } elseif (empty($categoryId) || $categoryId === 'new') {
-            $categoryId = null;
-        }
-
-        Task::create([
-            'title'           => $request->title,
-            'document_link'   => $request->document_link,
-            'category_id'     => $categoryId,
-            'project_id'      => $projectId,
-            'document_status' => $request->document_status ?? 'todo',
-            'priority'        => $request->priority ?? 'medium',
-            'date_prevue'     => $request->date_prevue,
-            'execution_date'  => $request->execution_date,
-            'start_time'      => $request->start_time,
-            'end_time'        => $request->end_time,
-            'type'            => $request->type,
-        ]);
-
-        $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
-
-        return redirect()->route('dashboard', ['view' => $targetView])
-            ->with('success', 'Livrable enregistré avec succès !');
-    }
-
-    /**
-     * Supprime une tâche
-     */
-    public function destroy($id)
-    {
-        $task = Task::findOrFail($id);
-        $task->delete();
-
-        return redirect()->back()->with('success', 'Tâche supprimée avec succès !');
-    }
 
     /**
      * Supprime un projet existant
