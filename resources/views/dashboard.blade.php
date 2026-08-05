@@ -117,28 +117,26 @@
                     <template x-if="selectedProject && selectedProject !== 'new'">
                         <div class="mt-1.5 flex items-center justify-between bg-red-50 border border-red-100 px-3 py-1 rounded-lg">
                             <span class="text-xs text-red-600 font-medium">Gérer ce projet :</span>
-                            <a :href="'/projects/' + selectedProject" 
-                               onclick="event.preventDefault(); if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { 
-                                   let form = document.createElement('form');
-                                   form.method = 'POST';
-                                   form.action = '/projects/' + this.getAttribute('data-id');
-                                   let csrf = document.createElement('input');
-                                   csrf.type = 'hidden';
-                                   csrf.name = '_token';
-                                   csrf.value = '{{ csrf_token() }}';
-                                   let method = document.createElement('input');
-                                   method.type = 'hidden';
-                                   method.name = '_method';
-                                   method.value = 'DELETE';
-                                   form.appendChild(csrf);
-                                   form.appendChild(method);
-                                   document.body.appendChild(form);
-                                   form.submit();
-                               }" 
-                               :data-id="selectedProject"
-                               class="text-xs font-bold text-red-600 hover:text-red-800 underline">
+                            <button type="button" 
+                                    @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+                                        fetch('/projects/' + selectedProject, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/json'
+                                            }
+                                        }).then(response => {
+                                            if(response.ok) {
+                                                window.location.reload();
+                                            } else {
+                                                alert('Erreur lors de la suppression du projet.');
+                                            }
+                                        });
+                                    }"
+                                    class="text-xs font-bold text-red-600 hover:text-red-800 underline">
                                 Supprimer de la liste
-                            </a>
+                            </button>
                         </div>
                     </template>
                 </div>
