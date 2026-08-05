@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
-use App\Http\Controllers\ProjectController; 
+use App\Http\Controllers\ProjetController; // Avec un "e"
 
 // Redirection de la racine
 Route::get('/', function () {
@@ -20,4 +20,5 @@ Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.de
 // Commutation de mode
 Route::get('/switch-mode/{mode}', [TaskController::class, 'switchMode'])->name('mode.switch');
 //le contrôleur est importé
-Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+Route::delete('/projects/{project}', [ProjetController::class, 'destroy'])->name('projects.destroy');
