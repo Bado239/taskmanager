@@ -31,16 +31,21 @@ class ProjetController extends Controller
         return redirect('/projets');
     }
 
-    public function destroy(Projet $project)
+    public function destroy($id)
     {
-        // Dissocier les tâches associées avant la suppression
-        if (method_exists($project, 'tasks')) {
-            $project->tasks()->update(['project_id' => null]);
+        $projet = Projet::find($id);
+
+        if (!$projet) {
+            return redirect()->route('dashboard')->with('error', 'Projet introuvable ou déjà supprimé.');
         }
 
-        $project->delete();
+        // Dissocier les tâches associées si la relation existe
+        if (method_exists($projet, 'tasks')) {
+            $projet->tasks()->update(['project_id' => null]);
+        }
 
-        // Redirection vers le dashboard après la suppression
+        $projet->delete();
+
         return redirect()->route('dashboard')->with('success', 'Projet supprimé avec succès.');
     }
 }
