@@ -10,7 +10,7 @@ use App\Models\Project;
 class TaskController extends Controller
 {
     /**
-     * Affiche le Tableau de bord avec indicateurs globaux et separation des vues
+     * Affiche le Tableau de bord avec indicateurs globaux et séparation des vues
      */
     public function index(Request $request)
     {
@@ -80,9 +80,10 @@ class TaskController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'type'  => 'required|string',
+            'type'  => 'required|string|in:office,master',
         ]);
 
+        // Gestion de l'association ou création de projet
         $projectId = $request->project_id;
         if ($request->project_id === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
@@ -93,18 +94,22 @@ class TaskController extends Controller
             $projectId = null;
         }
 
+        // Création de la tâche
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
-            'category_id'     => $request->category_id,
+            'category_id'     => $request->category_id ?: null,
             'project_id'      => $projectId,
             'document_status' => $request->document_status ?? 'todo',
             'priority'        => $request->priority ?? 'medium',
-            'due_date'        => $request->date_prevue,
-            'type'            => $request->type ?? session('current_mode', 'office'),
+            'date_prevue'     => $request->date_prevue, // Ajusté à 'date_prevue' (ou replacez par 'due_date' selon votre table SQL)
+            'type'            => $request->type,
         ]);
 
-        return redirect()->route('dashboard', ['view' => $request->type])
+        // Redirection vers le mode spécifique de la tâche créée
+        $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
+
+        return redirect()->route('dashboard', ['view' => $targetView])
             ->with('success', 'Livrable enregistré avec succès !');
     }
 
