@@ -240,11 +240,6 @@
                     🇸🇳 Dakar, Sénégal
                 </span>
             </h1>
-            <div class="flex items-center gap-2 text-xs text-gray-600 mt-3">
-                <span class="font-bold">Mode actif :</span>
-                <span class="px-2.5 py-1 rounded bg-[#0052cc] text-white font-semibold">💼 Bureau</span>
-                <a href="{{ route('dashboard', ['view' => 'master']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">🎓 Master</a>
-            </div>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -341,11 +336,6 @@
                     🇸🇳 Dakar, Sénégal
                 </span>
             </h1>
-            <div class="flex items-center gap-2 text-xs text-gray-600 mt-3">
-                <span class="font-bold">Mode actif :</span>
-                <a href="{{ route('dashboard', ['view' => 'office']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">💼 Bureau</a>
-                <span class="px-2.5 py-1 rounded bg-[#0052cc] text-white font-semibold">🎓 Master</span>
-            </div>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
