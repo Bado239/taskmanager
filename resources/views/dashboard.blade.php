@@ -27,7 +27,6 @@
             </a>
         </div>
 
-        <!-- BOUTON D'OUVERTURE DU FORMULAIRE EN HAUT -->
         <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
             <span>+ Nouvelle tâche 
                 @if($view === 'office') (Mode Office)
@@ -53,11 +52,11 @@
             <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
         </div>
 
-        <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ selectedProject: '', selectedCategory: '' }">
             @csrf
             
             @if($view === 'dashboard')
-            <div>
+            <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Destination de la Tâche *</label>
                 <select name="type" required class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="office">💼 Mode Office</option>
@@ -68,66 +67,86 @@
                 <input type="hidden" name="type" value="{{ $view }}">
             @endif
 
-            {{-- 1. PROJET EN PREMIER --}}
-            <div x-data="{ selectedProject: '' }" class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">1. Projet Associé *</label>
-                    <div class="flex gap-2">
-                        <select name="project_id" x-model="selectedProject" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                            <option value="">-- Sélectionner un projet --</option>
-                            @foreach($projects as $project)
-                                <option value="{{ $project->id }}">{{ $project->title }}</option>
-                            @endforeach
-                            <option value="new">➕ Créer un nouveau projet...</option>
-                        </select>
+            {{-- 1. PROJET ASSOCIÉ --}}
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">1. Projet Associé *</label>
+                <select name="project_id" x-model="selectedProject" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <option value="">-- Sélectionner un projet --</option>
+                    @foreach($projects as $project)
+                        <option value="{{ $project->id }}">{{ $project->title }}</option>
+                    @endforeach
+                    <option value="new">➕ Créer un nouveau projet...</option>
+                </select>
+
+                <template x-if="selectedProject && selectedProject !== 'new'">
+                    <div class="mt-1.5 flex items-center justify-between bg-red-50 border border-red-100 px-3 py-1 rounded-lg">
+                        <span class="text-xs text-red-600 font-medium">Gérer ce projet :</span>
+                        <button type="button" 
+                                @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+                                    fetch('/projects/' + selectedProject, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        }
+                                    }).then(response => {
+                                        if(response.ok) { window.location.reload(); }
+                                        else { alert('Erreur lors de la suppression du projet.'); }
+                                    });
+                                }"
+                                class="text-xs font-bold text-red-600 hover:text-red-800 underline">
+                            Supprimer de la liste
+                        </button>
                     </div>
+                </template>
 
-                    <template x-if="selectedProject && selectedProject !== 'new'">
-                        <div class="mt-1.5 flex items-center justify-between bg-red-50 border border-red-100 px-3 py-1 rounded-lg">
-                            <span class="text-xs text-red-600 font-medium">Gérer ce projet :</span>
-                            <button type="button" 
-                                    @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) {
-                                        fetch('/projects/' + selectedProject, {
-                                            method: 'DELETE',
-                                            headers: {
-                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                'Accept': 'application/json',
-                                                'Content-Type': 'application/json'
-                                            }
-                                        }).then(response => {
-                                            if(response.ok) {
-                                                window.location.reload();
-                                            } else {
-                                                alert('Erreur lors de la suppression du projet.');
-                                            }
-                                        });
-                                    }"
-                                    class="text-xs font-bold text-red-600 hover:text-red-800 underline">
-                                Supprimer de la liste
-                            </button>
-                        </div>
-                    </template>
-                </div>
-
-                <div x-show="selectedProject === 'new'" style="display: none;">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nom du nouveau projet *</label>
+                <div x-show="selectedProject === 'new'" style="display: none;" class="mt-2">
                     <input type="text" name="new_project_name" placeholder="Nom du nouveau projet..."
                            class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
             </div>
 
-            {{-- 2. ÉTAPE (Catégorie / Variable) --}}
+            {{-- 2. ÉTAPE (CATÉGORIE) - Même comportement dynamique --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">2. Étape (Catégorie)</label>
-                <select name="category_id" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <select name="category_id" x-model="selectedCategory" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner une étape --</option>
                     @foreach($categories as $category)
-                        <option value="{{ $category->id }}" 
-                            {{ ($view === 'office' && $category->id == $defaultCatOffice) || ($view === 'master' && $category->id == $defaultCatMaster) ? 'selected' : '' }}>
+                        <option value="{{ $category->id }}">
                             {{ $category->title ?? $category->name }}
                         </option>
                     @endforeach
+                    <option value="new">➕ Créer une nouvelle étape...</option>
                 </select>
+
+                <template x-if="selectedCategory && selectedCategory !== 'new'">
+                    <div class="mt-1.5 flex items-center justify-between bg-red-50 border border-red-100 px-3 py-1 rounded-lg">
+                        <span class="text-xs text-red-600 font-medium">Gérer cette étape :</span>
+                        <button type="button" 
+                                @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) {
+                                    fetch('/categories/' + selectedCategory, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Accept': 'application/json',
+                                            'Content-Type': 'application/json'
+                                        }
+                                    }).then(response => {
+                                        if(response.ok) { window.location.reload(); }
+                                        else { alert('Erreur lors de la suppression de l\'étape.'); }
+                                    });
+                                }"
+                                class="text-xs font-bold text-red-600 hover:text-red-800 underline">
+                            Supprimer de la liste
+                        </button>
+                    </div>
+                </template>
+
+                <div x-show="selectedCategory === 'new'" style="display: none;" class="mt-2">
+                    <input type="text" name="new_category_name" placeholder="Nom de la nouvelle étape..."
+                           class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                </div>
             </div>
 
             {{-- 3. LIBELLÉ DE LA TÂCHE --}}
@@ -137,14 +156,14 @@
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            {{-- LIEN DOCUMENT --}}
-            <div>
+            {{-- LIEN DE TRAVAIL --}}
+            <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Lien de Travail</label>
                 <input type="url" name="document_link" placeholder="https://..."
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            {{-- 4. ÉCHÉANCE ET DATE DE RÉALISATION --}}
+            {{-- 4. ÉCHÉANCE ET DATE D'EXÉCUTION --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">4. Échéance Finale</label>
                 <input type="date" name="date_prevue" 
@@ -158,20 +177,18 @@
             </div>
 
             {{-- 5. HEURES DE DÉBUT ET DE FIN --}}
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
-                    <input type="time" name="start_time" 
-                           class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de fin</label>
-                    <input type="time" name="end_time" 
-                           class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
+                <input type="time" name="start_time" 
+                       class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de fin</label>
+                <input type="time" name="end_time" 
+                       class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            {{-- ÉTAT & PRIORITÉ --}}
+            {{-- ÉTAT & URGENCE --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">État du Livrable</label>
                 <select name="document_status" class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
@@ -191,8 +208,8 @@
             </div>
 
             {{-- SOUMISSION --}}
-            <div class="md:col-span-3 pt-2">
-                <button type="submit" class="bg-[#0052cc] hover:bg-[#003d99] text-white font-bold text-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm">
+            <div class="md:col-span-2 pt-2">
+                <button type="submit" class="bg-[#0052cc] hover:bg-[#003d99] text-white font-bold text-sm py-2.5 px-6 rounded-lg transition-colors shadow-sm w-full">
                     💾 Valider et Enregistrer la tâche
                 </button>
             </div>
@@ -219,52 +236,7 @@
         }
     </script>
 
-    <!-- VUE 1 : DASHBOARD -->
-    @if($view === 'dashboard')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <span>Accueil</span> / <span class="text-gray-600 font-medium">Cockpit d'analyse</span>
-            </div>
-            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-                📊 Bilan Global - Cockpit Livrables 
-                <span class="text-xs bg-blue-50 text-[#0052cc] px-2.5 py-0.5 rounded-full font-semibold border border-blue-100">
-                    🇸🇳 Dakar, Sénégal
-                </span>
-            </h1>
-
-            <div class="flex items-center justify-between border-t border-gray-100 pt-4">
-                <div class="flex items-center gap-2 text-xs text-gray-600">
-                    <span class="font-bold">Accès rapides :</span>
-                    <a href="{{ route('dashboard', ['view' => 'office']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">💼 Mode Office</a>
-                    <a href="{{ route('dashboard', ['view' => 'master']) }}" class="px-2.5 py-1 rounded bg-gray-100 font-semibold hover:bg-gray-200">🎓 Mode Master</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-[#0052cc] text-white p-5 rounded-xl shadow-sm">
-                <span class="text-xs font-semibold uppercase opacity-80">📌 Total tâches (Global)</span>
-                <div class="text-3xl font-bold mt-2">{{ $totalTasks }}</div>
-            </div>
-
-            <div class="bg-amber-400 text-gray-900 p-5 rounded-xl shadow-sm">
-                <span class="text-xs font-semibold uppercase opacity-80">🕒 À faire</span>
-                <div class="text-3xl font-bold mt-2">{{ $todoTasks }}</div>
-            </div>
-
-            <div class="bg-sky-500 text-white p-5 rounded-xl shadow-sm">
-                <span class="text-xs font-semibold uppercase opacity-80">⚙️ En cours</span>
-                <div class="text-3xl font-bold mt-2">{{ $doingTasks }}</div>
-            </div>
-
-            <div class="bg-emerald-600 text-white p-5 rounded-xl shadow-sm">
-                <span class="text-xs font-semibold uppercase opacity-80">✅ Terminées</span>
-                <div class="text-3xl font-bold mt-2">{{ $doneTasks }}</div>
-            </div>
-        </div>
-    @endif
-
-    <!-- VUE 2 : MODE OFFICE (CLASSÉ PAR PROJET) -->
+    <!-- VUE : MODE OFFICE -->
     @if($view === 'office')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
@@ -279,7 +251,6 @@
         </div>
 
         @php
-            // Regroupement des tâches office par projet
             $groupedOfficeTasks = $officeTasks->groupBy(function($task) {
                 return $task->project->title ?? 'Sans Projet';
             });
@@ -288,7 +259,6 @@
         <div class="space-y-6">
             @forelse($groupedOfficeTasks as $projectName => $tasksInProject)
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <!-- EN-TÊTE DU PROJET -->
                     <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                         <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
                             📁 Projet : <span class="text-[#0052cc]">{{ $projectName }}</span>
@@ -340,9 +310,15 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 text-xs text-gray-600">
-                                            <div class="font-medium">📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</div>
+                                            <div class="font-medium">
+                                                📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}
+                                            </div>
                                             @if($task->start_time || $task->end_time)
-                                                <div class="text-gray-400 mt-0.5">⏰ {{ $task->start_time ?? '--:--' }} à {{ $task->end_time ?? '--:--' }}</div>
+                                                <div class="text-gray-500 mt-0.5 font-semibold">
+                                                    ⏰ {{ $task->start_time ? \Carbon\Carbon::parse($task->start_time)->format('H:i') : '--:--' }} à {{ $task->end_time ? \Carbon\Carbon::parse($task->end_time)->format('H:i') : '--:--' }}
+                                                </div>
+                                            @else
+                                                <div class="text-gray-400 mt-0.5">⏰ Aucune heure définie</div>
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 text-xs text-gray-500">
@@ -368,94 +344,6 @@
                     <div class="font-semibold text-gray-600">Aucune activité enregistrée en Mode Office</div>
                 </div>
             @endforelse
-        </div>
-    @endif
-
-    <!-- VUE 3 : MODE MASTER -->
-    @if($view === 'master')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
-            <div class="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                <span>Accueil</span> / <span class="text-gray-600 font-medium">Cockpit d'analyse</span>
-            </div>
-            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                🎓 MASTER Cockpit Livrables 
-                <span class="text-xs bg-blue-50 text-[#0052cc] px-2.5 py-0.5 rounded-full font-semibold border border-blue-100">
-                    🇸🇳 Dakar, Sénégal
-                </span>
-            </h1>
-        </div>
-
-        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div class="p-5 border-b border-gray-100 flex items-center justify-between">
-                <div>
-                    <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                        📊 Activités du mode MASTER
-                    </h2>
-                    <span class="text-xs text-gray-400 font-medium">{{ $masterTasks->count() }} tâche(s) enregistrée(s)</span>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-600">
-                    <thead class="bg-[#f8fafc] text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
-                        <tr>
-                            <th class="px-4 py-3">Rang</th>
-                            <th class="px-4 py-3">Détails de l'activité</th>
-                            <th class="px-4 py-3">Statut / Catégorie</th>
-                            <th class="px-4 py-3">Échéance</th>
-                            <th class="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($masterTasks as $index => $task)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-4 py-4 font-bold text-gray-400">#{{ $index + 1 }}</td>
-                                <td class="px-4 py-4">
-                                    <div class="font-bold text-gray-900">{{ $task->title }}</div>
-                                    @if($task->document_link)
-                                        <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document de travail</a>
-                                    @endif
-                                    <div class="text-xs text-gray-400 mt-0.5">
-                                        Projet: {{ $task->project->title ?? 'Aucun' }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 space-y-1">
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <span class="bg-purple-50 text-purple-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-purple-100">
-                                            {{ $task->category->title ?? $task->category->name ?? 'Master ISEF1' }}
-                                        </span>
-                                        @if(($task->document_status ?? $task->status) === 'done')
-                                            <span class="bg-[#e6f4ea] text-[#137333] text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
-                                        @elseif(($task->document_status ?? $task->status) === 'in_progress')
-                                            <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
-                                        @else
-                                            <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-0.5 rounded border border-gray-200">🔴 Cadrage</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-xs text-gray-500">
-                                    {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
-                                </td>
-                                <td class="px-4 py-4 text-right">
-                                    <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" onclick="return confirm('Supprimer ce livrable ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">
-                                            Supprimer
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-400">
-                                    <div class="font-semibold text-gray-600">Aucune activité enregistrée en Mode Master</div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
         </div>
     @endif
 
