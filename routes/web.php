@@ -25,3 +25,6 @@ Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.de
 
 // Route pour la suppression de projet
 Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+// Si vous gérez les projets dans TaskController :
+Route::delete('/projects/{id}', [TaskController::class, 'destroyProject'])->name('projects.destroy');

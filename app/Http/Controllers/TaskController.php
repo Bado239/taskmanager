@@ -124,4 +124,21 @@ class TaskController extends Controller
 
         return redirect()->back()->with('success', 'Tâche supprimée avec succès !');
     }
+
+    /**
+     * Supprime un projet existant
+     */
+    public function destroyProject($id)
+    {
+        $project = Project::findOrFail($id);
+        
+        // Optionnel : Si vos tâches ont une contrainte en cascade, elles seront supprimées. 
+        // Si vous voulez détacher les tâches avant de supprimer le projet :
+        // $project->tasks()->update(['project_id' => null]);
+
+        $project->delete();
+
+        return redirect()->back()->with('success', 'Projet supprimé avec succès !');
+    }
+    
 }
