@@ -10,11 +10,18 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [TaskController::class, 'index'])->name('dashboard');
 
-// Route corrigée pour correspondre au nom appelé dans app.blade.php
+// Route pour basculer le mode (office / master)
 Route::get('/switch-mode/{mode}', [TaskController::class, 'switchMode'])->name('mode.switch');
 
+// Routes pour les tâches
 Route::post('/tasks', [TaskController::class, 'store'])->name('tasks.store');
+
+// Sécurité anti-erreur 405 : si une requête GET arrive sur /tasks, on redirige vers le dashboard
+Route::get('/tasks', function () {
+    return redirect()->route('dashboard');
+});
+
 Route::delete('/tasks/{id}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 
-// Route Ajax appelée par Alpine.js pour la suppression de projet
+// Route pour la suppression de projet
 Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
