@@ -13,11 +13,12 @@ class Task extends Model
         'title', 
         'category_id', 
         'project_id', 
-        'project_step_id',   // ⭐ Ajouté : Étape liée au projet
+        'project_step_id',   // Étape liée au projet
         'priority', 
         'date_prevue', 
-        'heure_debut', 
-        'heure_fin', 
+        'execution_date',    // ⭐ Remplacé pour correspondre au formulaire
+        'start_time',        // ⭐ Remplacé pour correspondre au formulaire
+        'end_time',          // ⭐ Remplacé pour correspondre au formulaire
         'document_link', 
         'progress', 
         'status',
@@ -50,7 +51,7 @@ class Task extends Model
     }
 
     /**
-     * ⭐ Étape de projet associée
+     * Étape de projet associée
      */
     public function step()
     {
