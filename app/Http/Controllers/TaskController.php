@@ -6,16 +6,19 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Project;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
     /**
-     * Affiche le Tableau de bord avec indicateurs globaux et séparation des vues
+     * Affiche le Tableau de bord avec indicateurs globaux, filtres et séparation des vues
      */
     public function index(Request $request)
     {
         $view = $request->query('view', session('active_view', 'dashboard'));
-        
+        $filter = $request->query('filter', 'all'); // 'all' ou 'today'
+        $statusFilter = $request->query('status', 'active'); // 'active' ou 'archived'
+
         if (in_array($view, ['office', 'master'])) {
             session(['current_mode' => $view]);
         }
@@ -23,31 +26,71 @@ class TaskController extends Controller
         session(['active_view' => $view]);
         $currentMode = session('current_mode', 'office');
 
+        $today = Carbon::now()->format('Y-m-d');
+        $currentTime = Carbon::now()->format('H:i');
+
+        // Automatisation de l'archivage :
+        // 1. Tâche dont l'heure de fin est atteinte (execution_date == aujourd'hui et heure_fin <= heure actuelle)
+        // 2. Tâche validée (document_status == 'done') dont la date d'exécution est passée (< aujourd'hui)
+        Task::where('is_archived', false)->each(function($task) use ($today, $currentTime) {
+            $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
+            $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
+
+            if ($isFinishedToday || $isValidatedPassed) {
+                $task->update(['is_archived' => true]);
+            }
+        });
+
         $categories = Category::all();
         $projects = Project::all();
 
-        $totalTasks = Task::count();
-        $todoTasks  = Task::where('document_status', 'todo')->count();
-        $doingTasks = Task::where('document_status', 'in_progress')->count();
-        $doneTasks  = Task::where('document_status', 'done')->count();
+        // Indicateurs globaux (Tâches actives non archivées)
+        $totalTasks = Task::where('is_archived', false)->count();
+        $todoTasks  = Task::where('is_archived', false)->where('document_status', 'todo')->count();
+        $doingTasks = Task::where('is_archived', false)->where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('is_archived', false)->where('document_status', 'done')->count();
 
-        $officeTasks = Task::where('type', 'office')
-                           ->with(['category', 'project'])
-                           ->latest()
-                           ->get();
+        // Nouveaux indicateurs demandés
+        $officeTodayCount = Task::where('is_archived', false)->where('type', 'office')->where('execution_date', $today)->count();
+        $masterTodayCount = Task::where('is_archived', false)->where('type', 'master')->where('execution_date', $today)->count();
+        $archivedCount = Task::where('is_archived', true)->count();
 
-        $masterTasks = Task::where('type', 'master')
-                           ->with(['category', 'project'])
-                           ->latest()
-                           ->get();
+        // Requête Mode Office avec filtres
+        $officeQuery = Task::where('type', 'office');
+        if ($statusFilter === 'archived') {
+            $officeQuery->where('is_archived', true);
+        } else {
+            $officeQuery->where('is_archived', false);
+            if ($filter === 'today') {
+                $officeQuery->where('execution_date', $today);
+            }
+        }
+        $officeTasks = $officeQuery->with(['category', 'project'])->latest()->get();
+
+        // Requête Mode Master avec filtres
+        $masterQuery = Task::where('type', 'master');
+        if ($statusFilter === 'archived') {
+            $masterQuery->where('is_archived', true);
+        } else {
+            $masterQuery->where('is_archived', false);
+            if ($filter === 'today') {
+                $masterQuery->where('execution_date', $today);
+            }
+        }
+        $masterTasks = $masterQuery->with(['category', 'project'])->latest()->get();
 
         return view('dashboard', compact(
             'view',
+            'filter',
+            'statusFilter',
             'currentMode',
             'totalTasks',
             'todoTasks',
             'doingTasks',
             'doneTasks',
+            'officeTodayCount',
+            'masterTodayCount',
+            'archivedCount',
             'officeTasks',
             'masterTasks',
             'categories',
@@ -121,16 +164,29 @@ class TaskController extends Controller
             'project_id'      => $projectId,
             'document_status' => $request->document_status ?? 'todo',
             'priority'        => $request->priority ?? 'medium',
-            'date_prevue'     => $request->execution_date ?? $request->date_prevue,
+            'date_prevue'     => $request->date_prevue,
+            'execution_date'  => $request->execution_date,
             'heure_debut'     => $request->start_time,
             'heure_fin'       => $request->end_time,
             'type'            => $request->type,
+            'is_archived'     => false,
         ]);
 
         $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
 
         return redirect()->route('dashboard', ['view' => $targetView])
             ->with('success', 'Livrable enregistré avec succès !');
+    }
+
+    /**
+     * Archive manuellement une tâche
+     */
+    public function archive($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->update(['is_archived' => true]);
+
+        return redirect()->back()->with('success', 'Tâche archivée avec succès !');
     }
 
     /**

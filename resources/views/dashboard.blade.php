@@ -194,13 +194,13 @@
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
                 📊 Tableau de bord Global
             </h1>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
-                    <div class="text-xs text-blue-600 font-semibold">Total Tâches</div>
+                    <div class="text-xs text-blue-600 font-semibold">Total Actives</div>
                     <div class="text-2xl font-bold text-[#0052cc]">{{ $totalTasks }}</div>
                 </div>
                 <div class="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
-                    <div class="text-xs text-red-600 font-semibold">Cadrage / À faire</div>
+                    <div class="text-xs text-red-600 font-semibold">À faire</div>
                     <div class="text-2xl font-bold text-red-600">{{ $todoTasks }}</div>
                 </div>
                 <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl text-center">
@@ -211,19 +211,47 @@
                     <div class="text-xs text-emerald-600 font-semibold">Validées</div>
                     <div class="text-2xl font-bold text-emerald-600">{{ $doneTasks }}</div>
                 </div>
+                <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl text-center">
+                    <div class="text-xs text-indigo-600 font-semibold">Office (Aujourd'hui)</div>
+                    <div class="text-2xl font-bold text-indigo-600">{{ $officeTodayCount }}</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl text-center">
+                    <div class="text-xs text-purple-600 font-semibold">Master (Aujourd'hui)</div>
+                    <div class="text-2xl font-bold text-purple-600">{{ $masterTodayCount }}</div>
+                </div>
+                <div class="bg-gray-100 border border-gray-200 p-4 rounded-xl text-center">
+                    <div class="text-xs text-gray-600 font-semibold">Archives</div>
+                    <div class="text-2xl font-bold text-gray-700">{{ $archivedCount }}</div>
+                </div>
             </div>
         </div>
     @endif
 
     <!-- ================= VUE : MODE OFFICE ================= -->
     @if($view === 'office')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                 💼 OFFICE Cockpit Livrables 
                 <span class="text-xs bg-blue-50 text-[#0052cc] px-2.5 py-0.5 rounded-full font-semibold border border-blue-100">
                     🇸🇳 Dakar, Sénégal
                 </span>
             </h1>
+
+            <!-- Barres de filtres -->
+            <div class="flex items-center gap-2">
+                <a href="{{ route('dashboard', ['view' => 'office', 'filter' => 'all', 'status' => 'active']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   Toutes Actives
+                </a>
+                <a href="{{ route('dashboard', ['view' => 'office', 'filter' => 'today', 'status' => 'active']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   📅 Aujourd'hui
+                </a>
+                <a href="{{ route('dashboard', ['view' => 'office', 'status' => 'archived']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   📁 Archives
+                </a>
+            </div>
         </div>
 
         @php
@@ -265,6 +293,9 @@
                                                 📌 Étape : {{ $task->category->title ?? $task->category->name ?? 'Général' }}
                                             </div>
                                             <div class="font-bold text-gray-900">{{ $task->title }}</div>
+                                            @if($task->document_link)
+                                                <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document / Support</a>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-4 space-y-1">
                                             <div>
@@ -286,7 +317,13 @@
                                         <td class="px-4 py-4 text-xs text-gray-500">
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
-                                        <td class="px-4 py-4 text-right">
+                                        <td class="px-4 py-4 text-right space-x-2">
+                                            @if(!$task->is_archived)
+                                                <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
+                                                </form>
+                                            @endif
                                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -300,7 +337,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-sm text-gray-400 font-semibold text-gray-600">
+                <div class="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-sm text-gray-600 font-semibold">
                     Aucune activité enregistrée en Mode Office
                 </div>
             @endforelse
@@ -309,10 +346,26 @@
 
     <!-- ================= VUE : MODE MASTER ================= -->
     @if($view === 'master')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                 🎓 MASTER Cockpit - Suivi Académique
             </h1>
+
+            <!-- Barres de filtres -->
+            <div class="flex items-center gap-2">
+                <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   Toutes Actives
+                </a>
+                <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'today', 'status' => 'active']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   📅 Aujourd'hui
+                </a>
+                <a href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}" 
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   📁 Archives
+                </a>
+            </div>
         </div>
 
         @php
@@ -369,7 +422,13 @@
                                         <td class="px-4 py-4 text-xs text-gray-500">
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
-                                        <td class="px-4 py-4 text-right">
+                                        <td class="px-4 py-4 text-right space-x-2">
+                                            @if(!$task->is_archived)
+                                                <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
+                                                </form>
+                                            @endif
                                             <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
