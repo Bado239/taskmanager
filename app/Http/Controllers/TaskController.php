@@ -30,14 +30,14 @@ class TaskController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        // Automatisation de l'archivage avec DB::raw pour forcer le type booléen sous PostgreSQL
-        $tasksToCheck = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->get();
+        // Automatisation de l'archivage avec les entiers (0 / 1)
+        $tasksToCheck = Task::where('is_archived', 0)->get();
         foreach ($tasksToCheck as $task) {
             $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
             $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
 
             if ($isFinishedToday || $isValidatedPassed) {
-                $task->update(['is_archived' => true]);
+                $task->update(['is_archived' => 1]);
             }
         }
 
@@ -45,22 +45,22 @@ class TaskController extends Controller
         $projects = Project::all();
 
         // Indicateurs globaux (Tâches actives non archivées)
-        $totalTasks = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->count();
-        $todoTasks  = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'todo')->count();
-        $doingTasks = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'in_progress')->count();
-        $doneTasks  = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'done')->count();
+        $totalTasks = Task::where('is_archived', 0)->count();
+        $todoTasks  = Task::where('is_archived', 0)->where('document_status', 'todo')->count();
+        $doingTasks = Task::where('is_archived', 0)->where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('is_archived', 0)->where('document_status', 'done')->count();
 
         // Nouveaux indicateurs demandés
-        $officeTodayCount = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('type', 'office')->where('execution_date', $today)->count();
-        $masterTodayCount = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('type', 'master')->where('execution_date', $today)->count();
-        $archivedCount = Task::where(DB::raw('is_archived'), '=', DB::raw('true'))->count();
+        $officeTodayCount = Task::where('is_archived', 0)->where('type', 'office')->where('execution_date', $today)->count();
+        $masterTodayCount = Task::where('is_archived', 0)->where('type', 'master')->where('execution_date', $today)->count();
+        $archivedCount = Task::where('is_archived', 1)->count();
 
         // Requête Mode Office avec filtres
         $officeQuery = Task::where('type', 'office');
         if ($statusFilter === 'archived') {
-            $officeQuery->where(DB::raw('is_archived'), '=', DB::raw('true'));
+            $officeQuery->where('is_archived', 1);
         } else {
-            $officeQuery->where(DB::raw('is_archived'), '=', DB::raw('false'));
+            $officeQuery->where('is_archived', 0);
             if ($filter === 'today') {
                 $officeQuery->where('execution_date', $today);
             }
@@ -70,9 +70,9 @@ class TaskController extends Controller
         // Requête Mode Master avec filtres
         $masterQuery = Task::where('type', 'master');
         if ($statusFilter === 'archived') {
-            $masterQuery->where(DB::raw('is_archived'), '=', DB::raw('true'));
+            $masterQuery->where('is_archived', 1);
         } else {
-            $masterQuery->where(DB::raw('is_archived'), '=', DB::raw('false'));
+            $masterQuery->where('is_archived', 0);
             if ($filter === 'today') {
                 $masterQuery->where('execution_date', $today);
             }
@@ -169,7 +169,7 @@ class TaskController extends Controller
             'heure_debut'     => $request->start_time,
             'heure_fin'       => $request->end_time,
             'type'            => $request->type,
-            'is_archived'     => false,
+            'is_archived'     => 0,
         ]);
 
         $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
@@ -184,7 +184,7 @@ class TaskController extends Controller
     public function archive($id)
     {
         $task = Task::findOrFail($id);
-        $task->update(['is_archived' => true]);
+        $task->update(['is_archived' => 1]);
 
         return redirect()->back()->with('success', 'Tâche archivée avec succès !');
     }
