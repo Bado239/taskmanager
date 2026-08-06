@@ -2,28 +2,17 @@
 
 @section('content')
 @php
-    $defaultCatOffice = $categoriesOffice->firstWhere('title', 'CGP')?->id ?? $categoriesOffice->firstWhere('name', 'CGP')?->id ?? '';
-    $defaultCatMaster = $categoriesMaster->firstWhere('title', 'Master ISEF1')?->id ?? $categoriesMaster->firstWhere('name', 'Master ISEF1')?->id ?? '';
-    
     $currentType = $view === 'dashboard' ? 'office' : $view;
+    // Fusion et déduplication des projets et catégories pour les deux modes
+    $allProjects = $projectsOffice->concat($projectsMaster)->unique('id');
+    $allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
 @endphp
 
 <div class="space-y-6 pb-12" 
      x-data="{ 
          currentMode: '{{ $currentType }}',
-         projectsOffice: @js($projectsOffice),
-         projectsMaster: @js($projectsMaster),
-         categoriesOffice: @js($categoriesOffice),
-         categoriesMaster: @js($categoriesMaster),
-         
-         get filteredProjects() {
-             if (this.currentMode === 'master') return this.projectsMaster;
-             return this.projectsOffice;
-         },
-         get filteredCategories() {
-             if (this.currentMode === 'master') return this.categoriesMaster;
-             return this.categoriesOffice;
-         }
+         projects: @js($allProjects),
+         categories: @js($allCategories)
      }">
 
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
@@ -89,13 +78,12 @@
                 <div class="flex gap-2">
                     <select name="project_id" x-model="selectedProject" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Sélectionner --</option>
-                        <template x-for="project in filteredProjects" :key="project.id">
+                        <template x-for="project in projects" :key="project.id">
                             <option :value="project.id" x-text="project.title"></option>
                         </template>
                         <option value="new">➕ Créer un nouveau...</option>
                     </select>
 
-                    {{-- Bouton pour supprimer le projet sélectionné --}}
                     <template x-if="selectedProject && selectedProject !== 'new'">
                         <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
                             🗑️
@@ -115,13 +103,12 @@
                 <div class="flex gap-2">
                     <select name="category_id" x-model="selectedCategory" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Sélectionner --</option>
-                        <template x-for="category in filteredCategories" :key="category.id">
+                        <template x-for="category in categories" :key="category.id">
                             <option :value="category.id" x-text="category.title ?? category.name"></option>
                         </template>
                         <option value="new">➕ Créer une nouvelle...</option>
                     </select>
 
-                    {{-- Bouton pour supprimer l'étape sélectionnée --}}
                     <template x-if="selectedCategory && selectedCategory !== 'new'">
                         <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
                             🗑️
@@ -227,37 +214,30 @@
                 📊 Tableau de bord Global
             </h1>
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <!-- Total Actives -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'total']) }}" class="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'total' ? 'ring-2 ring-[#0052cc]' : '' }}">
                     <div class="text-xs text-blue-600 font-semibold">Total Actives</div>
                     <div class="text-2xl font-bold text-[#0052cc]">{{ $totalTasks }}</div>
                 </a>
-                <!-- À faire -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'todo']) }}" class="bg-red-50 hover:bg-red-100 border border-red-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'todo' ? 'ring-2 ring-red-500' : '' }}">
                     <div class="text-xs text-red-600 font-semibold">À faire</div>
                     <div class="text-2xl font-bold text-red-600">{{ $todoTasks }}</div>
                 </a>
-                <!-- En cours -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'doing']) }}" class="bg-amber-50 hover:bg-amber-100 border border-amber-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'doing' ? 'ring-2 ring-amber-500' : '' }}">
                     <div class="text-xs text-amber-600 font-semibold">En cours</div>
                     <div class="text-2xl font-bold text-amber-600">{{ $doingTasks }}</div>
                 </a>
-                <!-- Validées -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'done']) }}" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'done' ? 'ring-2 ring-emerald-500' : '' }}">
                     <div class="text-xs text-emerald-600 font-semibold">Validées</div>
                     <div class="text-2xl font-bold text-emerald-600">{{ $doneTasks }}</div>
                 </a>
-                <!-- Office Aujourd'hui -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'office_today']) }}" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'office_today' ? 'ring-2 ring-indigo-500' : '' }}">
                     <div class="text-xs text-indigo-600 font-semibold">Office (Aujourd'hui)</div>
                     <div class="text-2xl font-bold text-indigo-600">{{ $officeTodayCount }}</div>
                 </a>
-                <!-- Master Aujourd'hui -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'master_today']) }}" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'master_today' ? 'ring-2 ring-purple-500' : '' }}">
                     <div class="text-xs text-purple-600 font-semibold">Master (Aujourd'hui)</div>
                     <div class="text-2xl font-bold text-purple-600">{{ $masterTodayCount }}</div>
                 </a>
-                <!-- Archives -->
                 <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'archived']) }}" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 p-4 rounded-xl text-center transition-all block {{ $indicator === 'archived' ? 'ring-2 ring-gray-600' : '' }}">
                     <div class="text-xs text-gray-600 font-semibold">Archives</div>
                     <div class="text-2xl font-bold text-gray-700">{{ $archivedCount }}</div>
@@ -265,7 +245,6 @@
             </div>
         </div>
 
-        {{-- Affichage de la liste des tâches si un indicateur a été cliqué --}}
         @if($indicator)
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
                 <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
@@ -361,7 +340,6 @@
                 </span>
             </h1>
 
-            <!-- Barres de filtres -->
             <div class="flex items-center gap-2">
                 <a href="{{ route('dashboard', ['view' => 'office', 'filter' => 'all', 'status' => 'active']) }}" 
                    class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
@@ -475,7 +453,6 @@
                 🎓 MASTER Cockpit - Suivi Académique
             </h1>
 
-            <!-- Barres de filtres -->
             <div class="flex items-center gap-2">
                 <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}" 
                    class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
@@ -575,35 +552,21 @@
 
 </div>
 
-{{-- Formulaires cachés pour la suppression des projets (Office & Master) --}}
-@foreach($projectsOffice as $p)
-    <form id="delete-project-{{ $p->id }}" action="{{ route('projects.destroy', $p->id) }}" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-    </form>
-@endforeach
-@foreach($projectsMaster as $p)
+{{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
+@foreach($allProjects as $p)
     <form id="delete-project-{{ $p->id }}" action="{{ route('projects.destroy', $p->id) }}" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
     </form>
 @endforeach
 
-{{-- Formulaires cachés pour la suppression des catégories (Office & Master) --}}
-@foreach($categoriesOffice as $c)
-    <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-    </form>
-@endforeach
-@foreach($categoriesMaster as $c)
+@foreach($allCategories as $c)
     <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
     </form>
 @endforeach
 
-{{-- SIGNATURE PROFESSIONNELLE EN BAS DE PAGE --}}
 <footer class="mt-16 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 font-medium">
     <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
         <span>Conçu et développé avec ❤️ par <strong class="text-gray-800 font-semibold">Bado</strong></span>
