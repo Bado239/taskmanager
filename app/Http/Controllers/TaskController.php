@@ -30,17 +30,16 @@ class TaskController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        // Automatisation de l'archivage sécurisée pour PostgreSQL (évite l'erreur d'opérateur booléen)
-        Task::where('is_archived', false)->chunk(100, function($tasks) use ($today, $currentTime) {
-            foreach ($tasks as $task) {
-                $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
-                $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
+        // Automatisation de l'archivage sécurisée avec les booléens stricts
+        $tasksToCheck = Task::where('is_archived', false)->get();
+        foreach ($tasksToCheck as $task) {
+            $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
+            $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
 
-                if ($isFinishedToday || $isValidatedPassed) {
-                    $task->update(['is_archived' => true]);
-                }
+            if ($isFinishedToday || $isValidatedPassed) {
+                $task->update(['is_archived' => true]);
             }
-        });
+        }
 
         $categories = Category::all();
         $projects = Project::all();
