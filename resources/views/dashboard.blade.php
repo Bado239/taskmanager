@@ -188,45 +188,137 @@
         }
     </script>
 
-    <!-- ================= VUE : DASHBOARD GLOBAL ================= -->
+<!-- ================= VUE : DASHBOARD GLOBAL ================= -->
     @if($view === 'dashboard')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
                 📊 Tableau de bord Global
             </h1>
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl text-center">
+                <!-- Total Actives -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'total']) }}" class="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'total' ? 'ring-2 ring-[#0052cc]' : '' }}">
                     <div class="text-xs text-blue-600 font-semibold">Total Actives</div>
                     <div class="text-2xl font-bold text-[#0052cc]">{{ $totalTasks }}</div>
-                </div>
-                <div class="bg-red-50 border border-red-100 p-4 rounded-xl text-center">
+                </a>
+                <!-- À faire -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'todo']) }}" class="bg-red-50 hover:bg-red-100 border border-red-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'todo' ? 'ring-2 ring-red-500' : '' }}">
                     <div class="text-xs text-red-600 font-semibold">À faire</div>
                     <div class="text-2xl font-bold text-red-600">{{ $todoTasks }}</div>
-                </div>
-                <div class="bg-amber-50 border border-amber-100 p-4 rounded-xl text-center">
+                </a>
+                <!-- En cours -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'doing']) }}" class="bg-amber-50 hover:bg-amber-100 border border-amber-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'doing' ? 'ring-2 ring-amber-500' : '' }}">
                     <div class="text-xs text-amber-600 font-semibold">En cours</div>
                     <div class="text-2xl font-bold text-amber-600">{{ $doingTasks }}</div>
-                </div>
-                <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-center">
+                </a>
+                <!-- Validées -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'done']) }}" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'done' ? 'ring-2 ring-emerald-500' : '' }}">
                     <div class="text-xs text-emerald-600 font-semibold">Validées</div>
                     <div class="text-2xl font-bold text-emerald-600">{{ $doneTasks }}</div>
-                </div>
-                <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl text-center">
+                </a>
+                <!-- Office Aujourd'hui -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'office_today']) }}" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'office_today' ? 'ring-2 ring-indigo-500' : '' }}">
                     <div class="text-xs text-indigo-600 font-semibold">Office (Aujourd'hui)</div>
                     <div class="text-2xl font-bold text-indigo-600">{{ $officeTodayCount }}</div>
-                </div>
-                <div class="bg-purple-50 border border-purple-100 p-4 rounded-xl text-center">
+                </a>
+                <!-- Master Aujourd'hui -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'master_today']) }}" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'master_today' ? 'ring-2 ring-purple-500' : '' }}">
                     <div class="text-xs text-purple-600 font-semibold">Master (Aujourd'hui)</div>
                     <div class="text-2xl font-bold text-purple-600">{{ $masterTodayCount }}</div>
-                </div>
-                <div class="bg-gray-100 border border-gray-200 p-4 rounded-xl text-center">
+                </a>
+                <!-- Archives -->
+                <a href="{{ route('dashboard', ['view' => 'dashboard', 'indicator' => 'archived']) }}" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 p-4 rounded-xl text-center transition-all block {{ $indicator === 'archived' ? 'ring-2 ring-gray-600' : '' }}">
                     <div class="text-xs text-gray-600 font-semibold">Archives</div>
                     <div class="text-2xl font-bold text-gray-700">{{ $archivedCount }}</div>
-                </div>
+                </a>
             </div>
         </div>
-    @endif
 
+        {{-- Affichage de la liste des tâches si un indicateur a été cliqué --}}
+        @if($indicator)
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+                <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                    <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
+                        📋 Résultats pour l'indicateur : 
+                        <span class="text-[#0052cc] uppercase">{{ str_replace('_', ' ', $indicator) }}</span>
+                    </h3>
+                    <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-3 py-1 rounded-lg">
+                        ✕ Fermer la liste
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-[#f8fafc] text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3">Type</th>
+                                <th class="px-4 py-3">Projet / Matière</th>
+                                <th class="px-4 py-3">Libellé de la Tâche</th>
+                                <th class="px-4 py-3">Statut</th>
+                                <th class="px-4 py-3">Date d'exécution</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($globalIndicatorTasks as $task)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-4 py-4 font-bold text-xs">
+                                        @if($task->type === 'office')
+                                            <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-200">Office</span>
+                                        @else
+                                            <span class="bg-purple-50 text-purple-600 px-2 py-1 rounded border border-purple-200">Master</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 font-semibold text-gray-800">
+                                        {{ $task->project->title ?? 'Général' }}
+                                    </td>
+                                    <td class="px-4 py-4 font-bold text-gray-900">
+                                        {{ $task->title }}
+                                        @if($task->document_link)
+                                            <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document</a>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4">
+                                        @if($task->is_archived)
+                                            <span class="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded border border-gray-200">📁 Archivée</span>
+                                        @elseif($task->document_status === 'done')
+                                            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
+                                        @elseif($task->document_status === 'in_progress')
+                                            <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
+                                        @else
+                                            <span class="bg-red-50 text-red-700 text-xs font-semibold px-2 py-0.5 rounded border border-red-200">🔴 À faire</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-4 text-xs text-gray-600">
+                                        {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}
+                                    </td>
+                                    <td class="px-4 py-4 text-right space-x-2">
+                                        @if(!$task->is_archived)
+                                            <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
+                                            </form>
+                                        @endif
+                                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">Supprimer</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-500 font-semibold">
+                                        Aucune tâche trouvée pour cet indicateur.
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        @endif
+    @endif
+    
     <!-- ================= VUE : MODE OFFICE ================= -->
     @if($view === 'office')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
