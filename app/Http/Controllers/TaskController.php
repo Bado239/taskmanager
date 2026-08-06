@@ -268,4 +268,5 @@ class TaskController extends Controller
 
         return redirect()->back()->with('success', 'Étape supprimée avec succès !');
     }
+    
 }
