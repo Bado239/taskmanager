@@ -79,44 +79,17 @@
                         <option value="new">➕ Créer un nouveau...</option>
                     </select>
 
-                    {{-- Formulaire de suppression invisible mais fonctionnel pour le projet sélectionné --}}
+                    {{-- Bouton pour supprimer le projet sélectionné --}}
                     <template x-if="selectedProject && selectedProject !== 'new'">
-                        <form :id="'delete-project-form-' + selectedProject" 
-                            :action="'{{ url('/projects') }}/' + selectedProject" 
-                            method="POST" 
-                            @submit.prevent="
-                                if(confirm('Voulez-vous vraiment supprimer ce projet ?')) {
-                                    let form = $el;
-                                    let idToDelete = selectedProject;
-                                    fetch(form.action, {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                            'Accept': 'application/json'
-                                        },
-                                        body: new FormData(form)
-                                    }).then(response => {
-                                        if(response.ok) {
-                                            let select = document.querySelector('[name=project_id]');
-                                            let option = select.querySelector('option[value=\'' + idToDelete + '\']');
-                                            if(option) option.remove();
-                                            selectedProject = '';
-                                        }
-                                    });
-                                }
-                            ">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
-                                🗑️
-                            </button>
-                        </form>
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
+                            🗑️
+                        </button>
                     </template>
                 </div>
 
                 <div x-show="selectedProject === 'new'" style="display: none;" class="mt-2">
                     <input type="text" name="new_project_name" placeholder="Nom du projet ou de la matière..."
-                        class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                           class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
             </div>
 
@@ -134,47 +107,20 @@
                         <option value="new">➕ Créer une nouvelle...</option>
                     </select>
 
-                    {{-- Formulaire de suppression invisible mais fonctionnel pour l'étape sélectionnée --}}
+                    {{-- Bouton pour supprimer l'étape sélectionnée --}}
                     <template x-if="selectedCategory && selectedCategory !== 'new'">
-                        <form :id="'delete-category-form-' + selectedCategory" 
-                            :action="'{{ url('/categories') }}/' + selectedCategory" 
-                            method="POST" 
-                            @submit.prevent="
-                                if(confirm('Voulez-vous vraiment supprimer cette étape ?')) {
-                                    let form = $el;
-                                    let idToDelete = selectedCategory;
-                                    fetch(form.action, {
-                                        method: 'POST',
-                                        headers: {
-                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                            'Accept': 'application/json'
-                                        },
-                                        body: new FormData(form)
-                                    }).then(response => {
-                                        if(response.ok) {
-                                            let select = document.querySelector('[name=category_id]');
-                                            let option = select.querySelector('option[value=\'' + idToDelete + '\']');
-                                            if(option) option.remove();
-                                            selectedCategory = '';
-                                        }
-                                    });
-                                }
-                            ">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
-                                🗑️
-                            </button>
-                        </form>
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
+                            🗑️
+                        </button>
                     </template>
                 </div>
 
                 <div x-show="selectedCategory === 'new'" style="display: none;" class="mt-2">
                     <input type="text" name="new_category_name" placeholder="Nom de l'étape ou de la leçon..."
-                        class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                           class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                 </div>
             </div>
-                    {{-- 3. LIBELLÉ DE LA TÂCHE --}}
+            {{-- 3. LIBELLÉ DE LA TÂCHE --}}
             <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
                 <input type="text" name="title" required placeholder="Ex: Résolution de l'exercice d'économétrie"
