@@ -81,24 +81,7 @@
 
                     {{-- Bouton pour supprimer le projet sélectionné --}}
                     <template x-if="selectedProject && selectedProject !== 'new'">
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) {
-                            fetch('{{ url('/projects') }}/' + selectedProject, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({ _method: 'DELETE' })
-                            }).then(response => {
-                                if(response.ok) {
-                                    // Supprime l'élément de la liste déroulante visuellement et réinitialise
-                                    let select = document.querySelector('[name=project_id]');
-                                    select.querySelector('option[value=\"' + selectedProject + '\"]').remove();
-                                    selectedProject = '';
-                                }
-                            });
-                        }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
                             🗑️
                         </button>
                     </template>
@@ -126,24 +109,7 @@
 
                     {{-- Bouton pour supprimer l'étape sélectionnée --}}
                     <template x-if="selectedCategory && selectedCategory !== 'new'">
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) {
-                            fetch('{{ url('/categories') }}/' + selectedCategory, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({ _method: 'DELETE' })
-                            }).then(response => {
-                                if(response.ok) {
-                                    // Supprime l'élément de la liste déroulante visuellement et réinitialise
-                                    let select = document.querySelector('[name=category_id]');
-                                    select.querySelector('option[value=\"' + selectedCategory + '\"]').remove();
-                                    selectedCategory = '';
-                                }
-                            });
-                        }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
                             🗑️
                         </button>
                     </template>
