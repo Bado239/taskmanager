@@ -30,8 +30,8 @@ class TaskController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        // Automatisation de l'archivage sécurisée avec les booléens stricts
-        $tasksToCheck = Task::where('is_archived', false)->get();
+        // Automatisation de l'archivage avec DB::raw pour forcer le type booléen sous PostgreSQL
+        $tasksToCheck = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->get();
         foreach ($tasksToCheck as $task) {
             $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
             $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
@@ -45,22 +45,22 @@ class TaskController extends Controller
         $projects = Project::all();
 
         // Indicateurs globaux (Tâches actives non archivées)
-        $totalTasks = Task::where('is_archived', false)->count();
-        $todoTasks  = Task::where('is_archived', false)->where('document_status', 'todo')->count();
-        $doingTasks = Task::where('is_archived', false)->where('document_status', 'in_progress')->count();
-        $doneTasks  = Task::where('is_archived', false)->where('document_status', 'done')->count();
+        $totalTasks = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->count();
+        $todoTasks  = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'todo')->count();
+        $doingTasks = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('document_status', 'done')->count();
 
         // Nouveaux indicateurs demandés
-        $officeTodayCount = Task::where('is_archived', false)->where('type', 'office')->where('execution_date', $today)->count();
-        $masterTodayCount = Task::where('is_archived', false)->where('type', 'master')->where('execution_date', $today)->count();
-        $archivedCount = Task::where('is_archived', true)->count();
+        $officeTodayCount = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('type', 'office')->where('execution_date', $today)->count();
+        $masterTodayCount = Task::where(DB::raw('is_archived'), '=', DB::raw('false'))->where('type', 'master')->where('execution_date', $today)->count();
+        $archivedCount = Task::where(DB::raw('is_archived'), '=', DB::raw('true'))->count();
 
         // Requête Mode Office avec filtres
         $officeQuery = Task::where('type', 'office');
         if ($statusFilter === 'archived') {
-            $officeQuery->where('is_archived', true);
+            $officeQuery->where(DB::raw('is_archived'), '=', DB::raw('true'));
         } else {
-            $officeQuery->where('is_archived', false);
+            $officeQuery->where(DB::raw('is_archived'), '=', DB::raw('false'));
             if ($filter === 'today') {
                 $officeQuery->where('execution_date', $today);
             }
@@ -70,9 +70,9 @@ class TaskController extends Controller
         // Requête Mode Master avec filtres
         $masterQuery = Task::where('type', 'master');
         if ($statusFilter === 'archived') {
-            $masterQuery->where('is_archived', true);
+            $masterQuery->where(DB::raw('is_archived'), '=', DB::raw('true'));
         } else {
-            $masterQuery->where('is_archived', false);
+            $masterQuery->where(DB::raw('is_archived'), '=', DB::raw('false'));
             if ($filter === 'today') {
                 $masterQuery->where('execution_date', $today);
             }
