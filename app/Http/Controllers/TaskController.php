@@ -29,13 +29,13 @@ class TaskController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        // Automatisation de l'archivage avec la valeur 0
-        Task::where('is_archived', 0)->each(function($task) use ($today, $currentTime) {
+        // Automatisation de l'archivage avec le booléen false
+        Task::where('is_archived', false)->each(function($task) use ($today, $currentTime) {
             $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
             $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
 
             if ($isFinishedToday || $isValidatedPassed) {
-                $task->update(['is_archived' => 1]);
+                $task->update(['is_archived' => true]);
             }
         });
 
@@ -43,22 +43,22 @@ class TaskController extends Controller
         $projects = Project::all();
 
         // Indicateurs globaux (Tâches actives non archivées)
-        $totalTasks = Task::where('is_archived', 0)->count();
-        $todoTasks  = Task::where('is_archived', 0)->where('document_status', 'todo')->count();
-        $doingTasks = Task::where('is_archived', 0)->where('document_status', 'in_progress')->count();
-        $doneTasks  = Task::where('is_archived', 0)->where('document_status', 'done')->count();
+        $totalTasks = Task::where('is_archived', false)->count();
+        $todoTasks  = Task::where('is_archived', false)->where('document_status', 'todo')->count();
+        $doingTasks = Task::where('is_archived', false)->where('document_status', 'in_progress')->count();
+        $doneTasks  = Task::where('is_archived', false)->where('document_status', 'done')->count();
 
         // Nouveaux indicateurs demandés
-        $officeTodayCount = Task::where('is_archived', 0)->where('type', 'office')->where('execution_date', $today)->count();
-        $masterTodayCount = Task::where('is_archived', 0)->where('type', 'master')->where('execution_date', $today)->count();
-        $archivedCount = Task::where('is_archived', 1)->count();
+        $officeTodayCount = Task::where('is_archived', false)->where('type', 'office')->where('execution_date', $today)->count();
+        $masterTodayCount = Task::where('is_archived', false)->where('type', 'master')->where('execution_date', $today)->count();
+        $archivedCount = Task::where('is_archived', true)->count();
 
         // Requête Mode Office avec filtres
         $officeQuery = Task::where('type', 'office');
         if ($statusFilter === 'archived') {
-            $officeQuery->where('is_archived', 1);
+            $officeQuery->where('is_archived', true);
         } else {
-            $officeQuery->where('is_archived', 0);
+            $officeQuery->where('is_archived', false);
             if ($filter === 'today') {
                 $officeQuery->where('execution_date', $today);
             }
@@ -68,9 +68,9 @@ class TaskController extends Controller
         // Requête Mode Master avec filtres
         $masterQuery = Task::where('type', 'master');
         if ($statusFilter === 'archived') {
-            $masterQuery->where('is_archived', 1);
+            $masterQuery->where('is_archived', true);
         } else {
-            $masterQuery->where('is_archived', 0);
+            $masterQuery->where('is_archived', false);
             if ($filter === 'today') {
                 $masterQuery->where('execution_date', $today);
             }
@@ -167,7 +167,7 @@ class TaskController extends Controller
             'heure_debut'     => $request->start_time,
             'heure_fin'       => $request->end_time,
             'type'            => $request->type,
-            'is_archived'     => 0,
+            'is_archived'     => false,
         ]);
 
         $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
@@ -182,7 +182,7 @@ class TaskController extends Controller
     public function archive($id)
     {
         $task = Task::findOrFail($id);
-        $task->update(['is_archived' => 1]);
+        $task->update(['is_archived' => true]);
 
         return redirect()->back()->with('success', 'Tâche archivée avec succès !');
     }
