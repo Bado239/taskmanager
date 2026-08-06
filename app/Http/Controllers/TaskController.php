@@ -42,13 +42,20 @@ class TaskController extends Controller
             }
         }
 
-        // Filtrage strict par type de vue pour séparer proprement les listes
+        // Listes indépendantes et étanches pour chaque mode
+        $projectsOffice = Project::where('type', 'office')->get();
+        $projectsMaster = Project::where('type', 'master')->get();
+        
+        $categoriesOffice = Category::where('type', 'office')->get();
+        $categoriesMaster = Category::where('type', 'master')->get();
+
+        // Pour la rétrocompatibilité (si un autre endroit utilise $projects / $categories globalement)
         if ($view === 'office') {
-            $categories = Category::where('type', 'office')->get();
-            $projects = Project::where('type', 'office')->get();
+            $categories = $categoriesOffice;
+            $projects = $projectsOffice;
         } elseif ($view === 'master') {
-            $categories = Category::where('type', 'master')->get();
-            $projects = Project::where('type', 'master')->get();
+            $categories = $categoriesMaster;
+            $projects = $projectsMaster;
         } else {
             $categories = Category::all();
             $projects = Project::all();
@@ -144,7 +151,11 @@ class TaskController extends Controller
             'officeTasks',
             'masterTasks',
             'categories',
-            'projects'
+            'projects',
+            'projectsOffice',
+            'projectsMaster',
+            'categoriesOffice',
+            'categoriesMaster'
         ));
     }
 
@@ -179,7 +190,7 @@ class TaskController extends Controller
                 ->withInput();
         }
 
-        // Gestion du projet avec association du type
+        // Gestion du projet avec association stricte du type
         $projectId = $request->project_id;
         if ($projectId === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
@@ -191,7 +202,7 @@ class TaskController extends Controller
             $projectId = null;
         }
 
-        // Gestion de l'étape (catégorie) avec association du type
+        // Gestion de l'étape (catégorie) avec association stricte du type
         $categoryId = $request->category_id;
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
             $newCategoryName = $request->new_category_name;

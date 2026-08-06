@@ -2,8 +2,8 @@
 
 @section('content')
 @php
-    $defaultCatOffice = $categories->firstWhere('title', 'CGP')?->id ?? $categories->firstWhere('name', 'CGP')?->id ?? '';
-    $defaultCatMaster = $categories->firstWhere('title', 'Master ISEF1')?->id ?? $categories->firstWhere('name', 'Master ISEF1')?->id ?? '';
+    $defaultCatOffice = $categoriesOffice->firstWhere('title', 'CGP')?->id ?? $categoriesOffice->firstWhere('name', 'CGP')?->id ?? '';
+    $defaultCatMaster = $categoriesMaster->firstWhere('title', 'Master ISEF1')?->id ?? $categoriesMaster->firstWhere('name', 'Master ISEF1')?->id ?? '';
     
     $currentType = $view === 'dashboard' ? 'office' : $view;
 @endphp
@@ -11,16 +11,18 @@
 <div class="space-y-6 pb-12" 
      x-data="{ 
          currentMode: '{{ $currentType }}',
-         allProjects: @js($projects),
-         allCategories: @js($categories),
+         projectsOffice: @js($projectsOffice),
+         projectsMaster: @js($projectsMaster),
+         categoriesOffice: @js($categoriesOffice),
+         categoriesMaster: @js($categoriesMaster),
          
          get filteredProjects() {
-             if (this.currentMode === 'dashboard') return this.allProjects;
-             return this.allProjects.filter(p => p.type === this.currentMode);
+             if (this.currentMode === 'master') return this.projectsMaster;
+             return this.projectsOffice;
          },
          get filteredCategories() {
-             if (this.currentMode === 'dashboard') return this.allCategories;
-             return this.allCategories.filter(c => c.type === this.currentMode);
+             if (this.currentMode === 'master') return this.categoriesMaster;
+             return this.categoriesOffice;
          }
      }">
 
@@ -573,15 +575,28 @@
 
 </div>
 
-{{-- Formulaires cachés pour la suppression classique des projets et catégories --}}
-@foreach($projects as $p)
+{{-- Formulaires cachés pour la suppression des projets (Office & Master) --}}
+@foreach($projectsOffice as $p)
+    <form id="delete-project-{{ $p->id }}" action="{{ route('projects.destroy', $p->id) }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+@endforeach
+@foreach($projectsMaster as $p)
     <form id="delete-project-{{ $p->id }}" action="{{ route('projects.destroy', $p->id) }}" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
     </form>
 @endforeach
 
-@foreach($categories as $c)
+{{-- Formulaires cachés pour la suppression des catégories (Office & Master) --}}
+@foreach($categoriesOffice as $c)
+    <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
+        @csrf
+        @method('DELETE')
+    </form>
+@endforeach
+@foreach($categoriesMaster as $c)
     <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
         @csrf
         @method('DELETE')
