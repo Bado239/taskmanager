@@ -576,9 +576,12 @@
     </form>
 @endforeach
 
-{{-- SIGNATURE EN BAS DE CHAQUE PAGE --}}
-<div class="mt-12 pt-4 border-t border-gray-200 text-center text-xs text-gray-400 font-medium">
-    Bado
-</div>
-
+{{-- SIGNATURE PROFESSIONNELLE EN BAS DE PAGE --}}
+<footer class="mt-16 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 font-medium">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
+        <span>Conçu et développé avec ❤️ par <strong class="text-gray-800 font-semibold">Bado</strong></span>
+        <span class="hidden sm:inline text-gray-300">•</span>
+        <span>Laravel Task Manager &copy; {{ date('Y') }}</span>
+    </div>
+</footer>
 @endsection
