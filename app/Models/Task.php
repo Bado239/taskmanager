@@ -33,7 +33,7 @@ class Task extends Model
      * @var array
      */
     protected $casts = [
-        'is_archived' => 'boolean',
+        'is_archived' => 'integer', // CORRIGÉ : Conversion en entier pour PostgreSQL
     ];
 
     /**
