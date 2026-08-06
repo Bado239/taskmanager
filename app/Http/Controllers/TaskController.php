@@ -85,7 +85,7 @@ class TaskController extends Controller
                 $globalIndicatorTasks = $query->with(['category', 'project'])->latest()->get();
             }
 
-            // Requête Mode Office
+            // Requête Mode Office avec filtres et tri chronologique
             $officeQuery = Task::where('type', 'office');
             if ($statusFilter === 'archived') {
                 $officeQuery->where('is_archived', 1);
@@ -95,9 +95,12 @@ class TaskController extends Controller
                     $officeQuery->where('execution_date', $today);
                 }
             }
-            $officeTasks = $officeQuery->with(['category', 'project'])->latest()->get();
+            $officeTasks = $officeQuery->with(['category', 'project'])
+                ->orderBy('execution_date', 'asc')
+                ->orderBy('heure_debut', 'asc')
+                ->get();
 
-            // Requête Mode Master
+            // Requête Mode Master avec filtres et tri chronologique
             $masterQuery = Task::where('type', 'master');
             if ($statusFilter === 'archived') {
                 $masterQuery->where('is_archived', 1);
@@ -107,7 +110,19 @@ class TaskController extends Controller
                     $masterQuery->where('execution_date', $today);
                 }
             }
-            $masterTasks = $masterQuery->with(['category', 'project'])->latest()->get();
+            $masterTasks = $masterQuery->with(['category', 'project'])
+                ->orderBy('execution_date', 'asc')
+                ->orderBy('heure_debut', 'asc')
+                ->get();
+
+            // Idem pour les résultats globaux des indicateurs du dashboard
+            if ($view === 'dashboard' && $indicator) {
+                // ... (ton switch existant)
+                $globalIndicatorTasks = $query->with(['category', 'project'])
+                    ->orderBy('execution_date', 'asc')
+                    ->orderBy('heure_debut', 'asc')
+                    ->get();
+            }
 
             return view('dashboard', compact(
                 'view',
