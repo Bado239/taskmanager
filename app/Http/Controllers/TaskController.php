@@ -42,9 +42,17 @@ class TaskController extends Controller
             }
         }
 
-        // On récupère tous les projets et catégories sans filtre strict pour éviter les listes vides
-        $categories = Category::all();
-        $projects = Project::all();
+        // Filtrage strict par type de vue pour séparer proprement les listes
+        if ($view === 'office') {
+            $categories = Category::where('type', 'office')->get();
+            $projects = Project::where('type', 'office')->get();
+        } elseif ($view === 'master') {
+            $categories = Category::where('type', 'master')->get();
+            $projects = Project::where('type', 'master')->get();
+        } else {
+            $categories = Category::all();
+            $projects = Project::all();
+        }
 
         // Indicateurs globaux
         $totalTasks = Task::where('is_archived', 0)->count();
