@@ -42,8 +42,18 @@ class TaskController extends Controller
                 }
             }
 
-            $categories = Category::all();
-            $projects = Project::all();
+            // Filtrage strict des projets et catégories selon la vue active
+            if ($view === 'office') {
+                $categories = Category::where('type', 'office')->get();
+                $projects = Project::where('type', 'office')->get();
+            } elseif ($view === 'master') {
+                $categories = Category::where('type', 'master')->get();
+                $projects = Project::where('type', 'master')->get();
+            } else {
+                // Sur le dashboard global, on récupère tout ou on sépare si besoin
+                $categories = Category::all();
+                $projects = Project::all();
+            }
 
             // Indicateurs globaux
             $totalTasks = Task::where('is_archived', 0)->count();
@@ -82,7 +92,10 @@ class TaskController extends Controller
                         $query->where('is_archived', 1);
                         break;
                 }
-                $globalIndicatorTasks = $query->with(['category', 'project'])->latest()->get();
+                $globalIndicatorTasks = $query->with(['category', 'project'])
+                    ->orderBy('execution_date', 'asc')
+                    ->orderBy('heure_debut', 'asc')
+                    ->get();
             }
 
             // Requête Mode Office avec filtres et tri chronologique
@@ -114,15 +127,6 @@ class TaskController extends Controller
                 ->orderBy('execution_date', 'asc')
                 ->orderBy('heure_debut', 'asc')
                 ->get();
-
-            // Idem pour les résultats globaux des indicateurs du dashboard
-            if ($view === 'dashboard' && $indicator) {
-                // ... (ton switch existant)
-                $globalIndicatorTasks = $query->with(['category', 'project'])
-                    ->orderBy('execution_date', 'asc')
-                    ->orderBy('heure_debut', 'asc')
-                    ->get();
-            }
 
             return view('dashboard', compact(
                 'view',
@@ -176,34 +180,36 @@ class TaskController extends Controller
                 ->withInput();
         }
 
-        // Gestion du projet
+        // Gestion du projet avec association du type
         $projectId = $request->project_id;
         if ($projectId === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
                 'title' => $request->new_project_name,
+                'type'  => $request->type, // 'office' ou 'master'
             ]);
             $projectId = $newProject->id;
         } elseif (empty($projectId) || $projectId === 'new') {
             $projectId = null;
         }
 
-        // Gestion de l'étape (catégorie)
+        // Gestion de l'étape (catégorie) avec association du type
         $categoryId = $request->category_id;
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
             $newCategoryName = $request->new_category_name;
             $newCategory = Category::create([
                 'name'  => $newCategoryName,
                 'title' => $newCategoryName,
+                'type'  => $request->type, // 'office' ou 'master'
             ]);
             $categoryId = $newCategory->id;
         } else {
             if (empty($categoryId) || $categoryId === 'new') {
-                $defaultCategory = Category::first();
+                $defaultCategory = Category::where('type', $request->type)->first() ?? Category::first();
                 $categoryId = $defaultCategory ? $defaultCategory->id : null;
             }
         }
 
-        // Enregistrement
+        // Enregistrement de la tâche
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
