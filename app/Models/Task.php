@@ -16,6 +16,7 @@ class Task extends Model
         'project_step_id',   // Étape liée au projet
         'priority', 
         'date_prevue',       // Correspond à la date en base de données
+        'execution_date',    // Date d'exécution
         'heure_debut',       // Correspond à l'heure de début en base de données
         'heure_fin',         // Correspond à l'heure de fin en base de données
         'document_link', 
@@ -23,6 +24,16 @@ class Task extends Model
         'status',
         'type',              // Mode de l'application (master ou office)
         'document_status',   // Statut du livrable
+        'is_archived',       // Statut d'archivage
+    ];
+
+    /**
+     * Les attributs qui doivent être convertis.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'is_archived' => 'boolean',
     ];
 
     /**
