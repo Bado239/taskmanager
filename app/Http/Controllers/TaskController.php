@@ -19,7 +19,7 @@ class TaskController extends Controller
         $view = $request->query('view', session('active_view', 'dashboard'));
         $filter = $request->query('filter', 'all'); 
         $statusFilter = $request->query('status', 'active'); 
-        $indicator = $request->query('indicator');
+        $indicator = $request->query('indicator'); // Récupération du clic sur un indicateur
 
         if (in_array($view, ['office', 'master'])) {
             session(['current_mode' => $view]);
@@ -42,12 +42,24 @@ class TaskController extends Controller
             }
         }
 
-        // FILTRAGE PRINCIPAL : On récupère uniquement les projets et catégories du mode actif ($currentMode)
-        // Si on est sur le dashboard global, on peut par défaut charger 'office' ou tout afficher selon votre préférence.
-        $activeType = ($view === 'dashboard') ? $currentMode : $view;
+        // Listes indépendantes et étanches pour chaque mode
+        $projectsOffice = Project::where('type', 'office')->get();
+        $projectsMaster = Project::where('type', 'master')->get();
+        
+        $categoriesOffice = Category::where('type', 'office')->get();
+        $categoriesMaster = Category::where('type', 'master')->get();
 
-        $projects = Project::where('type', $activeType)->get();
-        $categories = Category::where('type', $activeType)->get();
+        // Pour la rétrocompatibilité (si un autre endroit utilise $projects / $categories globalement)
+        if ($view === 'office') {
+            $categories = $categoriesOffice;
+            $projects = $projectsOffice;
+        } elseif ($view === 'master') {
+            $categories = $categoriesMaster;
+            $projects = $projectsMaster;
+        } else {
+            $categories = Category::all();
+            $projects = Project::all();
+        }
 
         // Indicateurs globaux
         $totalTasks = Task::where('is_archived', 0)->count();
@@ -92,7 +104,7 @@ class TaskController extends Controller
                 ->get();
         }
 
-        // Requête Mode Office
+        // Requête Mode Office avec filtres et tri chronologique
         $officeQuery = Task::where('type', 'office');
         if ($statusFilter === 'archived') {
             $officeQuery->where('is_archived', 1);
@@ -107,7 +119,7 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-        // Requête Mode Master
+        // Requête Mode Master avec filtres et tri chronologique
         $masterQuery = Task::where('type', 'master');
         if ($statusFilter === 'archived') {
             $masterQuery->where('is_archived', 1);
@@ -139,7 +151,11 @@ class TaskController extends Controller
             'officeTasks',
             'masterTasks',
             'categories',
-            'projects'
+            'projects',
+            'projectsOffice',
+            'projectsMaster',
+            'categoriesOffice',
+            'categoriesMaster'
         ));
     }
 
@@ -203,7 +219,7 @@ class TaskController extends Controller
             }
         }
 
-        // Enregistrement de la tâche (Utilisation des noms de colonnes corrects : heure_debut / heure_fin)
+        // Enregistrement de la tâche
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
