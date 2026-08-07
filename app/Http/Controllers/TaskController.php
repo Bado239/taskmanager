@@ -42,9 +42,9 @@ class TaskController extends Controller
             }
         }
 
-        // Listes indépendantes et étanches pour chaque mode
-        $projectsOffice = Project::where('type', 'office')->get();
-        $projectsMaster = Project::where('type', 'master')->get();
+        // Listes indépendantes et étanches pour chaque mode (uniquement les projets actifs)
+        $projectsOffice = Project::where('type', 'office')->where('is_active', true)->get();
+        $projectsMaster = Project::where('type', 'master')->where('is_active', true)->get();
         
         $categoriesOffice = Category::where('type', 'office')->get();
         $categoriesMaster = Category::where('type', 'master')->get();
@@ -58,7 +58,7 @@ class TaskController extends Controller
             $projects = $projectsMaster;
         } else {
             $categories = Category::all();
-            $projects = Project::all();
+            $projects = Project::where('is_active', true)->get();
         }
 
         // Indicateurs globaux
@@ -270,13 +270,12 @@ class TaskController extends Controller
     {
         $project = Project::findOrFail($id);
 
-        // Détacher les tâches liées au lieu de les supprimer
-        $project->tasks()->update(['project_id' => null]);
+        // On désactive le projet pour qu'il sorte de la liste, 
+        // mais les tâches conservent leur project_id et gardent le nom du projet affiché
+        $project->is_active = false;
+        $project->save();
 
-        // Supprimer le projet
-        $project->delete();
-
-        return back()->with('success', 'Projet supprimé avec succès (les tâches ont été conservées).');
+        return back()->with('success', 'Projet retiré de la liste (les tâches conservent leur projet).');
     }
     /**
      * Supprime une étape / catégorie existante
