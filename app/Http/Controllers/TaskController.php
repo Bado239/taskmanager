@@ -285,10 +285,7 @@ class TaskController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        // Option : Dissocier les tâches en les rattachant à null (nécessite que la colonne soit nullable en BDD)
-        // Si la base refuse le null, vous pouvez soit supprimer les tâches, soit autoriser le null en base.
-        // Pour éviter l'erreur 500 actuelle, détachons la relation en forçant la mise à jour ou en évitant le update direct si non permis :
-        
+        // Détacher les tâches liées en mettant category_id à NULL
         \App\Models\Task::where('category_id', $id)->update(['category_id' => null]);
 
         // Supprimer la catégorie
