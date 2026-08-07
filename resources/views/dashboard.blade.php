@@ -7,7 +7,7 @@
     $allProjects = $projectsOffice->concat($projectsMaster)->unique('id');
     $allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
 
-    // Calcul des dates et heures par défaut
+    // Calcul initial des dates et heures par défaut (Échéance J+4, Exécution J+2)
     $today = \Carbon\Carbon::now();
     $defaultDueDate = $today->copy()->addDays(4)->format('Y-m-d');
     $defaultExecutionDate = $today->copy()->addDays(2)->format('Y-m-d');
@@ -64,7 +64,33 @@
             <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
         </div>
 
-        <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" x-data="{ selectedProject: '', selectedCategory: '' }">
+        <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" 
+              x-data="{ 
+                  selectedProject: '', 
+                  selectedCategory: '',
+                  dueDate: '{{ $defaultDueDate }}',
+                  executionDate: '{{ $defaultExecutionDate }}',
+                  startTime: '{{ $defaultStartTime }}',
+                  endTime: '{{ $defaultEndTime }}',
+
+                  // Met à jour la date d'exécution pour qu'elle reste 2 jours avant l'échéance modifiée
+                  updateExecutionDate() {
+                      if (!this.dueDate) return;
+                      let d = new Date(this.dueDate);
+                      d.setDate(d.getDate() - 2);
+                      this.executionDate = d.toISOString().split('T')[0];
+                  },
+
+                  // Met à jour l'heure de fin pour qu'elle reste 2 heures après l'heure de début modifiée
+                  updateEndTime() {
+                      if (!this.startTime) return;
+                      let parts = this.startTime.split(':');
+                      let hours = parseInt(parts[0], 10) + 2;
+                      let minutes = parts[1];
+                      if (hours > 23) hours = 23; // Évite les dépassements sur 24h
+                      this.endTime = String(hours).padStart(2, '0') + ':' + minutes;
+                  }
+              }">
             @csrf
             
             @if($view === 'dashboard')
@@ -143,27 +169,27 @@
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
-            {{-- DATES ET HEURES --}}
+            {{-- DATES ET HEURES LIÉES REACTIVEMENT VIA ALPINE.JS --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
-                <input type="date" name="date_prevue" value="{{ $defaultDueDate }}" 
+                <input type="date" name="date_prevue" x-model="dueDate" @change="updateExecutionDate()" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Date d'exécution</label>
-                <input type="date" name="execution_date" value="{{ $defaultExecutionDate }}" 
+                <input type="date" name="execution_date" x-model="executionDate" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
-                <input type="time" name="start_time" value="{{ $defaultStartTime }}" 
+                <input type="time" name="start_time" x-model="startTime" @change="updateEndTime()" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de fin</label>
-                <input type="time" name="end_time" value="{{ $defaultEndTime }}" 
+                <input type="time" name="end_time" x-model="endTime" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
