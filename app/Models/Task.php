@@ -10,30 +10,29 @@ class Task extends Model
      * Les attributs qui sont assignables en masse.
      */
     protected $fillable = [
-        'title', 
-        'category_id', 
-        'project_id', 
-        'project_step_id',   // Étape liée au projet
-        'priority', 
-        'date_prevue',       // Correspond à la date en base de données
-        'execution_date',    // Date d'exécution
-        'heure_debut',       // Correspond à l'heure de début en base de données
-        'heure_fin',         // Correspond à l'heure de fin en base de données
-        'document_link', 
-        'progress', 
+        'title',
+        'category_id',
+        'project_id',
+        'project_name',      // Nom du projet sauvegardé (persiste même si le projet est supprimé)
+        'project_step_id',
+        'priority',
+        'date_prevue',
+        'execution_date',
+        'heure_debut',
+        'heure_fin',
+        'document_link',
+        'progress',
         'status',
-        'type',              // Mode de l'application (master ou office)
-        'document_status',   // Statut du livrable
-        'is_archived',       // Statut d'archivage
+        'type',
+        'document_status',
+        'is_archived',
     ];
 
     /**
      * Les attributs qui doivent être convertis.
-     *
-     * @var array
      */
     protected $casts = [
-        'is_archived' => 'integer', // CORRIGÉ : Conversion en entier pour PostgreSQL
+        'is_archived' => 'integer',
     ];
 
     /**

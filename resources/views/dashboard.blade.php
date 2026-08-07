@@ -314,7 +314,7 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-4 font-semibold text-gray-800">
-                                        {{ $task->project->title ?? 'Général' }}
+                                        {{ $task->project->title ?? $task->project_name ?? 'Général' }}
                                     </td>
                                     <td class="px-4 py-4 font-bold text-gray-900">
                                         {{ $task->title }}
@@ -392,7 +392,7 @@
 
         @php
             $groupedOfficeTasks = $officeTasks->groupBy(function($task) {
-                return $task->project->title ?? 'Sans Projet';
+                return $task->project->title ?? $task->project_name ?? 'Sans Projet';
             });
         @endphp
 
@@ -504,8 +504,8 @@
         </div>
 
         @php
-            $groupedMasterTasks = $masterTasks->groupBy(function($task) {
-                return $task->project->title ?? 'Matière Non Spécifiée';
+           $groupedMasterTasks = $masterTasks->groupBy(function($task) {
+                return $task->project->title ?? $task->project_name ?? 'Matière Non Spécifiée';
             });
         @endphp
 

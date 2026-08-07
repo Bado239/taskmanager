@@ -17,14 +17,14 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $view = $request->query('view', session('active_view', 'dashboard'));
-        $filter = $request->query('filter', 'all'); 
-        $statusFilter = $request->query('status', 'active'); 
-        $indicator = $request->query('indicator'); // Récupération du clic sur un indicateur
+        $filter = $request->query('filter', 'all');
+        $statusFilter = $request->query('status', 'active');
+        $indicator = $request->query('indicator');
 
         if (in_array($view, ['office', 'master'])) {
             session(['current_mode' => $view]);
         }
-        
+
         session(['active_view' => $view]);
         $currentMode = session('current_mode', 'office');
 
@@ -42,7 +42,7 @@ class TaskController extends Controller
             }
         }
 
-        // Listes des projets : Actifs OU encore rattachés à des tâches non archivées pour éviter le "Sans Projet"
+        // Listes des projets : Actifs OU encore rattachés à des tâches non archivées
         $projectsOffice = Project::where('type', 'office')->where(function($q) {
             $q->whereRaw('is_active = true')
               ->orWhereIn('id', Task::where('type', 'office')->where('is_archived', 0)->pluck('project_id'));
@@ -52,11 +52,10 @@ class TaskController extends Controller
             $q->whereRaw('is_active = true')
               ->orWhereIn('id', Task::where('type', 'master')->where('is_archived', 0)->pluck('project_id'));
         })->get();
-        
+
         $categoriesOffice = Category::where('type', 'office')->get();
         $categoriesMaster = Category::where('type', 'master')->get();
 
-        // Pour la rétrocompatibilité (si un autre endroit utilise $projects / $categories globalement)
         if ($view === 'office') {
             $categories = $categoriesOffice;
             $projects = $projectsOffice;
@@ -202,13 +201,19 @@ class TaskController extends Controller
 
         // Gestion du projet avec association stricte du type
         $projectId = $request->project_id;
+        $projectName = null;
+
         if ($projectId === 'new' && $request->filled('new_project_name')) {
             $newProject = Project::create([
                 'title' => $request->new_project_name,
-                'type'  => $request->type, // 'office' ou 'master'
+                'type'  => $request->type,
             ]);
             $projectId = $newProject->id;
-        } elseif (empty($projectId) || $projectId === 'new') {
+            $projectName = $newProject->title;
+        } elseif (!empty($projectId) && $projectId !== 'new') {
+            // Projet existant sélectionné : on récupère son nom
+            $projectName = Project::find($projectId)?->title;
+        } else {
             $projectId = null;
         }
 
@@ -219,7 +224,7 @@ class TaskController extends Controller
             $newCategory = Category::create([
                 'name'  => $newCategoryName,
                 'title' => $newCategoryName,
-                'type'  => $request->type, // 'office' ou 'master'
+                'type'  => $request->type,
             ]);
             $categoryId = $newCategory->id;
         } else {
@@ -229,12 +234,13 @@ class TaskController extends Controller
             }
         }
 
-        // Enregistrement de la tâche
+        // Enregistrement de la tâche avec le nom du projet sauvegardé
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
             'category_id'     => $categoryId,
             'project_id'      => $projectId,
+            'project_name'    => $projectName,
             'document_status' => $request->document_status ?? 'todo',
             'priority'        => $request->priority ?? 'medium',
             'date_prevue'     => $request->date_prevue,
@@ -274,26 +280,19 @@ class TaskController extends Controller
     }
 
     /**
-     * Supprime un projet existant
-     */
-// Dans app/Http/Controllers/TaskController.php
-
-    /**
-     * Supprime (désactive) logiquement un projet existant.
+     * Désactive logiquement un projet (les tâches gardent leur project_name).
      */
     public function destroyProject($id)
     {
         $project = Project::findOrFail($id);
 
-        // On ne supprime pas le projet de la base, on le désactive
         $project->update([
             'is_active' => false
         ]);
 
-        // Redirigez avec un message de succès
-        return back()->with('success', 'Projet archivé avec succès. Les tâches sont conservées.');
+        return back()->with('success', 'Projet archivé avec succès. Les tâches conservent le nom du projet.');
     }
-    
+
     /**
      * Supprime une étape / catégorie existante
      */
@@ -301,10 +300,8 @@ class TaskController extends Controller
     {
         $category = Category::findOrFail($id);
 
-        // Détacher les tâches liées en mettant category_id à NULL
         \App\Models\Task::where('category_id', $id)->update(['category_id' => null]);
 
-        // Supprimer la catégorie
         $category->delete();
 
         return back()->with('success', 'Étape supprimée avec succès (les tâches ont été conservées).');
