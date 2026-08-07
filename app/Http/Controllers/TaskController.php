@@ -269,19 +269,28 @@ class TaskController extends Controller
     public function destroyProject($id)
     {
         $project = Project::findOrFail($id);
+
+        // Détacher les tâches liées au lieu de les supprimer
+        $project->tasks()->update(['project_id' => null]);
+
+        // Supprimer le projet
         $project->delete();
 
-        return redirect()->back()->with('success', 'Projet supprimé avec succès !');
+        return back()->with('success', 'Projet supprimé avec succès (les tâches ont été conservées).');
     }
-
     /**
      * Supprime une étape / catégorie existante
      */
     public function destroyCategory($id)
     {
         $category = Category::findOrFail($id);
+
+        // Détacher les tâches liées au lieu de les supprimer
+        $category->tasks()->update(['category_id' => null]);
+
+        // Supprimer la catégorie
         $category->delete();
 
-        return redirect()->back()->with('success', 'Étape supprimée avec succès !');
+        return back()->with('success', 'Étape supprimée avec succès (les tâches ont été conservées).');
     }
 }

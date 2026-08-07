@@ -17,9 +17,11 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
 
+            // Modifié : category_id devient nullable et met à null au lieu de supprimer en cascade
             $table->foreignId('category_id')
+                ->nullable()
                 ->constrained()
-                ->onDelete('cascade');
+                ->onDelete('set null');
 
             // Projet / Étude lié
             $table->foreignId('project_id')
@@ -27,7 +29,7 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('set null');
 
-            // ⭐ MODIFIÉ : On crée la colonne simplement, sans contrainte 'constrained()' immédiate
+            // Colonne pour l'étape du projet
             $table->unsignedBigInteger('project_step_id')->nullable();
 
             $table->enum('status', ['todo', 'doing', 'done'])->default('todo');
@@ -36,7 +38,6 @@ return new class extends Migration
 
             $table->integer('progress')->default(0);
 
-            // ⭐ ajout logique même dans le design du système
             $table->integer('ordre')->default(999);
 
             $table->date('start_date')->nullable();
