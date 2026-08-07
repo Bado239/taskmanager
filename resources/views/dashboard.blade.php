@@ -25,7 +25,7 @@
              return this.allCategories.filter(c => c.type === this.currentMode);
          }
      }">
-     
+
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div class="flex items-center gap-2">
@@ -68,33 +68,26 @@
             <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
         </div>
 
-        <form action="{{ route('tasks.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4" 
-              x-data="{ 
-                  selectedProject: '', 
-                  selectedCategory: '',
-                  dueDate: '{{ $defaultDueDate }}',
-                  executionDate: '{{ $defaultExecutionDate }}',
-                  startTime: '{{ $defaultStartTime }}',
-                  endTime: '{{ $defaultEndTime }}',
+            @if($view === 'dashboard')
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                        Destination de la tâche *
+                    </label>
 
-                  // Met à jour la date d'exécution pour qu'elle reste 2 jours avant l'échéance modifiée
-                  updateExecutionDate() {
-                      if (!this.dueDate) return;
-                      let d = new Date(this.dueDate);
-                      d.setDate(d.getDate() - 2);
-                      this.executionDate = d.toISOString().split('T')[0];
-                  },
+                    <select x-model="$root.currentMode"
+                            required
+                            class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm">
+                        <option value="office">💼 Mode Office</option>
+                        <option value="master">🎓 Mode Master</option>
+                    </select>
 
-                  // Met à jour l'heure de fin pour qu'elle reste 2 heures après l'heure de début modifiée
-                  updateEndTime() {
-                      if (!this.startTime) return;
-                      let parts = this.startTime.split(':');
-                      let hours = parseInt(parts[0], 10) + 2;
-                      let minutes = parts[1];
-                      if (hours > 23) hours = 23; // Évite les dépassements sur 24h
-                      this.endTime = String(hours).padStart(2, '0') + ':' + minutes;
-                  }
-              }">
+                    <input type="hidden"
+                        name="type"
+                        :value="$root.currentMode">
+                </div>
+            @else
+                <input type="hidden" name="type" value="{{ $view }}">
+            @endif
             @csrf
             
             @if($view === 'dashboard')
@@ -115,7 +108,7 @@
                 <div class="flex gap-2">
                     <select name="project_id" x-model="selectedProject" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Sélectionner --</option>
-                        <template x-for="project in projects" :key="project.id">
+                       <template x-for="project in $root.projects" :key="project.id">
                             <option :value="project.id" x-text="project.title"></option>
                         </template>
                         <option value="new">➕ Créer un nouveau...</option>
@@ -141,8 +134,8 @@
                 <div class="flex gap-2">
                     <select name="category_id" x-model="selectedCategory" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                         <option value="">-- Sélectionner --</option>
-                        <template x-for="category in categories" :key="category.id">
-                            <option :value="category.id" x-text="category.title ?? category.name"></option>
+                        <template x-for="category in $root.categories" :key="category.id">
+                            <option :value="category.id" x-text="category.title || category.name"></option>
                         </template>
                         <option value="new">➕ Créer une nouvelle...</option>
                     </select>
