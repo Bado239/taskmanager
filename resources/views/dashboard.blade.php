@@ -13,15 +13,19 @@
     $defaultStartTime = '09:00';$defaultEndTime = '11:00';
 @endphp
 
-<div class="space-y-6 pb-12" 
-     x-data="{ 
+<div class="space-y-6 pb-12"
+     x-data="{
          currentMode: '{{ $currentType }}',
-         // --- MODIFICATION ICI (Filtrage des projets actifs) ---
-         projects: @js($allProjects->where('is_active', true)),
-         // ------------------------------------------------------
-         categories: @js($allCategories)
+         allProjects: @js($allProjects->where('is_active', true)->values()),
+         allCategories: @js($allCategories->values()),
+         get projects() {
+             return this.allProjects.filter(p => p.type === this.currentMode);
+         },
+         get categories() {
+             return this.allCategories.filter(c => c.type === this.currentMode);
+         }
      }">
-
+     
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div class="flex items-center gap-2">
