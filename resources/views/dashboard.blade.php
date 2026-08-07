@@ -6,6 +6,13 @@
     // Fusion et déduplication des projets et catégories pour les deux modes
     $allProjects = $projectsOffice->concat($projectsMaster)->unique('id');
     $allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
+
+    // Calcul des dates et heures par défaut
+    $today = \Carbon\Carbon::now();
+    $defaultDueDate = $today->copy()->addDays(4)->format('Y-m-d');
+    $defaultExecutionDate = $today->copy()->addDays(2)->format('Y-m-d');
+    $defaultStartTime = '09:00';
+    $defaultEndTime = '11:00';
 @endphp
 
 <div class="space-y-6 pb-12" 
@@ -139,24 +146,24 @@
             {{-- DATES ET HEURES --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
-                <input type="date" name="date_prevue" 
+                <input type="date" name="date_prevue" value="{{ $defaultDueDate }}" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Date d'exécution</label>
-                <input type="date" name="execution_date" 
+                <input type="date" name="execution_date" value="{{ $defaultExecutionDate }}" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
-                <input type="time" name="start_time" 
+                <input type="time" name="start_time" value="{{ $defaultStartTime }}" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de fin</label>
-                <input type="time" name="end_time" 
+                <input type="time" name="end_time" value="{{ $defaultEndTime }}" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
