@@ -43,9 +43,9 @@ class TaskController extends Controller
         }
 
         // Listes indépendantes et étanches pour chaque mode (uniquement les projets actifs)
-        $projectsOffice = Project::where('type', 'office')->where('is_active', true)->get();
-        $projectsMaster = Project::where('type', 'master')->where('is_active', true)->get();
-
+        $projectsOffice = Project::where('type', 'office')->whereRaw('is_active = true')->get();
+        $projectsMaster = Project::where('type', 'master')->whereRaw('is_active = true')->get();
+        
         $categoriesOffice = Category::where('type', 'office')->get();
         $categoriesMaster = Category::where('type', 'master')->get();
 
@@ -58,9 +58,9 @@ class TaskController extends Controller
             $projects = $projectsMaster;
         } else {
             $categories = Category::all();
-            $projects = Project::where('is_active', true)->get();
+            $projects = Project::whereRaw('is_active = true')->get();
         }
-        // Indicateurs globaux
+                // Indicateurs globaux
         $totalTasks = Task::where('is_archived', 0)->count();
         $todoTasks  = Task::where('is_archived', 0)->where('document_status', 'todo')->count();
         $doingTasks = Task::where('is_archived', 0)->where('document_status', 'in_progress')->count();
