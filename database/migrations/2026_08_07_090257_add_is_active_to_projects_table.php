@@ -9,15 +9,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('projects', function (Blueprint $table) {
-            // Ajoute la colonne is_active (par défaut à true / actif)
-            $table->boolean('is_active')->default(true);
+            // Ajoute la colonne seulement si elle n'existe pas encore
+            if (!Schema::hasColumn('projects', 'is_active')) {
+                $table->boolean('is_active')->default(true);
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->dropColumn('is_active');
+            if (Schema::hasColumn('projects', 'is_active')) {
+                $table->dropColumn('is_active');
+            }
         });
     }
 };
