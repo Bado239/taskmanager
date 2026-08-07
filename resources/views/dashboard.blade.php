@@ -2,23 +2,23 @@
 
 @section('content')
 @php
-    $currentType = $view === 'dashboard' ? 'office' : $view;
+    $currentType = $view === 'dashboard' ? 'office' :$view;
     // Fusion et déduplication des projets et catégories pour les deux modes
-    $allProjects = $projectsOffice->concat($projectsMaster)->unique('id');
-    $allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
+    $allProjects =$projectsOffice->concat($projectsMaster)->unique('id');$allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
 
     // Calcul initial des dates et heures par défaut (Échéance J+4, Exécution J+2)
     $today = \Carbon\Carbon::now();
-    $defaultDueDate = $today->copy()->addDays(4)->format('Y-m-d');
-    $defaultExecutionDate = $today->copy()->addDays(2)->format('Y-m-d');
-    $defaultStartTime = '09:00';
-    $defaultEndTime = '11:00';
+    $defaultDueDate =$today->copy()->addDays(4)->format('Y-m-d');
+    $defaultExecutionDate =$today->copy()->addDays(2)->format('Y-m-d');
+    $defaultStartTime = '09:00';$defaultEndTime = '11:00';
 @endphp
 
 <div class="space-y-6 pb-12" 
      x-data="{ 
          currentMode: '{{ $currentType }}',
-         projects: @js($allProjects),
+         // --- MODIFICATION ICI (Filtrage des projets actifs) ---
+         projects: @js($allProjects->where('is_active', true)),
+         // ------------------------------------------------------
          categories: @js($allCategories)
      }">
 
@@ -118,7 +118,8 @@
                     </select>
 
                     <template x-if="selectedProject && selectedProject !== 'new'">
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer ce projet ?')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer ce projet">
+                        {{-- MODIFICATION ICI : Texte de confirmation changé pour "archiver" --}}
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment archiver ce projet ? (Les tâches existantes seront conservées)')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Archiver ce projet">
                             🗑️
                         </button>
                     </template>
@@ -143,7 +144,7 @@
                     </select>
 
                     <template x-if="selectedCategory && selectedCategory !== 'new'">
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ?')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
+                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ? (Les tâches liées seront conservées)')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
                             🗑️
                         </button>
                     </template>
@@ -239,7 +240,7 @@
             }
         }
     </script>
-
+        
     <!-- ================= VUE : DASHBOARD GLOBAL ================= -->
     @if($view === 'dashboard')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">

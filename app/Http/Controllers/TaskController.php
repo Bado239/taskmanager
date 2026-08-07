@@ -276,18 +276,24 @@ class TaskController extends Controller
     /**
      * Supprime un projet existant
      */
+// Dans app/Http/Controllers/TaskController.php
+
+    /**
+     * Supprime (désactive) logiquement un projet existant.
+     */
     public function destroyProject($id)
     {
         $project = Project::findOrFail($id);
 
-        // On désactive le projet pour qu'il sorte de la liste, 
-        // mais les tâches conservent leur project_id et gardent le nom du projet affiché
-        $project->is_active = false;
-        $project->save();
+        // On ne supprime pas le projet de la base, on le désactive
+        $project->update([
+            'is_active' => false
+        ]);
 
-        return back()->with('success', 'Projet retiré de la liste (les tâches conservent leur projet).');
+        // Redirigez avec un message de succès
+        return back()->with('success', 'Projet archivé avec succès. Les tâches sont conservées.');
     }
-
+    
     /**
      * Supprime une étape / catégorie existante
      */
