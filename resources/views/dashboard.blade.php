@@ -13,19 +13,7 @@
     $defaultStartTime = '09:00';$defaultEndTime = '11:00';
 @endphp
 
-<div class="space-y-6 pb-12"
-     x-data="{
-         currentMode: '{{ $currentType }}',
-         allProjects: @js($allProjects->where('is_active', true)->values()),
-         allCategories: @js($allCategories->values()),
-         get projects() {
-             return this.allProjects.filter(p => p.type === this.currentMode);
-         },
-         get categories() {
-             return this.allCategories.filter(c => c.type === this.currentMode);
-         }
-     }">
-
+<div class="space-y-6 pb-12">
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
         <div class="flex items-center gap-2">
@@ -54,105 +42,169 @@
     </div>
 
     <!-- FORMULAIRE DE CRÉATION DE TÂCHE (CACHÉ PAR DÉFAUT) -->
-    <div id="taskFormContainer" class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md" style="display: none;">
-        
-        <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                ➕ Enregistrer une tâche 
-                <span id="formTitleContext" class="text-[#0052cc]">
-                    @if($view === 'dashboard') en Mode Global (Sélectionnez le type ci-dessous)
-                    @else en Mode {{ strtoupper($view) }}
-                    @endif
-                </span>
-            </h2>
-            <button onclick="toggleTaskForm()" type="button" class="text-gray-400 hover:text-gray-600 text-xs font-bold">✕ Fermer</button>
-        </div>
+<div id="taskFormContainer"
+     class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md"
+     style="display: none;">
 
-            @if($view === 'dashboard')
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">
-                        Destination de la tâche *
-                    </label>
+    <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
+            ➕ Enregistrer une tâche
+            <span class="text-[#0052cc]">
+                @if($view === 'dashboard')
+                    en Mode Global
+                @else
+                    en Mode {{ strtoupper($view) }}
+                @endif
+            </span>
+        </h2>
 
-                    <select x-model="$root.currentMode"
-                            required
-                            class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm">
-                        <option value="office">💼 Mode Office</option>
-                        <option value="master">🎓 Mode Master</option>
-                    </select>
+        <button onclick="toggleTaskForm()" type="button"
+                class="text-gray-400 hover:text-gray-600 text-xs font-bold">
+            ✕ Fermer
+        </button>
+    </div>
 
-                    <input type="hidden"
-                        name="type"
-                        :value="$root.currentMode">
-                </div>
-            @else
-                <input type="hidden" name="type" value="{{ $view }}">
-            @endif
-            @csrf
-            
-            @if($view === 'dashboard')
+    <form action="{{ route('tasks.store') }}"
+          method="POST"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+          x-data="{
+              currentMode: '{{ $currentType }}',
+              selectedProject: '',
+              selectedCategory: '',
+              dueDate: '{{ $defaultDueDate }}',
+              executionDate: '{{ $defaultExecutionDate }}',
+              startTime: '{{ $defaultStartTime }}',
+              endTime: '{{ $defaultEndTime }}',
+
+              projects: @js($allProjects->where('is_active', true)->values()),
+              categories: @js($allCategories->values()),
+
+              get filteredProjects() {
+                  return this.projects.filter(project =>
+                      project.type === this.currentMode
+                  );
+              },
+
+              get filteredCategories() {
+                  return this.categories.filter(category =>
+                      category.type === this.currentMode
+                  );
+              },
+
+              updateExecutionDate() {
+                  if (!this.dueDate) return;
+
+                  const date = new Date(this.dueDate);
+                  date.setDate(date.getDate() - 2);
+                  this.executionDate = date.toISOString().split('T')[0];
+              },
+
+              updateEndTime() {
+                  if (!this.startTime) return;
+
+                  const parts = this.startTime.split(':');
+                  let hours = parseInt(parts[0], 10) + 2;
+
+                  if (hours > 23) hours = 23;
+
+                  this.endTime =
+                      String(hours).padStart(2, '0') + ':' + parts[1];
+              }
+          }">
+
+        @csrf
+
+        {{-- DESTINATION --}}
+        @if($view === 'dashboard')
             <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-gray-700 mb-1">Destination de la Tâche *</label>
-                <select name="type" x-model="currentMode" required class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                <label class="block text-xs font-semibold text-gray-700 mb-1">
+                    Destination de la Tâche *
+                </label>
+
+                <select x-model="currentMode"
+                        required
+                        class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="office">💼 Mode Office</option>
                     <option value="master">🎓 Mode Master</option>
                 </select>
+
+                <input type="hidden" name="type" :value="currentMode">
             </div>
-            @else
-                <input type="hidden" name="type" value="{{ $view }}">
-            @endif
+        @else
+            <input type="hidden" name="type" value="{{ $view }}">
+        @endif
 
-            {{-- 1. PROJET / MATIÈRE --}}
-            <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">1. Projet / Matière *</label>
-                <div class="flex gap-2">
-                    <select name="project_id" x-model="selectedProject" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                        <option value="">-- Sélectionner --</option>
-                       <template x-for="project in $root.projects" :key="project.id">
-                            <option :value="project.id" x-text="project.title"></option>
-                        </template>
-                        <option value="new">➕ Créer un nouveau...</option>
-                    </select>
+        {{-- PROJET / MATIÈRE --}}
+        <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">
+                1. Projet / Matière *
+            </label>
 
-                    <template x-if="selectedProject && selectedProject !== 'new'">
-                        {{-- MODIFICATION ICI : Texte de confirmation changé pour "archiver" --}}
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment archiver ce projet ? (Les tâches existantes seront conservées)')) { document.getElementById('delete-project-' + selectedProject).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Archiver ce projet">
-                            🗑️
-                        </button>
+            <div class="flex gap-2">
+                <select name="project_id"
+                        x-model="selectedProject"
+                        required
+                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <option value="">-- Sélectionner --</option>
+
+                    <template x-for="project in filteredProjects" :key="project.id">
+                        <option :value="project.id"
+                                x-text="project.title">
+                        </option>
                     </template>
-                </div>
 
-                <div x-show="selectedProject === 'new'" style="display: none;" class="mt-2">
-                    <input type="text" name="new_project_name" placeholder="Nom du projet ou de la matière..."
-                           class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                </div>
+                    <option value="new">➕ Créer un nouveau...</option>
+                </select>
+
+                <template x-if="selectedProject && selectedProject !== 'new'">
+                    <button type="button"
+                            @click="if (confirm('Voulez-vous vraiment archiver ce projet ?')) {
+                                document.getElementById('delete-project-' + selectedProject).submit()
+                            }"
+                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
+                        🗑️
+                    </button>
+                </template>
             </div>
 
-            {{-- 2. ÉTAPE / LEÇON --}}
-            <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-1">2. Étape / Leçon *</label>
-                <div class="flex gap-2">
-                    <select name="category_id" x-model="selectedCategory" required class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                        <option value="">-- Sélectionner --</option>
-                        <template x-for="category in $root.categories" :key="category.id">
-                            <option :value="category.id" x-text="category.title || category.name"></option>
-                        </template>
-                        <option value="new">➕ Créer une nouvelle...</option>
-                    </select>
+            <div x-show="selectedProject === 'new'" class="mt-2">
+                <input type="text"
+                       name="new_project_name"
+                       placeholder="Nom du projet ou de la matière..."
+                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
 
-                    <template x-if="selectedCategory && selectedCategory !== 'new'">
-                        <button type="button" @click="if(confirm('Voulez-vous vraiment supprimer cette étape ? (Les tâches liées seront conservées)')) { document.getElementById('delete-category-' + selectedCategory).submit(); }" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors" title="Supprimer cette étape">
-                            🗑️
-                        </button>
+        {{-- CATÉGORIE --}}
+        <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1">
+                2. Étape / Leçon *
+            </label>
+
+            <div class="flex gap-2">
+                <select name="category_id"
+                        x-model="selectedCategory"
+                        required
+                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                    <option value="">-- Sélectionner --</option>
+
+                    <template x-for="category in filteredCategories" :key="category.id">
+                        <option :value="category.id"
+                                x-text="category.title || category.name">
+                        </option>
                     </template>
-                </div>
 
-                <div x-show="selectedCategory === 'new'" style="display: none;" class="mt-2">
-                    <input type="text" name="new_category_name" placeholder="Nom de l'étape ou de la leçon..."
-                           class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                </div>
+                    <option value="new">➕ Créer une nouvelle...</option>
+                </select>
             </div>
 
+            <div x-show="selectedCategory === 'new'" class="mt-2">
+                <input type="text"
+                       name="new_category_name"
+                       placeholder="Nom de l'étape ou de la leçon..."
+                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
             {{-- 3. LIBELLÉ DE LA TÂCHE --}}
             <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
