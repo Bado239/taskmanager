@@ -281,7 +281,7 @@ class TaskController extends Controller
     /**
      * Désactive logiquement un projet (les tâches gardent leur project_name).
      */
-    public function destroyProject($id)
+    public function destroyProject(Request $request, $id)
     {
         $project = Project::findOrFail($id);
 
@@ -289,7 +289,16 @@ class TaskController extends Controller
             'is_active' => false
         ]);
 
-        return back()->with('success', 'Projet archivé avec succès. Les tâches conservent le nom du projet.');
+        $message = 'Projet archivé avec succès. Les tâches conservent le nom du projet.';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     /**

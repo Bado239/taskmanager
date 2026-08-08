@@ -104,8 +104,39 @@
                 let hours = parseInt(parts[0], 10) + 2;
                 if (hours > 23) hours = 23;
                 this.endTime = String(hours).padStart(2, '0') + ':' + parts[1];
+            },
+
+            async deleteProject(projectId) {
+                if (!confirm('Voulez-vous vraiment archiver ce projet ?')) return;
+
+                try {
+                    const response = await fetch(`/projects/${projectId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Erreur lors de la suppression.');
+                    }
+
+                    this.projects = this.projects.filter(project => String(project.id) !== String(projectId));
+
+                    if (String(this.selectedProject) === String(projectId)) {
+                        this.selectedProject = '';
+                    }
+
+                    alert(data.message || 'Projet archivé avec succès.');
+                } catch (error) {
+                    alert(error.message || 'Une erreur est survenue.');
+                }
             }
-        }">
+        }" >
 
         @csrf
 
@@ -146,9 +177,7 @@
 
                 <template x-if="selectedProject && selectedProject !== 'new'">
                     <button type="button"
-                            @click="if (confirm('Voulez-vous vraiment archiver ce projet ?')) {
-                                document.getElementById('delete-project-' + selectedProject).submit()
-                            }"
+                            @click="deleteProject(selectedProject)"
                             class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
                         🗑️
                     </button>
@@ -629,12 +658,6 @@
 </div>
 
 {{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
-@foreach($allProjects as $p)
-    <form id="delete-project-{{ $p->id }}" action="{{ route('projects.destroy', $p->id) }}" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-    </form>
-@endforeach
 
 @foreach($allCategories as $c)
     <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
