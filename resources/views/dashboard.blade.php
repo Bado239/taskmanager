@@ -65,52 +65,47 @@
     </div>
 
     <form action="{{ route('tasks.store') }}"
-          method="POST"
-          class="grid grid-cols-1 md:grid-cols-2 gap-4"
-          x-data="{
-              currentMode: '{{ $currentType }}',
-              selectedProject: '',
-              selectedCategory: '',
-              dueDate: '{{ $defaultDueDate }}',
-              executionDate: '{{ $defaultExecutionDate }}',
-              startTime: '{{ $defaultStartTime }}',
-              endTime: '{{ $defaultEndTime }}',
+        method="POST"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        x-data="{
+            currentMode: '{{ $currentType }}',
+            selectedProject: '',
+            selectedCategory: '',
+            dueDate: '{{ $defaultDueDate }}',
+            executionDate: '{{ $defaultExecutionDate }}',
+            startTime: '{{ $defaultStartTime }}',
+            endTime: '{{ $defaultEndTime }}',
 
-              projects: @js($allProjects->where('is_active', true)->values()),
-              categories: @js($allCategories->values()),
+            projects: @js($allProjects->where('is_active', true)->values()),
+            categories: @js($allCategories->values()),
 
-              get filteredProjects() {
-                  return this.projects.filter(project =>
-                      project.type === this.currentMode
-                  );
-              },
+            get filteredProjects() {
+                return this.projects.filter(project =>
+                    project.type === this.currentMode
+                );
+            },
 
-              get filteredCategories() {
-                  return this.categories.filter(category =>
-                      category.type === this.currentMode
-                  );
-              },
+            get filteredCategories() {
+                return this.categories.filter(category =>
+                    category.type === this.currentMode
+                );
+            },
 
-              updateExecutionDate() {
-                  if (!this.dueDate) return;
+            updateExecutionDate() {
+                if (!this.dueDate) return;
+                const date = new Date(this.dueDate);
+                date.setDate(date.getDate() - 2);
+                this.executionDate = date.toISOString().split('T')[0];
+            },
 
-                  const date = new Date(this.dueDate);
-                  date.setDate(date.getDate() - 2);
-                  this.executionDate = date.toISOString().split('T')[0];
-              },
-
-              updateEndTime() {
-                  if (!this.startTime) return;
-
-                  const parts = this.startTime.split(':');
-                  let hours = parseInt(parts[0], 10) + 2;
-
-                  if (hours > 23) hours = 23;
-
-                  this.endTime =
-                      String(hours).padStart(2, '0') + ':' + parts[1];
-              }
-          }">
+            updateEndTime() {
+                if (!this.startTime) return;
+                const parts = this.startTime.split(':');
+                let hours = parseInt(parts[0], 10) + 2;
+                if (hours > 23) hours = 23;
+                this.endTime = String(hours).padStart(2, '0') + ':' + parts[1];
+            }
+        }">
 
         @csrf
 
@@ -120,39 +115,32 @@
                 <label class="block text-xs font-semibold text-gray-700 mb-1">
                     Destination de la Tâche *
                 </label>
-
                 <select x-model="currentMode"
                         required
                         class="w-full bg-blue-50 border border-blue-200 text-[#0052cc] font-bold rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="office">💼 Mode Office</option>
                     <option value="master">🎓 Mode Master</option>
                 </select>
-
                 <input type="hidden" name="type" :value="currentMode">
             </div>
         @else
             <input type="hidden" name="type" value="{{ $view }}">
         @endif
 
-        {{-- PROJET / MATIÈRE --}}
+        {{-- 1. PROJET / MATIÈRE --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">
                 1. Projet / Matière *
             </label>
-
             <div class="flex gap-2">
                 <select name="project_id"
                         x-model="selectedProject"
                         required
                         class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
-
                     <template x-for="project in filteredProjects" :key="project.id">
-                        <option :value="project.id"
-                                x-text="project.title">
-                        </option>
+                        <option :value="project.id" x-text="project.title"></option>
                     </template>
-
                     <option value="new">➕ Créer un nouveau...</option>
                 </select>
 
@@ -169,48 +157,53 @@
 
             <div x-show="selectedProject === 'new'" class="mt-2">
                 <input type="text"
-                       name="new_project_name"
-                       placeholder="Nom du projet ou de la matière..."
-                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
+                    name="new_project_name"
+                    placeholder="Nom du projet ou de la matière..."
+                    class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
             </div>
         </div>
 
-        {{-- CATÉGORIE --}}
+        {{-- 2. CATÉGORIE (Étape / Leçon) --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">
                 2. Étape / Leçon *
             </label>
-
             <div class="flex gap-2">
                 <select name="category_id"
                         x-model="selectedCategory"
                         required
                         class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
-
                     <template x-for="category in filteredCategories" :key="category.id">
-                        <option :value="category.id"
-                                x-text="category.title || category.name">
-                        </option>
+                        <option :value="category.id" x-text="category.title || category.name"></option>
                     </template>
-
                     <option value="new">➕ Créer une nouvelle...</option>
                 </select>
+
+                <template x-if="selectedCategory && selectedCategory !== 'new'">
+                    <button type="button"
+                            @click="if (confirm('Voulez-vous vraiment supprimer cette étape ?')) {
+                                document.getElementById('delete-category-' + selectedCategory).submit()
+                            }"
+                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
+                        🗑️
+                    </button>
+                </template>
             </div>
 
             <div x-show="selectedCategory === 'new'" class="mt-2">
                 <input type="text"
-                       name="new_category_name"
-                       placeholder="Nom de l'étape ou de la leçon..."
-                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
+                    name="new_category_name"
+                    placeholder="Nom de l'étape ou de la leçon..."
+                    class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
             </div>
         </div>
-            {{-- 3. LIBELLÉ DE LA TÂCHE --}}
-            <div class="md:col-span-2">
-                <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
-                <input type="text" name="title" required placeholder="Ex: Résolution de l'exercice d'économétrie"
-                       class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-            </div>
+                    {{-- 3. LIBELLÉ DE LA TÂCHE --}}
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
+                    <input type="text" name="title" required placeholder="Ex: Résolution de l'exercice d'économétrie"
+                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                </div>
 
             {{-- LIEN DE TRAVAIL --}}
             <div class="md:col-span-2">
