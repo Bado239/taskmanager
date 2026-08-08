@@ -217,7 +217,7 @@ class TaskController extends Controller
             $projectId = null;
         }
 
-        // Gestion de l'étape (catégorie) avec association stricte du type
+    // Gestion de l'étape (catégorie) avec association stricte du type
         $categoryId = $request->category_id;
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
             $newCategoryName = $request->new_category_name;
@@ -227,11 +227,10 @@ class TaskController extends Controller
                 'type'  => $request->type,
             ]);
             $categoryId = $newCategory->id;
-        } else {
-            if (empty($categoryId) || $categoryId === 'new') {
-                $defaultCategory = Category::where('type', $request->type)->first() ?? Category::first();
-                $categoryId = $defaultCategory ? $defaultCategory->id : null;
-            }
+        } elseif (empty($categoryId) || $categoryId === 'new') {
+            // S'il n'y a vraiment rien de sélectionné, on cherche la première du bon type, sinon null
+            $defaultCategory = Category::where('type', $request->type)->first();
+            $categoryId = $defaultCategory ? $defaultCategory->id : null;
         }
 
         // Enregistrement de la tâche avec le nom du projet sauvegardé
