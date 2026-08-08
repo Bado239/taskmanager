@@ -221,11 +221,10 @@ class TaskController extends Controller
         $categoryId = $request->category_id;
 
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
-            $newCategory = Category::create([
-                'name'  => $request->new_category_name,
-                'title' => $request->new_category_name,
-                'type'  => $request->type,
-            ]);
+                $newCategory = Category::create([
+                    'name' => $request->new_category_name,
+                    'type' => $request->type,
+                ]);
             $categoryId = $newCategory->id;
         } elseif (!empty($categoryId) && $categoryId !== 'new') {
             // Catégorie existante sélectionnée : on s'assure qu'elle existe bien
