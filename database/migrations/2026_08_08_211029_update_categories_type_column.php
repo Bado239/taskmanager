@@ -3,26 +3,29 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Category;
 
 return new class extends Migration {
     public function up(): void
     {
-        // 1. S'assure que la colonne 'type' existe dans la table 'categories'
-        if (!Schema::hasColumn('categories', 'type')) {
-            Schema::table('categories', function (Blueprint $table) {
-                $table->string('type')->default('office')->after('name');
+        if (!Schema::hasColumn('tasks', 'category_name')) {
+            Schema::table('tasks', function (Blueprint $table) {
+                $table->string('category_name')->nullable()->after('category_id');
             });
         }
 
-        // 2. Assigne par défaut le type 'office' à toutes les catégories existantes qui n'en ont pas
-        Category::whereNull('type')->orWhere('type', '')->update(['type' => 'office']);
+        // Remplir les tâches existantes avec le nom de la catégorie associée
+        \App\Models\Task::whereNotNull('category_id')->whereNull('category_name')->each(function ($task) {
+            $category = \App\Models\Category::find($task->category_id);
+            if ($category) {
+                $task->update(['category_name' => $category->title ?? $category->name]);
+            }
+        });
     }
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropColumn('type');
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('category_name');
         });
     }
 };

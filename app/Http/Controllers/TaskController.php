@@ -219,18 +219,19 @@ class TaskController extends Controller
 
     // Gestion de l'étape (catégorie) avec association stricte du type
         $categoryId = $request->category_id;
+
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
-            $newCategoryName = $request->new_category_name;
             $newCategory = Category::create([
-                'name'  => $newCategoryName,
-                'title' => $newCategoryName,
+                'name'  => $request->new_category_name,
+                'title' => $request->new_category_name,
                 'type'  => $request->type,
             ]);
             $categoryId = $newCategory->id;
-        } elseif (empty($categoryId) || $categoryId === 'new') {
-            // S'il n'y a vraiment rien de sélectionné, on cherche la première du bon type, sinon null
-            $defaultCategory = Category::where('type', $request->type)->first();
-            $categoryId = $defaultCategory ? $defaultCategory->id : null;
+        } elseif (!empty($categoryId) && $categoryId !== 'new') {
+            // Catégorie existante sélectionnée : on s'assure qu'elle existe bien
+            $categoryId = Category::find($categoryId)?->id;
+        } else {
+            $categoryId = null;
         }
 
         // Enregistrement de la tâche avec le nom du projet sauvegardé
