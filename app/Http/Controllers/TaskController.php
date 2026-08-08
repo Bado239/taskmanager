@@ -304,7 +304,10 @@ class TaskController extends Controller
     /**
      * Supprime une étape / catégorie existante
      */
-    public function destroyCategory($id)
+/**
+     * Supprime une étape / catégorie existante
+     */
+    public function destroyCategory(Request $request, $id)
     {
         $category = Category::findOrFail($id);
 
@@ -312,6 +315,15 @@ class TaskController extends Controller
 
         $category->delete();
 
-        return back()->with('success', 'Étape supprimée avec succès (les tâches ont été conservées).');
+        $message = 'Étape supprimée avec succès (les tâches ont été conservées).';
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 }

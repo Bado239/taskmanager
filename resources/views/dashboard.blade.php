@@ -135,8 +135,39 @@
                 } catch (error) {
                     alert(error.message || 'Une erreur est survenue.');
                 }
+            },
+
+            async deleteCategory(categoryId) {
+                if (!confirm('Voulez-vous vraiment supprimer cette étape ?')) return;
+
+                try {
+                    const response = await fetch(`/categories/${categoryId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Erreur lors de la suppression.');
+                    }
+
+                    this.categories = this.categories.filter(category => String(category.id) !== String(categoryId));
+
+                    if (String(this.selectedCategory) === String(categoryId)) {
+                        this.selectedCategory = '';
+                    }
+
+                    alert(data.message || 'Étape supprimée avec succès.');
+                } catch (error) {
+                    alert(error.message || 'Une erreur est survenue.');
+                }
             }
-        }" >
+        }">
 
         @csrf
 
@@ -211,9 +242,7 @@
 
                 <template x-if="selectedCategory && selectedCategory !== 'new'">
                     <button type="button"
-                            @click="if (confirm('Voulez-vous vraiment supprimer cette étape ?')) {
-                                document.getElementById('delete-category-' + selectedCategory).submit()
-                            }"
+                            @click="deleteCategory(selectedCategory)"
                             class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
                         🗑️
                     </button>
