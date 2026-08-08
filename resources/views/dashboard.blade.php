@@ -134,7 +134,7 @@
             <input type="hidden" name="type" value="{{ $view }}">
         @endif
 
-{{-- 1. PROJET / MATIÈRE --}}
+        {{-- PROJET / MATIÈRE --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">
                 1. Projet / Matière *
@@ -158,39 +158,36 @@
 
                 <template x-if="selectedProject && selectedProject !== 'new'">
                     <button type="button"
-                            @click="if (confirm('Voulez-vous vraiment archiver ce projet ?')) { 
-                                document.getElementById('delete-project-' + selectedProject).submit() 
+                            @click="if (confirm('Voulez-vous vraiment archiver ce projet ?')) {
+                                document.getElementById('delete-project-' + selectedProject).submit()
                             }"
-                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
-                            title="Archiver ce projet">
+                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
                         🗑️
                     </button>
                 </template>
             </div>
 
-            <div x-show="selectedProject === 'new'" style="display: none;" class="mt-2">
+            <div x-show="selectedProject === 'new'" class="mt-2">
                 <input type="text"
                        name="new_project_name"
                        placeholder="Nom du projet ou de la matière..."
-                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
             </div>
         </div>
 
-        {{-- 2. ÉTAPE / LEÇON --}}
+        {{-- CATÉGORIE --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">
                 2. Étape / Leçon *
             </label>
 
             <div class="flex gap-2">
-                {{-- AJOUT DE x-model ICI --}}
                 <select name="category_id"
                         x-model="selectedCategory"
                         required
                         class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
 
-                    {{-- Boucle sur filteredCategories (même logique que les projets) --}}
                     <template x-for="category in filteredCategories" :key="category.id">
                         <option :value="category.id"
                                 x-text="category.title || category.name">
@@ -199,29 +196,22 @@
 
                     <option value="new">➕ Créer une nouvelle...</option>
                 </select>
-
-                {{-- BOUTON DE SUPPRESSION AJOUTÉ ICI --}}
-                <template x-if="selectedCategory && selectedCategory !== 'new'">
-                    <button type="button"
-                            @click="if (confirm('Voulez-vous vraiment supprimer cette étape ? (Les tâches liées seront conservées)')) { 
-                                document.getElementById('delete-category-' + selectedCategory).submit() 
-                            }"
-                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold transition-colors"
-                            title="Supprimer cette étape">
-                        🗑️
-                    </button>
-                </template>
             </div>
 
-            {{-- CHAMP DE CRÉATION AJOUTÉ ICI (affiché si "new" est sélectionné) --}}
-            <div x-show="selectedCategory === 'new'" style="display: none;" class="mt-2">
+            <div x-show="selectedCategory === 'new'" class="mt-2">
                 <input type="text"
                        name="new_category_name"
                        placeholder="Nom de l'étape ou de la leçon..."
-                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+                       class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
             </div>
         </div>
-        
+            {{-- 3. LIBELLÉ DE LA TÂCHE --}}
+            <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
+                <input type="text" name="title" required placeholder="Ex: Résolution de l'exercice d'économétrie"
+                       class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+            </div>
+
             {{-- LIEN DE TRAVAIL --}}
             <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Lien de Travail</label>
@@ -278,22 +268,6 @@
                 </button>
             </div>
         </form>
-
-        {{-- Formulaire caché pour la suppression des catégories (À AJOUTER ICI) --}}
-        <template x-for="category in filteredCategories" :key="'delete-' + category.id">
-            <form :id="'delete-category-' + category.id" 
-                  :action="'/categories/' + category.id" 
-                  method="POST" 
-                  style="display: none;">
-                @csrf
-                @method('DELETE')
-            </form>
-        </template>
-
-    </div> {{-- Fin du div taskFormContainer --}}
-
-    <script>
-        // ... votre script toggleTaskForm ...
     </div>
 
     <script>
@@ -676,7 +650,7 @@
     </form>
 @endforeach
 
-<footer class="mt-16 pt-6 border-t border-grFay-200 text-center text-xs text-gray-500 font-medium">
+<footer class="mt-16 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 font-medium">
     <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
         <span>Conçu et développé avec ❤️ par <strong class="text-gray-800 font-semibold">Bado</strong></span>
         <span class="hidden sm:inline text-gray-300">•</span>
