@@ -141,34 +141,21 @@
             </label>
 
             <div class="flex gap-2">
-                <select name="category_id"
-                        x-model="selectedCategory"
+                <select name="project_id"
+                        x-model="selectedProject"
                         required
                         class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                    
                     <option value="">-- Sélectionner --</option>
 
-                    <template x-for="category in filteredCategories" :key="category.id">
-                        <option :value="category.id"
-                                x-text="category.title || category.name">
+                    <template x-for="project in filteredProjects" :key="project.id">
+                        <option :value="project.id"
+                                x-text="project.title">
                         </option>
                     </template>
 
-                    <option value="new">➕ Créer une nouvelle...</option>
+                    <option value="new">➕ Créer un nouveau...</option>
                 </select>
 
-                {{-- BOUTON SUPPRESSION DE L'ÉTAPE / LEÇON --}}
-                <template x-if="selectedCategory && selectedCategory !== 'new'">
-                    <button type="button"
-                            @click="if (confirm('Voulez-vous vraiment supprimer cette étape / leçon ?')) {
-                                document.getElementById('delete-category-' + selectedCategory).submit()
-                            }"
-                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold"
-                            title="Supprimer cette étape / leçon">
-                        🗑️
-                    </button>
-                </template>
-            </div>
                 <template x-if="selectedProject && selectedProject !== 'new'">
                     <button type="button"
                             @click="if (confirm('Voulez-vous vraiment archiver ce projet ?')) {
