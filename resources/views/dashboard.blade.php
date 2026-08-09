@@ -695,11 +695,11 @@
     </form>
 @endforeach
 
-<footer class="mt-20 pb-8 text-center text-xs text-gray-500">
-    <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-2 px-4 py-2 rounded-full bg-gray-50 border border-gray-100 shadow-sm">
-        <span>Laravel Task Manager &copy; {{ date('Y') }}</span>
+<footer class="mt-20 pb-8 text-center text-sm text-gray-600 font-medium">
+    <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-gray-50/80 backdrop-blur-sm border border-gray-200/60 shadow-sm">
+        <span class="text-gray-700">Laravel Task Manager &copy; {{ date('Y') }}</span>
         <span class="hidden sm:inline text-gray-300">•</span>
-        <span>Conçu avec ❤️ par <strong class="text-gray-700 font-semibold">Bado</strong></span>
+        <span>Conçu avec <span class="text-red-500">❤️</span> par <strong class="text-gray-900 font-semibold">Bado</strong></span>
     </div>
 </footer>
 @endsection
