@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\Project;
 use App\Models\Category;
+use App\Models\PersonalResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -14,7 +15,7 @@ class DashboardController extends Controller
     {
         $today = Carbon::today();
 
-        // Mode d'affichage actif : 'dashboard' (par défaut), 'office' ou 'master'
+        // Mode d'affichage actif : 'dashboard' (par défaut), 'office', 'master' ou 'personal'
         $view = $request->get('view', 'dashboard');
 
         // 📊 Indicateurs globaux (Calculés sur TOUTES les tâches du système)
@@ -41,6 +42,14 @@ class DashboardController extends Controller
         $allTasks = Task::with(['project', 'category'])
             ->latest()
             ->get();
+
+        // 🌱 Ressources personnelles pour le mode Développement Personnel
+        $personalResources = collect();
+        if ($view === 'personal') {
+            $personalResources = PersonalResource::where('is_active', true)
+                ->latest()
+                ->get();
+        }
 
         // 📅 Métriques complémentaires
         $tasksToday = Task::with(['project', 'category'])
@@ -75,6 +84,7 @@ class DashboardController extends Controller
             'allTasks',
             'officeTasks',
             'masterTasks',
+            'personalResources',
             'tasksToday',
             'urgentTasks',
             'tasksWeek',
