@@ -151,7 +151,6 @@ class TaskController extends Controller
                 ->latest()
                 ->get();
         }
-
         return view('dashboard', compact(
             'view',
             'filter',
