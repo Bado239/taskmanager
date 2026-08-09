@@ -17,4 +17,8 @@ class PersonalResource extends Model
         'author_or_source',
         'is_active',
     ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
 }
