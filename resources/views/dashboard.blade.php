@@ -29,6 +29,10 @@
                class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 🎓 Mode Master
             </a>
+            <a href="{{ route('dashboard', ['view' => 'personal']) }}" 
+            class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                🌱 Perso
+            </a>
         </div>
 
         <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
@@ -681,6 +685,31 @@
                     Aucune activité enregistrée en Mode Master
                 </div>
             @endforelse
+        </div>
+    @endif
+
+    <!-- ================= VUE : DÉVELOPPEMENT PERSONNEL ================= -->
+    @if($view === 'personal')
+        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                🌱 Espace Développement Personnel
+            </h1>
+            <p class="text-sm text-gray-500 mt-2">Maîtrise de la langue française, culture générale et lectures enrichissantes.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Section Livres -->
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">📚 Bibliothèque à lire</h3>
+                <!-- Ici tu pourras boucler sur tes livres -->
+                <div class="text-center py-8 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
+            </div>
+
+            <!-- Section Vocabulaire -->
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">✍️ Vocabulaire & Français</h3>
+                <div class="text-center py-8 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
+            </div>
         </div>
     @endif
 
