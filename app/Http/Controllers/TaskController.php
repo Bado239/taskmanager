@@ -147,11 +147,10 @@ class TaskController extends Controller
 // 🌱 Récupération des ressources pour le mode Développement Personnel
         $personalResources = collect();
         if ($view === 'personal') {
-            $personalResources = PersonalResource::where('is_active', '=', DB::raw('true'))
+            $personalResources = PersonalResource::whereRaw('is_active = true')
                 ->latest()
                 ->get();
-        }
-                
+        }                
         return view('dashboard', compact(
             'view',
             'filter',
