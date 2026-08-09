@@ -144,13 +144,15 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-        // 🌱 Récupération des ressources pour le mode Développement Personnel
+// 🌱 Récupération des ressources pour le mode Développement Personnel
         $personalResources = collect();
         if ($view === 'personal') {
-            $personalResources = PersonalResource::where('is_active', 1)
+            $personalResources = PersonalResource::where('is_active', '=', DB::raw('true'))
                 ->latest()
                 ->get();
-        }        return view('dashboard', compact(
+        }
+                
+        return view('dashboard', compact(
             'view',
             'filter',
             'statusFilter',
