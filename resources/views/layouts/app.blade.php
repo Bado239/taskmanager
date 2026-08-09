@@ -94,6 +94,13 @@
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                             @endif
                         </a>
+                        <a href="{{ route('dashboard', ['view' => 'personal']) }}" 
+                            class="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors {{ request('view') === 'personal' ? 'bg-gray-100 font-bold text-gray-900 border border-gray-200' : 'text-gray-600 hover:bg-gray-50' }}">
+                            <span class="flex items-center gap-2">🌱 Développement Personnel</span>
+                            @if(request('view') === 'personal')
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            @endif
+                        </a>
                     </div>
                 </div>
 
