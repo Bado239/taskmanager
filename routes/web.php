@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\PersonalResourceController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -34,3 +35,7 @@ Route::delete('/projects/{id}', [TaskController::class, 'destroyProject'])->name
 
 // Route pour la suppression d'étape/catégorie si gérée dans le contrôleur
 Route::delete('/categories/{id}', [TaskController::class, 'destroyCategory'])->name('categories.destroy');
+
+// Ajoute cette ligne parmi tes autres routes POST :
+Route::post('/personal-resources', [PersonalResourceController::class, 'store'])->name('personal-resources.store');
+Route::delete('/personal-resources/{id}', [PersonalResourceController::class, 'destroy'])->name('personal-resources.destroy');

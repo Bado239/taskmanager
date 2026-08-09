@@ -698,21 +698,77 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
             <!-- Section Livres -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">📚 Bibliothèque à lire</h3>
-                <!-- Ici tu pourras boucler sur tes livres -->
-                <div class="text-center py-8 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
+                
+                <!-- Formulaire d'ajout de livre -->
+                <form action="{{ route('personal-resources.store') }}" method="POST" class="mb-4 space-y-2">
+                    @csrf
+                    <input type="hidden" name="type" value="book">
+                    <input type="text" name="title" placeholder="Titre du livre" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500" required>
+                    <input type="text" name="author_or_source" placeholder="Auteur (optionnel)" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-blue-500">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-3 py-2 text-sm transition">+ Ajouter un livre</button>
+                </form>
+
+                <!-- Liste des livres -->
+                @if($personalResources->where('type', 'book')->isNotEmpty())
+                    <ul class="space-y-3 divide-y divide-gray-100">
+                        @foreach($personalResources->where('type', 'book') as $book)
+                            <li class="pt-3 flex justify-between items-start">
+                                <div>
+                                    <p class="font-semibold text-gray-800 text-sm">{{ $book->title }}</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ $book->author_or_source }}</p>
+                                </div>
+                                <form action="{{ route('personal-resources.destroy', $book->id) }}" method="POST">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs ml-2">✕</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <div class="text-center py-4 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
+                @endif
             </div>
 
             <!-- Section Vocabulaire -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">✍️ Vocabulaire & Français</h3>
-                <div class="text-center py-8 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
+                
+                <!-- Formulaire d'ajout de mot -->
+                <form action="{{ route('personal-resources.store') }}" method="POST" class="mb-4 space-y-2">
+                    @csrf
+                    <input type="hidden" name="type" value="vocab">
+                    <input type="text" name="title" placeholder="Mot ou expression" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-green-500" required>
+                    <textarea name="description" placeholder="Définition ou exemple d'utilisation..." rows="2" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-green-500"></textarea>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold rounded px-3 py-2 text-sm transition">+ Ajouter un mot</button>
+                </form>
+
+                <!-- Liste des mots -->
+                @if($personalResources->where('type', 'vocab')->isNotEmpty())
+                    <ul class="space-y-3 divide-y divide-gray-100">
+                        @foreach($personalResources->where('type', 'vocab') as $word)
+                            <li class="pt-3 flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">{{ $word->title }}</p>
+                                    <p class="text-xs text-gray-600 mt-1">{{ $word->description }}</p>
+                                </div>
+                                <form action="{{ route('personal-resources.destroy', $word->id) }}" method="POST">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs ml-2">✕</button>
+                                </form>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <div class="text-center py-4 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
+                @endif
             </div>
+
         </div>
     @endif
-
 </div>
 
 {{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
