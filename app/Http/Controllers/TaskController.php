@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\PersonalResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +22,7 @@ class TaskController extends Controller
         $statusFilter = $request->query('status', 'active');
         $indicator = $request->query('indicator');
 
-        if (in_array($view, ['office', 'master'])) {
+        if (in_array($view, ['office', 'master', 'personal'])) {
             session(['current_mode' => $view]);
         }
 
@@ -143,6 +144,14 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
+        // 🌱 Récupération des ressources pour le mode Développement Personnel
+        $personalResources = collect();
+        if ($view === 'personal') {
+            $personalResources = PersonalResource::where('is_active', true)
+                ->latest()
+                ->get();
+        }
+
         return view('dashboard', compact(
             'view',
             'filter',
@@ -159,6 +168,7 @@ class TaskController extends Controller
             'indicator',
             'officeTasks',
             'masterTasks',
+            'personalResources',
             'categories',
             'projects',
             'projectsOffice',
@@ -173,7 +183,7 @@ class TaskController extends Controller
      */
     public function switchMode(Request $request, $mode)
     {
-        if (in_array($mode, ['office', 'master'])) {
+        if (in_array($mode, ['office', 'master', 'personal'])) {
             session(['current_mode' => $mode, 'active_view' => $mode]);
         }
 
@@ -211,29 +221,27 @@ class TaskController extends Controller
             $projectId = $newProject->id;
             $projectName = $newProject->title;
         } elseif (!empty($projectId) && $projectId !== 'new') {
-            // Projet existant sélectionné : on récupère son nom
             $projectName = Project::find($projectId)?->title;
         } else {
             $projectId = null;
         }
 
-    // Gestion de l'étape (catégorie) avec association stricte du type
+        // Gestion de l'étape (catégorie) avec association stricte du type
         $categoryId = $request->category_id;
 
         if ($categoryId === 'new' && $request->filled('new_category_name')) {
-                $newCategory = Category::create([
-                    'name' => $request->new_category_name,
-                    'type' => $request->type,
-                ]);
+            $newCategory = Category::create([
+                'name' => $request->new_category_name,
+                'type' => $request->type,
+            ]);
             $categoryId = $newCategory->id;
         } elseif (!empty($categoryId) && $categoryId !== 'new') {
-            // Catégorie existante sélectionnée : on s'assure qu'elle existe bien
             $categoryId = Category::find($categoryId)?->id;
         } else {
             $categoryId = null;
         }
 
-        // Enregistrement de la tâche avec le nom du projet sauvegardé
+        // Enregistrement de la tâche
         Task::create([
             'title'           => $request->title,
             'document_link'   => $request->document_link,
@@ -279,7 +287,7 @@ class TaskController extends Controller
     }
 
     /**
-     * Désactive logiquement un projet (les tâches gardent leur project_name).
+     * Désactive logiquement un projet
      */
     public function destroyProject(Request $request, $id)
     {
@@ -304,14 +312,11 @@ class TaskController extends Controller
     /**
      * Supprime une étape / catégorie existante
      */
-/**
-     * Supprime une étape / catégorie existante
-     */
     public function destroyCategory(Request $request, $id)
     {
         $category = Category::findOrFail($id);
 
-        \App\Models\Task::where('category_id', $id)->update(['category_id' => null]);
+        Task::where('category_id', $id)->update(['category_id' => null]);
 
         $category->delete();
 
