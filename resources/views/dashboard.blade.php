@@ -695,11 +695,14 @@
     </form>
 @endforeach
 
-<footer class="mt-16 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 font-medium">
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
-        <span>Conçu et développé avec ❤️ par <strong class="text-gray-800 font-semibold">Bado</strong></span>
-        <span class="hidden sm:inline text-gray-300">•</span>
+<footer class="mt-20 pt-8 border-t border-gray-100 text-center text-xs text-gray-400">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
         <span>Laravel Task Manager &copy; {{ date('Y') }}</span>
+        <span class="hidden sm:inline text-gray-200">|</span>
+        <span class="flex items-center gap-1.5">
+            Crafted with <span class="text-red-500 animate-pulse">❤️</span> by 
+            <a href="#" class="text-gray-700 font-semibold hover:text-indigo-600 transition-colors">Bado</a>
+        </span>
     </div>
 </footer>
 @endsection
