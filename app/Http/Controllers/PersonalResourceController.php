@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PersonalResource;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; // <-- Ajouté pour Supabase
 
 class PersonalResourceController extends Controller
 {
@@ -14,33 +14,49 @@ class PersonalResourceController extends Controller
             'type' => 'required|string',
             'title' => 'required|string|max:255',
             'author_or_source' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
+            'pdf_file' => 'required|mimes:pdf|max:20480', // PDF obligatoire, max 20Mo
         ]);
 
-        // Insertion compatible PostgreSQL (évite le cast true → 1)
-        DB::table('personal_resources')->insert([
+        // 1. Upload du PDF directement dans le bucket Supabase 'ebooks'
+        $path = $request->file('pdf_file')->store('/', 's3');
+
+        // 2. Récupération de l'URL publique permanente générée par Supabase
+        $url = Storage::disk('s3')->url($path);
+
+        // 3. Enregistrement en base de données
+        // Le $casts=['is_active' => 'boolean'] dans ton modèle va automatiquement 
+        // convertir true en 'true' pour PostgreSQL, plus besoin de DB::raw !
+        PersonalResource::create([
             'type' => $request->type,
             'title' => $request->title,
             'author_or_source' => $request->author_or_source,
-            'description' => $request->description,
-            'status' => $request->type === 'book' ? 'to_read' : 'to_do',
-            'is_active' => DB::raw('true'), // ← crucial pour PostgreSQL
-            'created_at' => now(),
-            'updated_at' => now(),
+            'pdf_path' => $url, // On stocke l'URL Supabase
+            'status' => 'to_read',
+            'is_active' => true, 
         ]);
 
         return redirect()
             ->route('dashboard', ['view' => 'personal'])
-            ->with('success', 'Ressource personnelle ajoutée avec succès !');
+            ->with('success', 'Livre et PDF ajoutés avec succès sur Supabase !');
     }
 
     public function destroy($id)
     {
-        PersonalResource::findOrFail($id)->delete();
+        $book = PersonalResource::findOrFail($id);
+        
+        // Optionnel : Supprimer aussi le fichier PDF de Supabase Storage quand on supprime le livre
+        if ($book->pdf_path) {
+            // On extrait le chemin relatif depuis l'URL complète pour le supprimer du bucket
+            $path = parse_url($book->pdf_path, PHP_URL_PATH);
+            $relativePath = str_replace('/storage/v1/object/public/ebooks/', '', $path);
+            Storage::disk('s3')->delete($relativePath);
+        }
+
+        $book->delete();
 
         return redirect()
             ->route('dashboard', ['view' => 'personal'])
-            ->with('success', 'Ressource supprimée.');
+            ->with('success', 'Livre supprimé.');
     }
 
     public function show($id)
@@ -53,11 +69,12 @@ class PersonalResourceController extends Controller
     {
         $book = PersonalResource::findOrFail($id);
         
+        // Sauvegarde des notes et du statut (en cours de lecture / terminé)
         $book->update([
-            'content' => $request->content,
             'notes' => $request->notes,
+            'status' => $request->status,
         ]);
 
-        return redirect()->back()->with('success', 'Progression sauvegardée !');
+        return redirect()->back()->with('success', 'Progression et notes sauvegardées !');
     }
 }
