@@ -702,6 +702,28 @@
             <!-- Section Livres -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">📚 Bibliothèque à lire</h3>
+                <!-- Affichage des erreurs de validation (TRÈS IMPORTANT) -->
+                @if($errors->any())
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-r-md">
+                        <p class="font-bold text-red-700">⚠️ Oups ! Une erreur est survenue :</p>
+                        <ul class="list-disc list-inside text-red-600 text-sm mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <!-- Affichage du succès -->
+                @if(session('success'))
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-4 rounded-r-md text-green-700">
+                        ✅ {{ session('success') }}
+                    </div>
+                @endif
+
+                <!-- Formulaire d'ajout de livre avec Upload PDF -->
+                <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
+                    ...
                 
                 <!-- Formulaire d'ajout de livre avec Upload PDF -->
                 <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
