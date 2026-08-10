@@ -793,10 +793,6 @@
 
         </div>
     @endif
-            </div>
-
-        </div>
-    @endif
 </div>
 
 {{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
