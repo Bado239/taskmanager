@@ -705,8 +705,9 @@
                 
                 <!-- Formulaire d'ajout de livre avec Upload PDF -->
                 <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
-                    @csrf
+                    @csrf <!-- ⚠️ INDISPENSABLE POUR EVITER L'ERREUR 419 -->
                     <input type="hidden" name="type" value="book">
+                    
                     <input type="text" name="title" placeholder="Titre du livre" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
                     <input type="text" name="author_or_source" placeholder="Auteur (optionnel)" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
                     
@@ -722,6 +723,7 @@
                         @foreach($personalResources->where('type', 'book') as $book)
                             <li class="pt-3 flex justify-between items-start">
                                 <div>
+                                    <!-- Le titre est cliquable vers le lecteur -->
                                     <a href="{{ route('personal-resources.show', $book->id) }}" class="font-semibold text-blue-700 hover:text-blue-900 text-sm hover:underline">{{ $book->title }}</a>
                                     <p class="text-xs text-gray-500 mt-1">{{ $book->author_or_source }}</p>
                                 </div>
@@ -736,7 +738,6 @@
                     <div class="text-center py-4 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
                 @endif
             </div>
-
             <!-- Section Vocabulaire -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">✍️ Vocabulaire & Français</h3>
