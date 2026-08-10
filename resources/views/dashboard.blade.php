@@ -788,7 +788,7 @@
                     </ul>
                 @else
                     <div class="text-center py-4 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
-                @endif> <!-- <--- ICI : Il y a un chevron de fermeture en trop ('>') -->
+                @endif
             </div>
 
         </div>
