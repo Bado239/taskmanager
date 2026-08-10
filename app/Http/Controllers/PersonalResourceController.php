@@ -42,4 +42,22 @@ class PersonalResourceController extends Controller
             ->route('dashboard', ['view' => 'personal'])
             ->with('success', 'Ressource supprimée.');
     }
+
+    public function show($id)
+    {
+        $book = PersonalResource::findOrFail($id);
+        return view('book-reader', compact('book'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $book = PersonalResource::findOrFail($id);
+        
+        $book->update([
+            'content' => $request->content,
+            'notes' => $request->notes,
+        ]);
+
+        return redirect()->back()->with('success', 'Progression sauvegardée !');
+    }
 }

@@ -718,7 +718,7 @@
                         @foreach($personalResources->where('type', 'book') as $book)
                             <li class="pt-3 flex justify-between items-start">
                                 <div>
-                                    <p class="font-semibold text-gray-800 text-sm">{{ $book->title }}</p>
+                                    <a href="{{ route('personal-resources.show', $book->id) }}" class="font-semibold text-blue-700 hover:text-blue-900 text-sm hover:underline">{{ $book->title }}</a>
                                     <p class="text-xs text-gray-500 mt-1">{{ $book->author_or_source }}</p>
                                 </div>
                                 <form action="{{ route('personal-resources.destroy', $book->id) }}" method="POST">

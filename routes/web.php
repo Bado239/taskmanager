@@ -39,3 +39,11 @@ Route::delete('/categories/{id}', [TaskController::class, 'destroyCategory'])->n
 // Ajoute cette ligne parmi tes autres routes POST :
 Route::post('/personal-resources', [PersonalResourceController::class, 'store'])->name('personal-resources.store');
 Route::delete('/personal-resources/{id}', [PersonalResourceController::class, 'destroy'])->name('personal-resources.destroy');
+
+
+
+// Route pour ouvrir le livre en mode lecture
+Route::get('/personal-resources/{id}', [PersonalResourceController::class, 'show'])->name('personal-resources.show');
+
+// Route pour sauvegarder le contenu et les notes
+Route::put('/personal-resources/{id}', [PersonalResourceController::class, 'update'])->name('personal-resources.update');
