@@ -793,8 +793,6 @@
 
         </div>
     @endif
-</div>
-
 {{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
 
 @foreach($allCategories as $c)
