@@ -788,12 +788,13 @@
                     </ul>
                 @else
                     <div class="text-center py-4 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
-                @endif>
+                @endif> <!-- <--- ICI : Il y a un chevron de fermeture en trop ('>') -->
             </div>
 
         </div>
     @endif
-{{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
+    
+    {{-- Formulaires de suppression dynamiques pour tous les projets et catégories fusionnés --}}
 
 @foreach($allCategories as $c)
     <form id="delete-category-{{ $c->id }}" action="{{ route('categories.destroy', $c->id) }}" method="POST" style="display: none;">
