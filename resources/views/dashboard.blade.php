@@ -688,7 +688,7 @@
         </div>
     @endif
 
-    <!-- ================= VUE : DÉVELOPPEMENT PERSONNEL ================= -->
+<!-- ================= VUE : DÉVELOPPEMENT PERSONNEL ================= -->
     @if($view === 'personal')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -702,7 +702,8 @@
             <!-- Section Livres -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">📚 Bibliothèque à lire</h3>
-                <!-- Affichage des erreurs de validation (TRÈS IMPORTANT) -->
+                
+                <!-- Affichage des erreurs de validation -->
                 @if($errors->any())
                     <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-r-md">
                         <p class="font-bold text-red-700">⚠️ Oups ! Une erreur est survenue :</p>
@@ -721,13 +722,9 @@
                     </div>
                 @endif
 
-                <!-- Formulaire d'ajout de livre avec Upload PDF -->
+                <!-- Formulaire d'ajout de livre avec Upload PDF (CORRIGÉ) -->
                 <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
-                    ...
-                
-                <!-- Formulaire d'ajout de livre avec Upload PDF -->
-                <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
-                    @csrf <!-- ⚠️ INDISPENSABLE POUR EVITER L'ERREUR 419 -->
+                    @csrf 
                     <input type="hidden" name="type" value="book">
                     
                     <input type="text" name="title" placeholder="Titre du livre" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
@@ -745,7 +742,6 @@
                         @foreach($personalResources->where('type', 'book') as $book)
                             <li class="pt-3 flex justify-between items-start">
                                 <div>
-                                    <!-- Le titre est cliquable vers le lecteur -->
                                     <a href="{{ route('personal-resources.show', $book->id) }}" class="font-semibold text-blue-700 hover:text-blue-900 text-sm hover:underline">{{ $book->title }}</a>
                                     <p class="text-xs text-gray-500 mt-1">{{ $book->author_or_source }}</p>
                                 </div>
@@ -760,6 +756,7 @@
                     <div class="text-center py-4 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
                 @endif
             </div>
+
             <!-- Section Vocabulaire -->
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                 <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">✍️ Vocabulaire & Français</h3>
@@ -791,7 +788,11 @@
                     </ul>
                 @else
                     <div class="text-center py-4 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
-                @endif
+                @endif>
+            </div>
+
+        </div>
+    @endif
             </div>
 
         </div>
