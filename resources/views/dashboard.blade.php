@@ -722,20 +722,53 @@
                     </div>
                 @endif
 
-                <!-- Formulaire d'ajout de livre avec Upload PDF (CORRIGÉ) -->
-                <form action="{{ route('personal-resources.store') }}" method="POST" enctype="multipart/form-data" class="mb-4 space-y-2">
-                    @csrf 
-                    <input type="hidden" name="type" value="book">
-                    
-                    <input type="text" name="title" placeholder="Titre du livre" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" required>
-                    <input type="text" name="author_or_source" placeholder="Auteur (optionnel)" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-                    
-                    <!-- Champ Upload PDF -->
-                    <input type="file" name="pdf_file" accept="application/pdf" class="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" required>
-                    
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-3 py-2 text-sm transition">+ Ajouter le livre (PDF)</button>
-                </form>
+                <!-- Formulaire ajout livre PDF -->
+                <form 
+                    action="{{ route('personal-resources.store') }}" 
+                    method="POST" 
+                    enctype="multipart/form-data"
+                    class="mb-4 space-y-2"
+                >
 
+                    @csrf
+
+                    <input 
+                        type="hidden" 
+                        name="type" 
+                        value="book"
+                    >
+
+                    <input 
+                        type="text" 
+                        name="title" 
+                        placeholder="Titre du livre"
+                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        required
+                    >
+
+                    <input 
+                        type="text" 
+                        name="author_or_source" 
+                        placeholder="Auteur (optionnel)"
+                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    >
+
+                    <input 
+                        type="file" 
+                        name="pdf_file"
+                        accept="application/pdf"
+                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        required
+                    >
+
+                    <button 
+                        type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-3 py-2 text-sm"
+                    >
+                        + Ajouter le livre (PDF)
+                    </button>
+
+                </form>
                 <!-- Liste des livres -->
                 @if($personalResources->where('type', 'book')->isNotEmpty())
                     <ul class="space-y-3 divide-y divide-gray-100">

@@ -7,95 +7,175 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
+
 class PersonalResourceController extends Controller
 {
 
+
     /**
-     * Ajouter un livre / ressource personnelle
+     * Ajouter livre PDF ou vocabulaire
      */
-/**
- * Ajouter un livre / ressource personnelle
- */
     public function store(Request $request)
     {
+
         $validated = $request->validate([
 
-            'type' => 'required|string|max:50',
+            'type' => [
+                'required',
+                'string',
+                'max:50'
+            ],
 
-            'title' => 'required|string|max:255',
+            'title' => [
+                'required',
+                'string',
+                'max:255'
+            ],
 
-            'author_or_source' => 'nullable|string|max:255',
+            'description' => [
+                'nullable',
+                'string'
+            ],
 
-            'pdf_file' => 'required|file|mimes:pdf|max:20480',
+            'author_or_source' => [
+                'nullable',
+                'string',
+                'max:255'
+            ],
+
+            'pdf_file' => [
+                'nullable',
+                'file',
+                'mimes:pdf',
+                'max:20480'
+            ],
 
         ]);
+
 
 
         try {
 
 
-            // 1 - Upload PDF Supabase Storage
-
-            $path = $request
-                ->file('pdf_file')
-                ->store('pdfs', 's3');
+            $pdfUrl = null;
 
 
-            if (!$path) {
 
-                throw new \Exception(
-                    "Upload PDF impossible"
-                );
+            /*
+            |--------------------------------------------------------------------------
+            | Upload PDF Supabase Storage
+            |--------------------------------------------------------------------------
+            */
+
+            if(
+                $validated['type'] === 'book'
+                &&
+                $request->hasFile('pdf_file')
+            ){
+
+
+                $path = $request
+                    ->file('pdf_file')
+                    ->store(
+                        'pdfs',
+                        's3'
+                    );
+
+
+
+                if(!$path){
+
+                    throw new \Exception(
+                        "Impossible d'envoyer le fichier PDF."
+                    );
+
+                }
+
+
+
+                $pdfUrl =
+
+                    rtrim(
+                        env('SUPABASE_URL'),
+                        '/'
+                    )
+
+                    . '/storage/v1/object/public/'
+
+                    . env(
+                        'AWS_BUCKET',
+                        'ebooks'
+                    )
+
+                    . '/'
+
+                    . $path;
 
             }
 
 
 
-            // 2 - Création URL publique
 
-            $url = rtrim(env('SUPABASE_URL'), '/')
-                . '/storage/v1/object/public/'
-                . env('AWS_BUCKET', 'ebooks')
-                . '/'
-                . $path;
-
+            /*
+            |--------------------------------------------------------------------------
+            | Création ressource
+            |--------------------------------------------------------------------------
+            */
 
 
-            // 3 - Enregistrement PostgreSQL
+            PersonalResource::create([
 
-            $book = PersonalResource::create([
 
                 'type' => $validated['type'],
 
+
                 'title' => $validated['title'],
 
-                'author_or_source' =>
-                    $validated['author_or_source'] ?? null,
 
-                'pdf_path' => $url,
+                'description' =>
+                    $validated['description']
+                    ?? null,
+
+
+                'author_or_source' =>
+                    $validated['author_or_source']
+                    ?? null,
+
+
+                'pdf_path' => $pdfUrl,
+
 
                 'status' => 'to_read',
 
+
                 'is_active' => true,
+
 
             ]);
 
 
 
+
+
             return redirect()
 
-                ->route('dashboard', [
-                    'view' => 'personal'
-                ])
+                ->route(
+                    'dashboard',
+                    [
+                        'view' => 'personal'
+                    ]
+                )
 
                 ->with(
                     'success',
-                    'Livre ajouté avec succès.'
+                    'Ressource ajoutée avec succès.'
                 );
 
 
+        }
 
-        } catch(Throwable $e) {
+
+        catch(Throwable $e){
 
 
             return back()
@@ -104,88 +184,7 @@ class PersonalResourceController extends Controller
 
                 ->with(
                     'error',
-                    "Erreur ajout livre : "
-                    .$e->getMessage()
-                );
-
-        }
-    }
-
-    /**
-     * Supprimer un livre
-     */
-    public function destroy($id)
-    {
-
-        try {
-
-
-            $book = PersonalResource::findOrFail($id);
-
-
-
-            if ($book->pdf_path) {
-
-
-                $path = parse_url(
-                    $book->pdf_path,
-                    PHP_URL_PATH
-                );
-
-
-                $prefix =
-                    '/storage/v1/object/public/ebooks/';
-
-
-
-                $relativePath =
-                    str_replace(
-                        $prefix,
-                        '',
-                        $path
-                    );
-
-
-
-                if ($relativePath) {
-
-                    Storage::disk('s3')
-                        ->delete($relativePath);
-
-                }
-
-            }
-
-
-
-            $book->delete();
-
-
-
-            return redirect()
-
-                ->route('dashboard', [
-                    'view' => 'personal'
-                ])
-
-                ->with(
-                    'success',
-                    'Livre supprimé avec succès.'
-                );
-
-
-        } catch (Throwable $e) {
-
-
-            return redirect()
-
-                ->route('dashboard', [
-                    'view' => 'personal'
-                ])
-
-                ->with(
-                    'error',
-                    "Erreur suppression : "
+                    'Erreur ajout : '
                     . $e->getMessage()
                 );
 
@@ -198,7 +197,7 @@ class PersonalResourceController extends Controller
 
 
     /**
-     * Afficher le lecteur PDF
+     * Lecture PDF
      */
     public function show($id)
     {
@@ -218,34 +217,139 @@ class PersonalResourceController extends Controller
 
 
     /**
-     * Mettre à jour notes et statut
+     * Mise à jour livre
      */
-    public function update(Request $request, $id)
+    public function update(
+        Request $request,
+        $id
+    )
     {
 
-        $book = PersonalResource::findOrFail($id);
+        $resource =
+            PersonalResource::findOrFail($id);
 
 
 
-        $book->update([
+        $resource->update([
 
-            'notes' => $request->notes,
+            'notes' =>
+                $request->notes,
 
-            'status' => $request->status,
+
+            'status' =>
+                $request->status,
 
         ]);
 
 
 
-        return redirect()
-
-            ->back()
+        return back()
 
             ->with(
                 'success',
-                'Progression sauvegardée.'
+                'Modification enregistrée.'
             );
 
     }
+
+
+
+
+
+    /**
+     * Suppression ressource
+     */
+    public function destroy($id)
+    {
+
+        try{
+
+
+            $resource =
+                PersonalResource::findOrFail($id);
+
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Suppression PDF Supabase
+            |--------------------------------------------------------------------------
+            */
+
+
+            if($resource->pdf_path){
+
+
+                $path = parse_url(
+                    $resource->pdf_path,
+                    PHP_URL_PATH
+                );
+
+
+
+                $path = str_replace(
+
+                    '/storage/v1/object/public/ebooks/',
+
+                    '',
+
+                    $path
+
+                );
+
+
+
+                if($path){
+
+                    Storage::disk('s3')
+                        ->delete($path);
+
+                }
+
+            }
+
+
+
+
+
+            $resource->delete();
+
+
+
+
+            return redirect()
+
+                ->route(
+                    'dashboard',
+                    [
+                        'view'=>'personal'
+                    ]
+                )
+
+                ->with(
+                    'success',
+                    'Suppression réussie.'
+                );
+
+
+        }
+
+
+        catch(Throwable $e){
+
+
+            return back()
+
+                ->with(
+                    'error',
+                    'Erreur suppression : '
+                    .$e->getMessage()
+                );
+
+        }
+
+    }
+
 
 }

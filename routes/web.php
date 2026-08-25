@@ -36,10 +36,22 @@ Route::delete('/projects/{id}', [TaskController::class, 'destroyProject'])->name
 // Route pour la suppression d'étape/catégorie si gérée dans le contrôleur
 Route::delete('/categories/{id}', [TaskController::class, 'destroyCategory'])->name('categories.destroy');
 
-// Ajoute cette ligne parmi tes autres routes POST :
-Route::post('/personal-resources', [PersonalResourceController::class, 'store'])->name('personal-resources.store');
-Route::delete('/personal-resources/{id}', [PersonalResourceController::class, 'destroy'])->name('personal-resources.destroy');
+// Protection si quelqu'un ouvre directement /personal-resources en GET
+Route::get('/personal-resources', function () {
+    return redirect()->route('dashboard', [
+        'view' => 'personal'
+    ]);
+});
 
+
+// Ajout livre PDF
+Route::post('/personal-resources', [PersonalResourceController::class, 'store'])
+    ->name('personal-resources.store');
+
+
+// Suppression livre
+Route::delete('/personal-resources/{id}', [PersonalResourceController::class, 'destroy'])
+    ->name('personal-resources.destroy');
 
 
 // Route pour ouvrir le livre en mode lecture
