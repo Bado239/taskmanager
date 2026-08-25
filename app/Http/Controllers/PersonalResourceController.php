@@ -15,82 +15,62 @@ class PersonalResourceController extends Controller
      */
     public function store(Request $request)
     {
-
-        $validated = $request->validate([
-
-            'type' => 'required|string|max:50',
-
-            'title' => 'required|string|max:255',
-
-            'author_or_source' => 'nullable|string|max:255',
-
-            'pdf_file' => 'required|file|mimes:pdf|max:20480',
-
-        ]);
-
-
-
+        dd([
+        'STORE APPELE',
+        $request->all()
+    ]);
+    
         try {
 
+            $validated = $request->validate([
 
-            // Upload PDF vers Supabase Storage
+                'type' => 'required|string|max:50',
 
-            $path = $request
-                ->file('pdf_file')
-                ->store('pdfs', 's3');
+                'title' => 'required|string|max:255',
 
+                'author_or_source' => 'nullable|string|max:255',
 
+                'pdf_file' => 'required|file|mimes:pdf|max:20480',
 
-            if (!$path) {
-
-                return back()
-                    ->withInput()
-                    ->with(
-                        'error',
-                        "L'upload du fichier PDF a échoué."
-                    );
-
-            }
+            ]);
 
 
-
-            // Création URL publique Supabase
-
-            $supabaseUrl = rtrim(
-                env('SUPABASE_URL'),
-                '/'
-            );
-
-
-            $bucketName = env(
-                'AWS_BUCKET',
-                'ebooks'
-            );
-
-
-
-            if (!$supabaseUrl) {
+            // Vérification fichier
+            if (!$request->hasFile('pdf_file')) {
 
                 throw new \Exception(
-                    "SUPABASE_URL absent dans .env"
+                    "Aucun fichier PDF reçu."
                 );
 
             }
 
 
+            // Upload Supabase Storage
+            $path = $request
+                ->file('pdf_file')
+                ->store('pdfs', 's3');
 
-            $url = $supabaseUrl
+
+            if (!$path) {
+
+                throw new \Exception(
+                    "Upload Supabase impossible."
+                );
+
+            }
+
+
+            // URL publique
+            $url = rtrim(env('SUPABASE_URL'), '/')
                 . '/storage/v1/object/public/'
-                . $bucketName
+                . env('AWS_BUCKET', 'ebooks')
                 . '/'
                 . $path;
 
 
 
-
-            // Enregistrement dans PostgreSQL
-
-            PersonalResource::create([
+            // Création livre
+            $book = PersonalResource::create([
 
                 'type' => $validated['type'],
 
@@ -103,10 +83,9 @@ class PersonalResourceController extends Controller
 
                 'status' => 'to_read',
 
-                'is_active' => 'true',
+                'is_active' => true,
 
             ]);
-
 
 
 
@@ -123,7 +102,7 @@ class PersonalResourceController extends Controller
 
 
 
-        } catch (Throwable $e) {
+        } catch(Throwable $e) {
 
 
             return back()
@@ -132,15 +111,11 @@ class PersonalResourceController extends Controller
 
                 ->with(
                     'error',
-                    "Erreur ajout livre : "
-                    . $e->getMessage()
+                    'Erreur ajout livre : '.$e->getMessage()
                 );
 
         }
-
     }
-
-
 
 
 
