@@ -15,6 +15,8 @@ class PersonalResource extends Model
         'description',
         'status',
         'author_or_source',
+        'pdf_path',
+        'notes',
         'is_active',
     ];
 
