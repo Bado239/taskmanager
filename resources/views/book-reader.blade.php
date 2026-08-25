@@ -11,13 +11,10 @@ Lecture : {{ $book->title }}
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-
 </head>
 
 
-
 <body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
-
 
 
 <!-- HEADER -->
@@ -61,16 +58,12 @@ id="toggleBtn"
 
 class="bg-blue-600 text-white px-4 py-2 rounded">
 
-📝 Notes
+📝 Masquer notes
 
 </button>
 
 
-
 </div>
-
-
-
 
 
 
@@ -79,8 +72,7 @@ class="bg-blue-600 text-white px-4 py-2 rounded">
 <div class="flex-1 flex overflow-hidden">
 
 
-
-<!-- LECTEUR -->
+<!-- PDF -->
 
 <div
 
@@ -89,30 +81,26 @@ id="pdfZone"
 class="w-[70%] flex flex-col bg-gray-700">
 
 
-
 <div
 
 id="pdfViewer"
 
-class="flex-1 overflow-y-auto p-5">
+class="flex-1 overflow-y-auto p-6">
 
 </div>
 
 
 
 
+<!-- PROGRESSION -->
 
-<!-- PROGRESSION FIXE -->
-
-<div class="bg-white p-3 border-t">
+<div class="bg-white p-4 border-t">
 
 
 <div class="flex justify-between text-sm">
 
 <span>
-
 📖 Progression
-
 </span>
 
 
@@ -129,7 +117,6 @@ class="flex-1 overflow-y-auto p-5">
 
 <div class="bg-gray-200 h-3 rounded mt-2">
 
-
 <div
 
 id="progressBar"
@@ -140,8 +127,8 @@ style="width:{{ $book->progress ?? 0 }}%">
 
 </div>
 
-
 </div>
+
 
 
 
@@ -156,6 +143,7 @@ Page :
 </span>
 
 /
+
 
 <span id="totalPages">
 
@@ -180,7 +168,6 @@ Page :
 
 
 
-
 <!-- NOTES -->
 
 
@@ -191,14 +178,11 @@ id="notesZone"
 class="w-[30%] bg-yellow-50 flex flex-col border-l">
 
 
-
 <div class="p-3 bg-yellow-100 font-bold">
 
 ✍️ Notes & Réflexions
 
 </div>
-
-
 
 
 
@@ -248,7 +232,6 @@ class="bg-blue-600 text-white m-3 py-2 rounded">
 </button>
 
 
-
 </form>
 
 
@@ -256,14 +239,7 @@ class="bg-blue-600 text-white m-3 py-2 rounded">
 </div>
 
 
-
-
-
 </div>
-
-
-
-
 
 
 
@@ -272,26 +248,22 @@ class="bg-blue-600 text-white m-3 py-2 rounded">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 
-
-
 <script>
 
 
 const url = "{{ $book->pdf_path }}";
 
 
-let pdfDoc;
+let pdfDoc = null;
 
 let totalPages = 0;
 
-let pagesLoaded = 0;
+let lastSavedPage = {{ $book->current_page ?? 1 }};
 
 
 
-let lastSavedPage =
-{{ $book->current_page ?? 1 }};
-
-
+const viewer =
+document.getElementById('pdfViewer');
 
 
 
@@ -307,7 +279,7 @@ pdfjsLib.getDocument(url)
 
 .promise
 
-.then(pdf => {
+.then(pdf=>{
 
 
 pdfDoc = pdf;
@@ -316,12 +288,14 @@ pdfDoc = pdf;
 totalPages = pdf.numPages;
 
 
+
 document.getElementById('totalPages').innerHTML =
 totalPages;
 
 
 
-loadPages();
+loadPage(lastSavedPage);
+
 
 
 });
@@ -331,31 +305,13 @@ loadPages();
 
 
 
+// Chargement progressif
+
+function loadPage(num){
 
 
-function loadPages(){
-
-
-for(let i=1;i<=totalPages;i++){
-
-
-renderPage(i);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-
-function renderPage(num){
+if(num < 1 || num > totalPages)
+return;
 
 
 
@@ -364,14 +320,9 @@ pdfDoc.getPage(num)
 .then(page=>{
 
 
-
-let scale = 1.4;
-
-
-
 let viewport =
 page.getViewport({
-scale:scale
+scale:1.5
 });
 
 
@@ -380,23 +331,11 @@ let canvas =
 document.createElement('canvas');
 
 
-
 canvas.dataset.page=num;
 
 
-
 canvas.className =
-"mb-6 shadow bg-white mx-auto";
-
-
-
-let ctx =
-canvas.getContext('2d');
-
-
-
-canvas.height =
-viewport.height;
+"mb-8 mx-auto shadow bg-white";
 
 
 
@@ -404,12 +343,17 @@ canvas.width =
 viewport.width;
 
 
-
-document
-.getElementById('pdfViewer')
-.appendChild(canvas);
+canvas.height =
+viewport.height;
 
 
+
+viewer.appendChild(canvas);
+
+
+
+let ctx =
+canvas.getContext('2d');
 
 
 
@@ -423,57 +367,47 @@ viewport:viewport
 
 
 
-
-
-observePage(canvas);
-
-
-
 });
-
-
 
 }
 
 
 
 
+// Chargement automatique quand on descend
+
+
+viewer.addEventListener('scroll',()=>{
+
+
+let canvases =
+document.querySelectorAll('#pdfViewer canvas');
 
 
 
-
-
-// DETECTION PAGE VISIBLE
-
-
-const viewer = document.getElementById('pdfViewer');
-
-
-viewer.addEventListener('scroll', function(){
-
-
-let canvases = document.querySelectorAll('#pdfViewer canvas');
-
-
-let current = 1;
+let page = 1;
 
 
 
 canvases.forEach((canvas,index)=>{
 
 
-let rect = canvas.getBoundingClientRect();
+let rect =
+canvas.getBoundingClientRect();
 
-let viewerRect = viewer.getBoundingClientRect();
+
+
+let zone =
+viewer.getBoundingClientRect();
 
 
 
 if(
-    rect.top <= viewerRect.top + 150 &&
-    rect.bottom >= viewerRect.top + 150
+rect.top <= zone.top + 200 &&
+rect.bottom >= zone.top + 200
 ){
 
-    current = index + 1;
+page=index+lastSavedPage;
 
 }
 
@@ -482,14 +416,11 @@ if(
 
 
 
-updateProgress(current);
+updateProgress(page);
 
 
 
 });
-
-
-
 
 
 
@@ -498,48 +429,11 @@ updateProgress(current);
 function updateProgress(page){
 
 
-if(page < 1){
-    page = 1;
-}
 
-
-if(page > totalPages){
-    page = totalPages;
-}
-
-
-
-let percent = Math.round(
-(page / totalPages) * 100
+let percent =
+Math.round(
+(page / totalPages)*100
 );
-
-
-
-document.getElementById('currentPage').innerHTML =
-page;
-
-
-
-document.getElementById('progressText').innerHTML =
-percent+" %";
-
-
-
-document.getElementById('progressBar').style.width =
-percent+"%";
-
-
-
-if(page !== lastSavedPage){
-
-    lastSavedPage = page;
-
-    saveProgress(page,percent);
-
-}
-
-
-}
 
 
 
@@ -570,11 +464,16 @@ saveProgress(page,percent);
 }
 
 
+// charger page suivante
+
+if(page+1 <= totalPages){
+
+loadPage(page+1);
 
 }
 
 
-
+}
 
 
 
@@ -602,6 +501,7 @@ headers:{
 
 
 "X-CSRF-TOKEN":
+
 "{{ csrf_token() }}"
 
 
@@ -610,12 +510,9 @@ headers:{
 
 body:JSON.stringify({
 
-
 current_page:page,
 
-
 progress:percent
-
 
 })
 
@@ -623,15 +520,11 @@ progress:percent
 }
 
 
-
 );
 
 
 
 }
-
-
-
 
 
 
@@ -661,11 +554,11 @@ if(notes.classList.contains('hidden')){
 notes.classList.remove('hidden');
 
 
-pdf.className=
+pdf.className =
 "w-[70%] flex flex-col bg-gray-700";
 
 
-btn.innerHTML="📝 Notes";
+btn.innerHTML="📝 Masquer notes";
 
 
 }
@@ -676,7 +569,7 @@ else{
 notes.classList.add('hidden');
 
 
-pdf.className=
+pdf.className =
 "w-full flex flex-col bg-gray-700";
 
 
@@ -691,8 +584,6 @@ btn.innerHTML="📖 Afficher notes";
 
 
 </script>
-
-
 
 
 </body>
