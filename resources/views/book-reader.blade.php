@@ -446,48 +446,47 @@ observePage(canvas);
 // DETECTION PAGE VISIBLE
 
 
-function observePage(canvas){
+const viewer = document.getElementById('pdfViewer');
 
 
-let observer =
-new IntersectionObserver(entries=>{
+viewer.addEventListener('scroll', function(){
 
 
-entries.forEach(entry=>{
+let canvases = document.querySelectorAll('#pdfViewer canvas');
 
 
-if(entry.isIntersecting){
-
-
-let page =
-parseInt(canvas.dataset.page);
+let current = 1;
 
 
 
-updateProgress(page);
+canvases.forEach((canvas,index)=>{
 
 
+let rect = canvas.getBoundingClientRect();
+
+let viewerRect = viewer.getBoundingClientRect();
+
+
+
+if(
+    rect.top <= viewerRect.top + 150 &&
+    rect.bottom >= viewerRect.top + 150
+){
+
+    current = index + 1;
 
 }
-
 
 
 });
 
 
 
-},{
-threshold:0.5
+updateProgress(current);
+
+
+
 });
-
-
-
-observer.observe(canvas);
-
-
-
-}
-
 
 
 
@@ -499,14 +498,48 @@ observer.observe(canvas);
 function updateProgress(page){
 
 
+if(page < 1){
+    page = 1;
+}
 
-let percent =
 
-Math.round(
+if(page > totalPages){
+    page = totalPages;
+}
 
-(page / totalPages)*100
 
+
+let percent = Math.round(
+(page / totalPages) * 100
 );
+
+
+
+document.getElementById('currentPage').innerHTML =
+page;
+
+
+
+document.getElementById('progressText').innerHTML =
+percent+" %";
+
+
+
+document.getElementById('progressBar').style.width =
+percent+"%";
+
+
+
+if(page !== lastSavedPage){
+
+    lastSavedPage = page;
+
+    saveProgress(page,percent);
+
+}
+
+
+}
 
 
 
