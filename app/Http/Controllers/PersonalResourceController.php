@@ -13,27 +13,103 @@ class PersonalResourceController extends Controller
     /**
      * Ajouter un livre / ressource personnelle
      */
+/**
+ * Ajouter un livre / ressource personnelle
+ */
     public function store(Request $request)
     {
-        dd([
-            "ETAPE 1 - RECU",
-            $request->all(),
-            "FICHIER",
-            $request->file('pdf_file')
-        ]);
-
-
         $validated = $request->validate([
+
             'type' => 'required|string|max:50',
+
             'title' => 'required|string|max:255',
+
             'author_or_source' => 'nullable|string|max:255',
+
             'pdf_file' => 'required|file|mimes:pdf|max:20480',
+
         ]);
 
 
-        dd("ETAPE 2 - VALIDATION OK");
-    }
+        try {
 
+
+            // 1 - Upload PDF Supabase Storage
+
+            $path = $request
+                ->file('pdf_file')
+                ->store('pdfs', 's3');
+
+
+            if (!$path) {
+
+                throw new \Exception(
+                    "Upload PDF impossible"
+                );
+
+            }
+
+
+
+            // 2 - Création URL publique
+
+            $url = rtrim(env('SUPABASE_URL'), '/')
+                . '/storage/v1/object/public/'
+                . env('AWS_BUCKET', 'ebooks')
+                . '/'
+                . $path;
+
+
+
+            // 3 - Enregistrement PostgreSQL
+
+            $book = PersonalResource::create([
+
+                'type' => $validated['type'],
+
+                'title' => $validated['title'],
+
+                'author_or_source' =>
+                    $validated['author_or_source'] ?? null,
+
+                'pdf_path' => $url,
+
+                'status' => 'to_read',
+
+                'is_active' => true,
+
+            ]);
+
+
+
+            return redirect()
+
+                ->route('dashboard', [
+                    'view' => 'personal'
+                ])
+
+                ->with(
+                    'success',
+                    'Livre ajouté avec succès.'
+                );
+
+
+
+        } catch(Throwable $e) {
+
+
+            return back()
+
+                ->withInput()
+
+                ->with(
+                    'error',
+                    "Erreur ajout livre : "
+                    .$e->getMessage()
+                );
+
+        }
+    }
 
     /**
      * Supprimer un livre
