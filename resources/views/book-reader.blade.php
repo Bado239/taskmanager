@@ -45,7 +45,6 @@ class="text-blue-600 text-sm">
 
 </p>
 
-
 </div>
 
 
@@ -69,16 +68,18 @@ class="bg-blue-600 text-white px-4 py-2 rounded">
 
 
 
+
 <div class="flex-1 flex overflow-hidden">
 
 
-<!-- PDF -->
+<!-- LECTEUR PDF -->
 
 <div
 
 id="pdfZone"
 
 class="w-[70%] flex flex-col bg-gray-700">
+
 
 
 <div
@@ -88,6 +89,7 @@ id="pdfViewer"
 class="flex-1 overflow-y-auto p-6">
 
 </div>
+
 
 
 
@@ -110,12 +112,12 @@ class="flex-1 overflow-y-auto p-6">
 
 </span>
 
-
 </div>
 
 
 
 <div class="bg-gray-200 h-3 rounded mt-2">
+
 
 <div
 
@@ -127,8 +129,8 @@ style="width:{{ $book->progress ?? 0 }}%">
 
 </div>
 
-</div>
 
+</div>
 
 
 
@@ -161,6 +163,7 @@ Page :
 
 
 </div>
+
 
 
 
@@ -235,17 +238,20 @@ class="bg-blue-600 text-white m-3 py-2 rounded">
 </form>
 
 
+</div>
+
+
 
 </div>
 
 
-</div>
 
 
 
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 
 
 <script>
@@ -258,7 +264,12 @@ let pdfDoc = null;
 
 let totalPages = 0;
 
-let lastSavedPage = {{ $book->current_page ?? 1 }};
+
+let currentPage =
+{{ $book->current_page ?? 1 }};
+
+
+let lastSavedPage=currentPage;
 
 
 
@@ -294,7 +305,17 @@ totalPages;
 
 
 
-loadPage(lastSavedPage);
+// charger depuis la dernière page
+
+for(
+let i=currentPage;
+i<=Math.min(currentPage+5,totalPages);
+i++
+){
+
+loadPage(i);
+
+}
 
 
 
@@ -305,13 +326,9 @@ loadPage(lastSavedPage);
 
 
 
-// Chargement progressif
+
 
 function loadPage(num){
-
-
-if(num < 1 || num > totalPages)
-return;
 
 
 
@@ -322,7 +339,7 @@ pdfDoc.getPage(num)
 
 let viewport =
 page.getViewport({
-scale:1.5
+scale:1.4
 });
 
 
@@ -331,11 +348,13 @@ let canvas =
 document.createElement('canvas');
 
 
+
 canvas.dataset.page=num;
 
 
+
 canvas.className =
-"mb-8 mx-auto shadow bg-white";
+"mb-8 mx-auto bg-white shadow";
 
 
 
@@ -369,32 +388,36 @@ viewport:viewport
 
 });
 
+
+
 }
 
 
 
 
-// Chargement automatique quand on descend
+
+
+
+
+// DETECTION PAGE REELLE
 
 
 viewer.addEventListener('scroll',()=>{
 
 
-let canvases =
+let pages =
 document.querySelectorAll('#pdfViewer canvas');
 
 
-
-let page = 1;
-
+let visiblePage=1;
 
 
-canvases.forEach((canvas,index)=>{
+
+pages.forEach(canvas=>{
 
 
 let rect =
 canvas.getBoundingClientRect();
-
 
 
 let zone =
@@ -403,24 +426,33 @@ viewer.getBoundingClientRect();
 
 
 if(
-rect.top <= zone.top + 200 &&
-rect.bottom >= zone.top + 200
+rect.top <= zone.top+200 &&
+rect.bottom >= zone.top+200
 ){
 
-page=index+lastSavedPage;
+
+visiblePage =
+parseInt(canvas.dataset.page);
+
 
 }
 
 
+
+});
+
+
+
+updateProgress(visiblePage);
+
+
+
 });
 
 
 
-updateProgress(page);
 
 
-
-});
 
 
 
@@ -430,9 +462,18 @@ function updateProgress(page){
 
 
 
+if(page<1)
+page=1;
+
+
+if(page>totalPages)
+page=totalPages;
+
+
+
 let percent =
 Math.round(
-(page / totalPages)*100
+(page/totalPages)*100
 );
 
 
@@ -452,6 +493,7 @@ percent+"%";
 
 
 
+
 if(page !== lastSavedPage){
 
 
@@ -461,22 +503,12 @@ lastSavedPage=page;
 saveProgress(page,percent);
 
 
-}
-
-
-// charger page suivante
-
-if(page+1 <= totalPages){
-
-loadPage(page+1);
-
-}
-
 
 }
 
 
 
+}
 
 
 
@@ -520,6 +552,7 @@ progress:percent
 }
 
 
+
 );
 
 
@@ -532,7 +565,9 @@ progress:percent
 
 
 
+
 function toggleNotes(){
+
 
 
 let notes =
@@ -583,7 +618,9 @@ btn.innerHTML="📖 Afficher notes";
 }
 
 
+
 </script>
+
 
 
 </body>
