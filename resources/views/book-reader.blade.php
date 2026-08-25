@@ -152,18 +152,7 @@ class="w-[70%] flex flex-col bg-gray-800 transition-all duration-300">
 @if($book->pdf_path)
 
 
-<iframe
-
-id="pdfReader"
-
-src="{{ $book->pdf_path }}#page={{ $book->current_page ?? 1 }}"
-
-class="flex-1 w-full"
-
-frameborder="0">
-
-</iframe>
-
+<div id="pdfViewer" class="flex-1 overflow-auto bg-gray-800"></div>
 
 
 <!-- PROGRESSION -->
@@ -481,7 +470,161 @@ progress:percent
 
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
 
+
+const url = "{{ $book->pdf_path }}";
+
+let currentPage = {{ $book->current_page ?? 1 }};
+
+let totalPages = 0;
+
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+
+
+pdfjsLib.getDocument(url)
+.promise
+.then(pdf => {
+
+
+    totalPages = pdf.numPages;
+
+
+    renderPage(currentPage,pdf);
+
+
+});
+
+
+
+
+
+function renderPage(page,pdf){
+
+
+pdf.getPage(page)
+.then(pageObj => {
+
+
+let scale = 1.5;
+
+
+let viewport =
+pageObj.getViewport({
+scale:scale
+});
+
+
+
+let canvas =
+document.createElement('canvas');
+
+
+let context =
+canvas.getContext('2d');
+
+
+canvas.height =
+viewport.height;
+
+
+canvas.width =
+viewport.width;
+
+
+
+document.getElementById('pdfViewer')
+.innerHTML='';
+
+
+document.getElementById('pdfViewer')
+.appendChild(canvas);
+
+
+
+pageObj.render({
+
+canvasContext:context,
+
+viewport:viewport
+
+});
+
+
+
+updateProgress(page);
+
+
+
+});
+
+}
+
+
+
+
+
+function updateProgress(page){
+
+
+let percent =
+Math.round(
+(page / totalPages) * 100
+);
+
+
+
+document.getElementById('progressText')
+.innerHTML =
+percent+" %";
+
+
+
+document.getElementById('progressBar')
+.style.width =
+percent+"%";
+
+
+
+
+fetch(
+"{{ route('personal-resources.progress',$book->id) }}",
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json",
+
+"X-CSRF-TOKEN":
+"{{ csrf_token() }}"
+
+},
+
+body:JSON.stringify({
+
+current_page:page,
+
+progress:percent
+
+})
+
+}
+
+);
+
+
+
+}
+
+
+
+</script>
 
 </body>
 
