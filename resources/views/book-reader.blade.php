@@ -80,6 +80,56 @@ id="pdfZone"
 
 class="w-[70%] flex flex-col bg-gray-700">
 
+<!-- BARRE DE CONTROLE LECTURE -->
+
+<div class="bg-gray-900 text-white h-14 flex items-center justify-center gap-5 shadow">
+
+    <button
+    onclick="previousPage()"
+    class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+        ⬅
+    </button>
+
+
+    <span class="font-bold">
+        <span id="topPage">
+            {{ $book->current_page ?? 1 }}
+        </span>
+        /
+        <span id="topTotal">
+            ...
+        </span>
+    </span>
+
+
+    <button
+    onclick="nextPage()"
+    class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded">
+        ➡
+    </button>
+
+
+    <button
+    onclick="zoomOut()"
+    class="bg-gray-700 px-3 py-2 rounded">
+        −
+    </button>
+
+
+    <span id="zoomText">
+        100%
+    </span>
+
+
+    <button
+    onclick="zoomIn()"
+    class="bg-gray-700 px-3 py-2 rounded">
+        +
+    </button>
+
+
+</div>
+
 
 
 <div
@@ -267,6 +317,7 @@ let totalPages = 0;
 let currentPage = {{ $book->current_page ?? 1 }};
 
 let lastSavedPage = currentPage;
+let zoom = 1.4;
 
 
 const viewer = document.getElementById('pdfViewer');
@@ -354,7 +405,7 @@ function loadPage(num){
 
         let viewport =
         page.getViewport({
-            scale:1.4
+            scale:zoom
         });
 
 
@@ -517,6 +568,10 @@ function updateProgress(page){
     document.getElementById('progressBar').style.width =
     percent + "%";
 
+    document.getElementById('topPage').innerHTML = page;
+
+    document.getElementById('topTotal').innerHTML = totalPages;
+
 
 
 
@@ -595,7 +650,103 @@ progress:percent
 
 
 
+function nextPage(){
 
+    if(currentPage < totalPages){
+
+        currentPage++;
+
+        let page =
+        document.querySelector(
+            `canvas[data-page="${currentPage}"]`
+        );
+
+        if(page){
+
+            page.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+
+        }
+
+    }
+
+}
+
+
+
+function previousPage(){
+
+    if(currentPage > 1){
+
+        currentPage--;
+
+        let page =
+        document.querySelector(
+            `canvas[data-page="${currentPage}"]`
+        );
+
+        if(page){
+
+            page.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+
+        }
+
+    }
+
+}
+
+
+
+function zoomIn(){
+
+    zoom += 0.2;
+
+    document.getElementById('zoomText').innerHTML =
+    Math.round((zoom/1.4)*100)+"%";
+
+    reloadPages();
+
+}
+
+
+
+function zoomOut(){
+
+    if(zoom > 0.8){
+
+        zoom -= 0.2;
+
+    }
+
+
+    document.getElementById('zoomText').innerHTML =
+    Math.round((zoom/1.4)*100)+"%";
+
+
+    reloadPages();
+
+}
+
+
+
+function reloadPages(){
+
+    viewer.innerHTML="";
+
+
+    for(let i=1;i<=totalPages;i++){
+
+        loadPage(i);
+
+    }
+
+
+}
 
 
 
