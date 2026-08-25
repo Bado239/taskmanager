@@ -264,17 +264,12 @@ let pdfDoc = null;
 
 let totalPages = 0;
 
+let currentPage = {{ $book->current_page ?? 1 }};
 
-let currentPage =
-{{ $book->current_page ?? 1 }};
-
-
-let lastSavedPage=currentPage;
+let lastSavedPage = currentPage;
 
 
-
-const viewer =
-document.getElementById('pdfViewer');
+const viewer = document.getElementById('pdfViewer');
 
 
 
@@ -293,34 +288,54 @@ pdfjsLib.getDocument(url)
 .then(pdf=>{
 
 
-pdfDoc = pdf;
+    pdfDoc = pdf;
 
 
-totalPages = pdf.numPages;
-
-
-
-document.getElementById('totalPages').innerHTML =
-totalPages;
+    totalPages = pdf.numPages;
 
 
 
-// charger depuis la dernière page
+    document.getElementById('totalPages').innerHTML =
+    totalPages;
 
-for(
-let i=currentPage;
-i<=Math.min(currentPage+5,totalPages);
-i++
-){
 
-loadPage(i);
 
-}
+    // CHARGER TOUT LE LIVRE
+
+    for(let i=1; i<=totalPages; i++){
+
+        loadPage(i);
+
+    }
+
+
+
+    // REVENIR A LA DERNIERE PAGE LUE
+
+    setTimeout(()=>{
+
+
+        let page =
+        document.querySelector(
+        `canvas[data-page="${currentPage}"]`
+        );
+
+
+        if(page){
+
+            page.scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+
+        }
+
+
+    },3000);
 
 
 
 });
-
 
 
 
@@ -332,61 +347,62 @@ function loadPage(num){
 
 
 
-pdfDoc.getPage(num)
+    pdfDoc.getPage(num)
 
-.then(page=>{
-
-
-let viewport =
-page.getViewport({
-scale:1.4
-});
+    .then(page=>{
 
 
-
-let canvas =
-document.createElement('canvas');
+        let viewport =
+        page.getViewport({
+            scale:1.4
+        });
 
 
 
-canvas.dataset.page=num;
+        let canvas =
+        document.createElement('canvas');
 
 
 
-canvas.className =
-"mb-8 mx-auto bg-white shadow";
+        canvas.dataset.page=num;
 
 
 
-canvas.width =
-viewport.width;
-
-
-canvas.height =
-viewport.height;
+        canvas.className =
+        "mb-8 mx-auto bg-white shadow";
 
 
 
-viewer.appendChild(canvas);
+        canvas.width =
+        viewport.width;
 
 
 
-let ctx =
-canvas.getContext('2d');
+        canvas.height =
+        viewport.height;
 
 
 
-page.render({
-
-canvasContext:ctx,
-
-viewport:viewport
-
-});
+        viewer.appendChild(canvas);
 
 
 
-});
+        let ctx =
+        canvas.getContext('2d');
+
+
+
+        page.render({
+
+            canvasContext:ctx,
+
+            viewport:viewport
+
+        });
+
+
+
+    });
 
 
 
@@ -399,51 +415,54 @@ viewport:viewport
 
 
 
-// DETECTION PAGE REELLE
+
+// DETECTION PAGE VISIBLE
 
 
 viewer.addEventListener('scroll',()=>{
 
 
-let pages =
-document.querySelectorAll('#pdfViewer canvas');
-
-
-let visiblePage=1;
+    let pages =
+    document.querySelectorAll('#pdfViewer canvas');
 
 
 
-pages.forEach(canvas=>{
-
-
-let rect =
-canvas.getBoundingClientRect();
-
-
-let zone =
-viewer.getBoundingClientRect();
+    let visiblePage = 1;
 
 
 
-if(
-rect.top <= zone.top+200 &&
-rect.bottom >= zone.top+200
-){
+    pages.forEach(canvas=>{
 
 
-visiblePage =
-parseInt(canvas.dataset.page);
-
-
-}
+        let rect =
+        canvas.getBoundingClientRect();
 
 
 
-});
+        let zone =
+        viewer.getBoundingClientRect();
 
 
 
-updateProgress(visiblePage);
+        if(
+            rect.top <= zone.top + 250 &&
+            rect.bottom >= zone.top + 250
+        ){
+
+
+            visiblePage =
+            parseInt(canvas.dataset.page);
+
+
+        }
+
+
+
+    });
+
+
+
+    updateProgress(visiblePage);
 
 
 
@@ -462,45 +481,56 @@ function updateProgress(page){
 
 
 
-if(page<1)
-page=1;
+    if(page < 1){
 
+        page = 1;
 
-if(page>totalPages)
-page=totalPages;
-
-
-
-let percent =
-Math.round(
-(page/totalPages)*100
-);
+    }
 
 
 
-document.getElementById('currentPage').innerHTML =
-page;
+    if(page > totalPages){
+
+        page = totalPages;
+
+    }
 
 
 
-document.getElementById('progressText').innerHTML =
-percent+" %";
+    let percent =
+    Math.round(
+        (page / totalPages) * 100
+    );
 
 
 
-document.getElementById('progressBar').style.width =
-percent+"%";
+    document.getElementById('currentPage').innerHTML =
+    page;
+
+
+
+    document.getElementById('progressText').innerHTML =
+    percent + " %";
+
+
+
+    document.getElementById('progressBar').style.width =
+    percent + "%";
 
 
 
 
-if(page !== lastSavedPage){
+
+    if(page !== lastSavedPage){
 
 
-lastSavedPage=page;
+        lastSavedPage = page;
 
 
-saveProgress(page,percent);
+        saveProgress(page,percent);
+
+
+    }
 
 
 
@@ -508,7 +538,8 @@ saveProgress(page,percent);
 
 
 
-}
+
+
 
 
 
@@ -542,9 +573,12 @@ headers:{
 
 body:JSON.stringify({
 
+
 current_page:page,
 
+
 progress:percent
+
 
 })
 
@@ -552,12 +586,12 @@ progress:percent
 }
 
 
-
 );
 
 
 
 }
+
 
 
 
@@ -583,17 +617,20 @@ document.getElementById('toggleBtn');
 
 
 
+
 if(notes.classList.contains('hidden')){
 
 
-notes.classList.remove('hidden');
+    notes.classList.remove('hidden');
 
 
-pdf.className =
-"w-[70%] flex flex-col bg-gray-700";
+    pdf.className =
+    "w-[70%] flex flex-col bg-gray-700";
 
 
-btn.innerHTML="📝 Masquer notes";
+    btn.innerHTML =
+    "📝 Masquer notes";
+
 
 
 }
@@ -601,26 +638,25 @@ btn.innerHTML="📝 Masquer notes";
 else{
 
 
-notes.classList.add('hidden');
+    notes.classList.add('hidden');
 
 
-pdf.className =
-"w-full flex flex-col bg-gray-700";
+    pdf.className =
+    "w-full flex flex-col bg-gray-700";
 
 
-btn.innerHTML="📖 Afficher notes";
-
-
-}
-
+    btn.innerHTML =
+    "📖 Afficher notes";
 
 
 }
 
+
+
+}
 
 
 </script>
-
 
 
 </body>
