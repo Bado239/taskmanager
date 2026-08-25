@@ -152,8 +152,48 @@ class="w-[70%] flex flex-col bg-gray-800 transition-all duration-300">
 @if($book->pdf_path)
 
 
-<div id="pdfViewer" class="flex-1 overflow-auto bg-gray-800"></div>
+<div class="flex-1 flex flex-col bg-gray-800">
 
+
+    <!-- CONTROLE PDF -->
+    <div class="bg-gray-900 text-white p-3 flex justify-center items-center gap-4">
+
+        <button
+            onclick="previousPage()"
+            class="bg-blue-600 px-4 py-2 rounded">
+            ⬅ Précédente
+        </button>
+
+
+        <span>
+            Page 
+            <span id="pageNumber">
+                {{ $book->current_page ?? 1 }}
+            </span>
+            /
+            <span id="totalPages">
+                ...
+            </span>
+        </span>
+
+
+        <button
+            onclick="nextPage()"
+            class="bg-blue-600 px-4 py-2 rounded">
+            Suivante ➡
+        </button>
+
+    </div>
+
+
+    <!-- LECTEUR -->
+    <div
+        id="pdfViewer"
+        class="flex-1 overflow-auto bg-gray-700 flex justify-center">
+    </div>
+
+
+</div>
 
 <!-- PROGRESSION -->
 
@@ -476,9 +516,13 @@ progress:percent
 
 const url = "{{ $book->pdf_path }}";
 
+
+let pdfDoc = null;
+
 let currentPage = {{ $book->current_page ?? 1 }};
 
 let totalPages = 0;
+
 
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
@@ -488,13 +532,18 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 pdfjsLib.getDocument(url)
 .promise
-.then(pdf => {
+.then(function(pdf){
 
+    pdfDoc = pdf;
 
     totalPages = pdf.numPages;
 
 
-    renderPage(currentPage,pdf);
+    document.getElementById('totalPages').innerHTML =
+    totalPages;
+
+
+    renderPage(currentPage);
 
 
 });
@@ -503,19 +552,20 @@ pdfjsLib.getDocument(url)
 
 
 
-function renderPage(page,pdf){
+
+function renderPage(num){
 
 
-pdf.getPage(page)
-.then(pageObj => {
+pdfDoc.getPage(num)
+.then(function(page){
 
 
 let scale = 1.5;
 
 
 let viewport =
-pageObj.getViewport({
-scale:scale
+page.getViewport({
+    scale:scale
 });
 
 
@@ -528,6 +578,7 @@ let context =
 canvas.getContext('2d');
 
 
+
 canvas.height =
 viewport.height;
 
@@ -537,16 +588,18 @@ viewport.width;
 
 
 
-document.getElementById('pdfViewer')
-.innerHTML='';
+let viewer =
+document.getElementById('pdfViewer');
 
 
-document.getElementById('pdfViewer')
-.appendChild(canvas);
+viewer.innerHTML="";
+
+
+viewer.appendChild(canvas);
 
 
 
-pageObj.render({
+page.render({
 
 canvasContext:context,
 
@@ -556,11 +609,17 @@ viewport:viewport
 
 
 
-updateProgress(page);
+document.getElementById('pageNumber')
+.innerHTML=num;
+
+
+
+saveProgress(num);
 
 
 
 });
+
 
 }
 
@@ -568,7 +627,47 @@ updateProgress(page);
 
 
 
-function updateProgress(page){
+
+
+function nextPage(){
+
+
+if(currentPage < totalPages){
+
+    currentPage++;
+
+    renderPage(currentPage);
+
+}
+
+
+}
+
+
+
+
+
+
+function previousPage(){
+
+
+if(currentPage > 1){
+
+    currentPage--;
+
+    renderPage(currentPage);
+
+}
+
+
+}
+
+
+
+
+
+
+function saveProgress(page){
 
 
 let percent =
@@ -578,15 +677,14 @@ Math.round(
 
 
 
-document.getElementById('progressText')
-.innerHTML =
+document.getElementById('progressText').innerHTML =
 percent+" %";
 
 
 
-document.getElementById('progressBar')
-.style.width =
+document.getElementById('progressBar').style.width =
 percent+"%";
+
 
 
 
@@ -606,6 +704,7 @@ headers:{
 
 },
 
+
 body:JSON.stringify({
 
 current_page:page,
@@ -614,18 +713,18 @@ progress:percent
 
 })
 
+
 }
 
 );
 
 
-
 }
 
 
 
-</script>
 
+</script>
 </body>
 
 </html>
