@@ -59,3 +59,10 @@ Route::get('/personal-resources/{id}', [PersonalResourceController::class, 'show
 
 // Route pour sauvegarder le contenu et les notes
 Route::put('/personal-resources/{id}', [PersonalResourceController::class, 'update'])->name('personal-resources.update');
+
+// Sauvegarde automatique de la progression de lecture PDF
+Route::post(
+    '/personal-resources/{id}/progress',
+    [PersonalResourceController::class, 'progress']
+)
+->name('personal-resources.progress');

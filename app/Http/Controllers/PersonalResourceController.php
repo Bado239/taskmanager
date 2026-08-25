@@ -352,4 +352,38 @@ class PersonalResourceController extends Controller
     }
 
 
+
+    /**
+     * Sauvegarde progression lecture PDF
+     */
+    public function progress(Request $request, $id)
+    {
+
+        $book = PersonalResource::findOrFail($id);
+
+
+
+        $book->update([
+
+            'current_page' => $request->current_page ?? 1,
+
+            'progress' => $request->progress ?? 0,
+
+        ]);
+
+
+
+        return response()->json([
+
+            'success' => true,
+
+            'current_page' => $book->current_page,
+
+            'progress' => $book->progress,
+
+        ]);
+
+    }
+
+
 }

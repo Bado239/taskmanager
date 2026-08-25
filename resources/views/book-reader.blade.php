@@ -2,10 +2,14 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Lecture : {{ $book->title }}</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+
+<title>
+Lecture : {{ $book->title }}
+</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
 
 </head>
 
@@ -14,90 +18,99 @@
 
 
 <!-- HEADER -->
+
 <div class="bg-white shadow-sm p-4 flex justify-between items-center border-b">
 
-    <div>
 
-        <a href="{{ route('dashboard',['view'=>'personal']) }}"
-           class="text-blue-600 text-sm hover:underline">
+<div>
 
-            ← Retour à l'espace personnel
+<a href="{{ route('dashboard',['view'=>'personal']) }}"
+class="text-blue-600 text-sm hover:underline">
 
-        </a>
+← Retour à l'espace personnel
 
-
-        <h1 class="text-xl font-bold text-gray-800 mt-1">
-
-            📖 {{ $book->title }}
-
-        </h1>
+</a>
 
 
-        @if($book->author_or_source)
+<h1 class="text-xl font-bold text-gray-800 mt-1">
 
-            <p class="text-sm text-gray-500">
-                {{ $book->author_or_source }}
-            </p>
+📖 {{ $book->title }}
 
-        @endif
+</h1>
 
 
-    </div>
+@if($book->author_or_source)
 
+<p class="text-sm text-gray-500">
 
+{{ $book->author_or_source }}
 
-    <div class="flex items-center gap-3">
+</p>
 
-
-        <!-- MODE LECTURE -->
-
-        <button
-            onclick="toggleNotes()"
-            id="toggleBtn"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-
-            📝 Masquer notes
-
-        </button>
-
-
-
-        <span class="px-3 py-1 rounded-full text-xs font-bold
-
-        @if($book->status === 'done')
-            bg-green-100 text-green-700
-
-        @elseif($book->status === 'reading')
-            bg-blue-100 text-blue-700
-
-        @else
-            bg-gray-100 text-gray-700
-
-        @endif">
-
-
-        @if($book->status === 'done')
-
-            ✅ Terminé
-
-        @elseif($book->status === 'reading')
-
-            📖 En cours
-
-        @else
-
-            📚 À lire
-
-        @endif
-
-
-        </span>
-
-
-    </div>
+@endif
 
 
 </div>
+
+
+
+
+
+<div class="flex items-center gap-3">
+
+
+<button
+
+onclick="toggleNotes()"
+
+id="toggleBtn"
+
+class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
+
+📝 Masquer notes
+
+</button>
+
+
+
+<span class="px-3 py-1 rounded-full text-xs font-bold
+
+@if($book->status === 'done')
+bg-green-100 text-green-700
+
+@elseif($book->status === 'reading')
+bg-blue-100 text-blue-700
+
+@else
+bg-gray-100 text-gray-700
+
+@endif
+">
+
+
+@if($book->status === 'done')
+
+✅ Terminé
+
+@elseif($book->status === 'reading')
+
+📖 En cours
+
+@else
+
+📚 À lire
+
+@endif
+
+
+</span>
+
+
+</div>
+
+
+</div>
+
 
 
 
@@ -106,7 +119,7 @@
 
 <div class="bg-green-100 text-green-700 text-center py-2 text-sm font-semibold">
 
-    {{ session('success') }}
+{{ session('success') }}
 
 </div>
 
@@ -116,189 +129,250 @@
 
 
 
-<!-- ESPACE PRINCIPAL -->
+
+
+<!-- ZONE PRINCIPALE -->
 
 <div class="flex-1 flex overflow-hidden">
 
 
 
-    <!-- PDF -->
 
-    <div
-        id="pdfZone"
-        class="w-[70%] flex flex-col bg-gray-800 transition-all duration-300">
 
+<!-- PDF -->
 
-        @if($book->pdf_path)
+<div
 
+id="pdfZone"
 
-            <iframe
+class="w-[70%] flex flex-col bg-gray-800 transition-all duration-300">
 
-                src="{{ $book->pdf_path }}"
 
-                class="flex-1 w-full"
 
-                frameborder="0">
+@if($book->pdf_path)
 
-            </iframe>
 
+<iframe
 
-        @else
+id="pdfReader"
 
+src="{{ $book->pdf_path }}#page={{ $book->current_page ?? 1 }}"
 
-            <div class="flex-1 flex items-center justify-center text-white italic">
+class="flex-1 w-full"
 
-                Aucun fichier PDF trouvé pour ce livre.
+frameborder="0">
 
-            </div>
+</iframe>
 
 
-        @endif
 
+<!-- PROGRESSION -->
 
-    </div>
+<div class="bg-white p-3 border-t">
 
 
+<div class="flex justify-between text-xs mb-2">
 
+<span>
 
+📖 Progression de lecture
 
+</span>
 
 
-    <!-- NOTES -->
+<span id="progressText">
 
-    <div
+{{ $book->progress ?? 0 }} %
 
-        id="notesZone"
+</span>
 
-        class="w-[30%] flex flex-col bg-yellow-50 border-l border-gray-300 transition-all duration-300">
 
+</div>
 
-        <div class="p-3 bg-yellow-100 border-b text-sm font-semibold text-yellow-700">
 
-            ✍️ Mes Notes & Réflexions
 
-        </div>
 
+<div class="w-full bg-gray-200 rounded-full h-3">
 
 
+<div
 
+id="progressBar"
 
-        <form
+class="bg-blue-600 h-3 rounded-full"
 
-            action="{{ route('personal-resources.update',$book->id) }}"
+style="width: {{ $book->progress ?? 0 }}%">
 
-            method="POST"
+</div>
 
-            class="flex-1 flex flex-col overflow-hidden">
 
+</div>
 
-            @csrf
 
-            @method('PUT')
 
+<div class="text-xs text-gray-500 mt-2">
 
+Page actuelle :
 
+<span id="currentPage">
 
-            <input
+{{ $book->current_page ?? 1 }}
 
-                type="hidden"
+</span>
 
-                name="status"
+</div>
 
-                value="{{ $book->status ?? 'reading' }}">
 
+</div>
 
 
 
+@else
 
 
-            <textarea
+<div class="flex-1 flex items-center justify-center text-white">
 
-                name="notes"
+Aucun PDF disponible
 
-                class="flex-1 w-full p-6 resize-none focus:outline-none text-gray-800 leading-relaxed bg-yellow-50/50"
+</div>
 
-                placeholder="Écrivez vos notes, résumés ou citations ici...">{{ $book->notes }}</textarea>
 
+@endif
 
 
+</div>
 
 
 
 
-            <div class="p-3 bg-white border-t flex flex-col gap-2">
 
 
-                <button
 
-                    type="submit"
 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg text-sm">
 
+<!-- NOTES -->
 
-                    💾 Sauvegarder les notes
+<div
 
+id="notesZone"
 
-                </button>
+class="w-[30%] flex flex-col bg-yellow-50 border-l transition-all duration-300">
 
 
 
+<div class="p-3 bg-yellow-100 border-b font-semibold text-yellow-700">
 
+✍️ Mes Notes & Réflexions
 
-                @if($book->status !== 'done')
+</div>
 
 
-                    <button
 
-                        type="submit"
 
-                        onclick="document.querySelector('input[name=status]').value='done'"
 
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg text-sm">
+<form
 
+action="{{ route('personal-resources.update',$book->id) }}"
 
-                        ✅ Marquer comme lu
+method="POST"
 
+class="flex-1 flex flex-col">
 
-                    </button>
 
+@csrf
 
-                @else
+@method('PUT')
 
 
-                    <button
 
-                        type="submit"
+<input
 
-                        onclick="document.querySelector('input[name=status]').value='reading'"
+type="hidden"
 
-                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg text-sm">
+name="status"
 
+value="{{ $book->status ?? 'reading' }}">
 
-                        ↩️ Relire ce livre
 
 
-                    </button>
 
 
-                @endif
+<textarea
 
+name="notes"
 
+class="flex-1 p-6 resize-none bg-yellow-50 outline-none"
 
-            </div>
+placeholder="Écrivez vos notes...">{{ $book->notes }}</textarea>
 
 
 
 
-        </form>
 
+<div class="p-3 bg-white border-t flex flex-col gap-2">
 
 
-    </div>
+<button
+
+type="submit"
+
+class="bg-blue-600 text-white py-2 rounded-lg font-bold">
+
+💾 Sauvegarder notes
+
+</button>
+
+
+
+@if($book->status !== 'done')
+
+
+<button
+
+type="submit"
+
+onclick="document.querySelector('input[name=status]').value='done'"
+
+class="bg-green-600 text-white py-2 rounded-lg font-bold">
+
+✅ Marquer comme lu
+
+</button>
+
+
+@else
+
+
+<button
+
+type="submit"
+
+onclick="document.querySelector('input[name=status]').value='reading'"
+
+class="bg-orange-500 text-white py-2 rounded-lg font-bold">
+
+↩️ Relire
+
+</button>
+
+
+@endif
+
+
+</div>
+
+
+
+</form>
 
 
 
 </div>
+
+
+
+</div>
+
 
 
 
@@ -312,48 +386,97 @@
 function toggleNotes(){
 
 
-    let notes = document.getElementById('notesZone');
-
-    let pdf = document.getElementById('pdfZone');
-
-    let btn = document.getElementById('toggleBtn');
+let notes =
+document.getElementById('notesZone');
 
 
-
-    if(notes.classList.contains('hidden')){
-
-
-        notes.classList.remove('hidden');
+let pdf =
+document.getElementById('pdfZone');
 
 
-        pdf.className =
-            "w-[70%] flex flex-col bg-gray-800 transition-all duration-300";
-
-
-        btn.innerHTML="📝 Masquer notes";
+let btn =
+document.getElementById('toggleBtn');
 
 
 
-    }
-
-    else{
+if(notes.classList.contains('hidden')){
 
 
-        notes.classList.add('hidden');
+notes.classList.remove('hidden');
+
+pdf.className =
+"w-[70%] flex flex-col bg-gray-800 transition-all duration-300";
 
 
-        pdf.className =
-            "w-full flex flex-col bg-gray-800 transition-all duration-300";
-
-
-        btn.innerHTML="📖 Afficher notes";
-
-
-    }
-
+btn.innerHTML="📝 Masquer notes";
 
 
 }
+
+else{
+
+
+notes.classList.add('hidden');
+
+
+pdf.className =
+"w-full flex flex-col bg-gray-800 transition-all duration-300";
+
+
+btn.innerHTML="📖 Afficher notes";
+
+
+}
+
+
+}
+
+
+
+
+
+
+// Sauvegarde progression
+
+function saveProgress(page,percent){
+
+
+
+fetch(
+
+"{{ route('personal-resources.progress',$book->id) }}",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json",
+
+"X-CSRF-TOKEN":
+"{{ csrf_token() }}"
+
+},
+
+body:JSON.stringify({
+
+current_page:page,
+
+progress:percent
+
+})
+
+}
+
+
+);
+
+
+}
+
+
+
 
 
 </script>
