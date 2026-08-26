@@ -244,15 +244,25 @@ class PersonalResourceController extends Controller
 
         $resource->update([
 
-            'notes' =>
-                $request->notes,
+            'notes' => $request->notes,
+
+            'status' => $request->status,
 
 
-            'status' =>
-                $request->status,
+            'reading_status' => 
+                $request->status === 'done'
+                ? 'finished'
+                : $resource->reading_status,
+
+
+            // Gestion automatique de la bibliothèque
+
+            'reading_status' => 
+                $request->status === 'done'
+                ? 'finished'
+                : $resource->reading_status,
 
         ]);
-
 
 
         return back()

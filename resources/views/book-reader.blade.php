@@ -276,14 +276,59 @@ class="flex-1 p-5 bg-yellow-50 resize-none">
 
 
 
+<div class="p-3 flex flex-col gap-2">
+
+
 <button
+type="submit"
+class="bg-blue-600 text-white py-2 rounded">
 
-class="bg-blue-600 text-white m-3 py-2 rounded">
-
-💾 Sauvegarder
+💾 Sauvegarder les notes
 
 </button>
 
+
+
+@if($book->reading_status !== 'finished')
+
+
+<button
+
+type="submit"
+
+onclick="
+document.querySelector('input[name=status]').value='done'
+"
+
+class="bg-green-600 text-white py-2 rounded">
+
+✅ Terminer la lecture
+
+</button>
+
+
+@else
+
+
+<button
+
+type="submit"
+
+onclick="
+document.querySelector('input[name=status]').value='reading'
+"
+
+class="bg-orange-500 text-white py-2 rounded">
+
+↩️ Reprendre la lecture
+
+</button>
+
+
+@endif
+
+
+</div>
 
 </form>
 
