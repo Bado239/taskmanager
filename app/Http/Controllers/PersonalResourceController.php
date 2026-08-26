@@ -74,6 +74,11 @@ class PersonalResourceController extends Controller
             ){
 
 
+                \Log::info('DEBUT UPLOAD SUPABASE');
+
+                $start = microtime(true);
+
+
                 $path = $request
                     ->file('pdf_file')
                     ->store(
@@ -81,6 +86,11 @@ class PersonalResourceController extends Controller
                         's3'
                     );
 
+
+                $temps = microtime(true) - $start;
+
+
+                \Log::info('FIN UPLOAD SUPABASE : '.$temps.' secondes');
 
 
                 if(!$path){
