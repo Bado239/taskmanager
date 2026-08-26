@@ -250,20 +250,23 @@ class PersonalResourceController extends Controller
 
 
             'reading_status' => 
+
                 $request->status === 'done'
+
                 ? 'finished'
-                : $resource->reading_status,
 
 
-            // Gestion automatique de la bibliothèque
+                : (
 
-            'reading_status' => 
-                $request->status === 'done'
-                ? 'finished'
-                : $resource->reading_status,
+                    $request->status === 'reading'
+
+                    ? 'reading'
+
+                    : $resource->reading_status
+
+                ),
 
         ]);
-
 
         return back()
 

@@ -173,13 +173,11 @@ class TaskController extends Controller
 
 
 
-            // Bibliothèque globale
+            // Bibliothèque globale : tous les livres
             $globalLibraryBooks = PersonalResource::whereRaw('is_active = true')
                 ->where('type','book')
-                ->where('reading_status','library')
                 ->latest()
                 ->get();
-
 
         }
         return view('dashboard', compact(
