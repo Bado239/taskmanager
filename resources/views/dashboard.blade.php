@@ -990,67 +990,13 @@
 
 
                     <tbody>
-
-
-                    <td class="px-4 py-3 text-right flex justify-end items-center gap-3">
-
-
-                    @if($book->reading_status === 'library')
-
-                    <form  
-                    action="{{ route('personal-resources.add-reading',$book->id) }}" 
-                    method="POST">
-
-                    @csrf
-
-                    <button
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
-
-                    ➕ Ajouter à lire
-
-                    </button>
-
-                    </form>
-
-
-                    @elseif($book->reading_status === 'finished')
-
-                    <span class="text-green-600">
-                    ✔ Déjà lu
-                    </span>
-
-
-                    @else
-
-                    <span class="text-blue-600">
-                    📖 En cours
-                    </span>
-
-                    @endif
-
-
-                    <form
-                    action="{{ route('personal-resources.destroy',$book->id) }}"
-                    method="POST"
-                    onsubmit="return confirm('Supprimer ce livre ?');">
-
-                    @csrf
-                    @method('DELETE')
-
-                    <button
-                    class="text-red-500 hover:text-red-700 text-lg">
-
-                    🗑
-
-                    </button>
-
-                    </form>
-
-
-                    </td>
+                    @foreach(
+                    $personalResources
+                    ->where('type','book')
+                    as $index=>$book
+                    )
 
                     <tr class="border-b">
-
 
 
                     <td class="px-4 py-3">
@@ -1124,13 +1070,7 @@
 
                     </td>
 
-
-
-
-
-
-                    <td class="px-4 py-3 text-right">
-
+                    <td class="px-4 py-3 text-right flex justify-end items-center gap-3">
 
 
                     @if($book->reading_status === 'library')
@@ -1142,48 +1082,56 @@
 
                     @csrf
 
-
                     <button
-
                     class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
 
                     ➕ Ajouter à lire
 
                     </button>
 
-
                     </form>
-
 
 
                     @elseif($book->reading_status === 'finished')
 
 
                     <span class="text-green-600">
-
                     ✔ Déjà lu
-
                     </span>
-
 
 
                     @else
 
 
                     <span class="text-blue-600">
-
                     📖 En cours
-
                     </span>
-
 
 
                     @endif
 
 
 
-                    </td>
+                    <form
+                    action="{{ route('personal-resources.destroy',$book->id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Voulez-vous supprimer ce livre ?');">
 
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                    type="submit"
+                    class="text-red-500 hover:text-red-700 text-lg">
+
+                    🗑
+
+                    </button>
+
+                    </form>
+
+
+                    </td>
 
 
                     </tr>
