@@ -700,130 +700,270 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             <!-- Section Livres -->
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">📚 Bibliothèque à lire</h3>
-                
-                <!-- Affichage des erreurs de validation -->
-                @if($errors->any())
-                    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-r-md">
-                        <p class="font-bold text-red-700">⚠️ Oups ! Une erreur est survenue :</p>
-                        <ul class="list-disc list-inside text-red-600 text-sm mt-2">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm md:col-span-2">
 
-                <!-- Affichage du succès -->
-                @if(session('success'))
-                    <div class="bg-green-50 border-l-4 border-green-500 p-4 mb-4 rounded-r-md text-green-700">
-                        ✅ {{ session('success') }}
-                    </div>
-                @endif
+                <div class="flex justify-between items-center mb-4">
 
-                <!-- Formulaire ajout livre PDF -->
-                <form 
-                    action="{{ route('personal-resources.store') }}" 
-                    method="POST" 
-                    enctype="multipart/form-data"
-                    class="mb-4 space-y-2"
-                >
+                    <h3 class="font-bold text-gray-900 flex items-center gap-2">
+                        📚 Bibliothèque à lire
+                    </h3>
 
-                    @csrf
 
-                    <input 
-                        type="hidden" 
-                        name="type" 
-                        value="book"
-                    >
+                    <button
+                        type="button"
+                        onclick="toggleBookForm()"
+                        id="btnBookForm"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold">
 
-                    <input 
-                        type="text" 
-                        name="title" 
-                        placeholder="Titre du livre"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                        required
-                    >
+                        📚 Ajouter un livre
 
-                    <input 
-                        type="text" 
-                        name="author_or_source" 
-                        placeholder="Auteur (optionnel)"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                    >
-
-                    <input 
-                        type="file" 
-                        name="pdf_file"
-                        accept="application/pdf"
-                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-                        required
-                    >
-
-                    <button 
-                        type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded px-3 py-2 text-sm"
-                    >
-                        + Ajouter le livre (PDF)
                     </button>
 
-                </form>
-                <!-- Liste des livres -->
-                @if($personalResources->where('type', 'book')->isNotEmpty())
-                    <ul class="space-y-3 divide-y divide-gray-100">
-                        @foreach($personalResources->where('type', 'book') as $book)
-                            <li class="pt-3 flex justify-between items-start">
-                                <div>
-                                    <a href="{{ route('personal-resources.show', $book->id) }}" class="font-semibold text-blue-700 hover:text-blue-900 text-sm hover:underline">{{ $book->title }}</a>
-                                    <p class="text-xs text-gray-500 mt-1">{{ $book->author_or_source }}</p>
-                                </div>
-                                <form action="{{ route('personal-resources.destroy', $book->id) }}" method="POST">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs ml-2">✕</button>
+
+                </div>
+
+
+                <!-- FORMULAIRE CACHE -->
+
+                <div id="bookForm"
+                    class="hidden bg-gray-50 border rounded-lg p-4 mb-5">
+
+
+                    <form 
+                    action="{{ route('personal-resources.store') }}"
+                    method="POST"
+                    enctype="multipart/form-data"
+                    class="space-y-3">
+
+
+                        @csrf
+
+
+                        <input 
+                        type="hidden"
+                        name="type"
+                        value="book">
+
+
+
+                        <input 
+                        type="text"
+                        name="title"
+                        placeholder="Titre du livre"
+                        class="w-full border rounded-lg px-3 py-2"
+                        required>
+
+
+
+                        <input
+                        type="text"
+                        name="author_or_source"
+                        placeholder="Auteur (optionnel)"
+                        class="w-full border rounded-lg px-3 py-2">
+
+
+
+                        <input
+                        type="file"
+                        name="pdf_file"
+                        accept="application/pdf"
+                        class="w-full border rounded-lg px-3 py-2"
+                        required>
+
+
+
+                        <div class="flex gap-3">
+
+
+                            <button
+                            type="submit"
+                            class="bg-blue-600 text-white px-5 py-2 rounded-lg font-semibold">
+
+                            💾 Ajouter
+
+                            </button>
+
+
+                            <button
+                            type="button"
+                            onclick="toggleBookForm()"
+                            class="bg-gray-400 text-white px-5 py-2 rounded-lg">
+
+                            Annuler
+
+                            </button>
+
+
+                        </div>
+
+
+                    </form>
+
+
+                </div>
+
+
+
+
+                <!-- TABLEAU DES LIVRES -->
+
+
+                @if($personalResources->where('type','book')->isNotEmpty())
+
+
+                <div class="overflow-x-auto">
+
+
+                    <table class="w-full text-sm text-left">
+
+
+                        <thead class="bg-gray-100">
+
+                            <tr>
+
+                                <th class="px-4 py-3">
+                                    #
+                                </th>
+
+                                <th class="px-4 py-3">
+                                    Titre
+                                </th>
+
+                                <th class="px-4 py-3">
+                                    Auteur
+                                </th>
+
+                                <th class="px-4 py-3">
+                                    Statut
+                                </th>
+
+                                <th class="px-4 py-3 text-right">
+                                    Actions
+                                </th>
+
+
+                            </tr>
+
+
+                        </thead>
+
+
+
+                        <tbody>
+
+
+                        @foreach($personalResources->where('type','book') as $index=>$book)
+
+
+                        <tr class="border-b">
+
+
+                            <td class="px-4 py-3">
+                                {{ $index+1 }}
+                            </td>
+
+
+
+                            <td class="px-4 py-3">
+
+
+                                <a href="{{ route('personal-resources.show',$book->id) }}"
+                                class="text-blue-600 font-semibold hover:underline">
+
+                                {{ $book->title }}
+
+                                </a>
+
+
+                            </td>
+
+
+
+                            <td class="px-4 py-3">
+
+                                {{ $book->author_or_source ?? '-' }}
+
+                            </td>
+
+
+
+                            <td class="px-4 py-3">
+
+
+                                @if($book->status === 'done')
+
+                                <span class="text-green-600">
+                                ✅ Terminé
+                                </span>
+
+                                @else
+
+                                <span class="text-blue-600">
+                                📖 Lecture
+                                </span>
+
+                                @endif
+
+
+                            </td>
+
+
+
+                            <td class="px-4 py-3 text-right">
+
+
+                                <form 
+                                action="{{ route('personal-resources.destroy',$book->id) }}"
+                                method="POST">
+
+                                @csrf
+                                @method('DELETE')
+
+
+                                <button
+                                class="text-red-500">
+
+                                ✕
+
+                                </button>
+
+
                                 </form>
-                            </li>
+
+
+                            </td>
+
+
+                        </tr>
+
+
                         @endforeach
-                    </ul>
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
                 @else
-                    <div class="text-center py-4 text-gray-400 text-sm italic">Aucun livre ajouté pour le moment.</div>
+
+
+                <p class="text-gray-400 text-center py-5">
+
+                Aucun livre ajouté pour le moment.
+
+                </p>
+
+
                 @endif
+
+
+
             </div>
-
-            <!-- Section Vocabulaire -->
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h3 class="font-bold text-gray-900 mb-4 flex items-center gap-2">✍️ Vocabulaire & Français</h3>
-                
-                <!-- Formulaire d'ajout de mot -->
-                <form action="{{ route('personal-resources.store') }}" method="POST" class="mb-4 space-y-2">
-                    @csrf
-                    <input type="hidden" name="type" value="vocab">
-                    <input type="text" name="title" placeholder="Mot ou expression" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-green-500" required>
-                    <textarea name="description" placeholder="Définition ou exemple d'utilisation..." rows="2" class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-1 focus:ring-green-500"></textarea>
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold rounded px-3 py-2 text-sm transition">+ Ajouter un mot</button>
-                </form>
-
-                <!-- Liste des mots -->
-                @if($personalResources->where('type', 'vocab')->isNotEmpty())
-                    <ul class="space-y-3 divide-y divide-gray-100">
-                        @foreach($personalResources->where('type', 'vocab') as $word)
-                            <li class="pt-3 flex justify-between items-start">
-                                <div class="flex-1">
-                                    <p class="font-semibold text-gray-800 text-sm">{{ $word->title }}</p>
-                                    <p class="text-xs text-gray-600 mt-1">{{ $word->description }}</p>
-                                </div>
-                                <form action="{{ route('personal-resources.destroy', $word->id) }}" method="POST">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="text-red-400 hover:text-red-600 text-xs ml-2">✕</button>
-                                </form>
-                            </li>
-                        @endforeach
-                    </ul>
-                @else
-                    <div class="text-center py-4 text-gray-400 text-sm italic">Ajoute des mots pour enrichir ton expression.</div>
-                @endif
-            </div>
-
         </div>
     @endif
     
@@ -843,4 +983,33 @@
         <span>Conçu avec <span class="text-red-500">❤️</span> par <strong class="text-slate-900 font-semibold">Bado</strong></span>
     </div>
 </footer>
+<script>
+
+function toggleBookForm(){
+
+    let form = document.getElementById('bookForm');
+
+    let btn = document.getElementById('btnBookForm');
+
+
+    if(form.classList.contains('hidden')){
+
+        form.classList.remove('hidden');
+
+        btn.innerHTML="✕ Fermer";
+
+    }
+
+    else{
+
+        form.classList.add('hidden');
+
+        btn.innerHTML="📚 Ajouter un livre";
+
+    }
+
+}
+
+</script>
+
 @endsection

@@ -177,37 +177,3 @@ Route::post('/personal-resources/{id}/progress', [
     'progress'
 
 ])->name('personal-resources.progress');
-
-
-
-
-
-/*
-|--------------------------------------------------------------------------
-| TEST CONFIGURATION PHP RENDER
-|--------------------------------------------------------------------------
-|
-| TEMPORAIRE
-| À supprimer après vérification
-|
-*/
-
-Route::get('/php-info-test', function () {
-
-
-    return [
-
-        'upload_max_filesize' => ini_get('upload_max_filesize'),
-
-        'post_max_size' => ini_get('post_max_size'),
-
-        'memory_limit' => ini_get('memory_limit'),
-
-        'max_execution_time' => ini_get('max_execution_time'),
-
-        'max_input_time' => ini_get('max_input_time'),
-
-    ];
-
-
-});
