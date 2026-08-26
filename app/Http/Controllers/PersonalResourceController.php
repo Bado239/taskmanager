@@ -47,7 +47,7 @@ class PersonalResourceController extends Controller
                 'nullable',
                 'file',
                 'mimes:pdf',
-                'max:20480'
+                'max:102400'
             ],
 
         ]);
