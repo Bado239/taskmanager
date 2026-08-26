@@ -906,32 +906,77 @@
 
                             </td>
 
+                            <td class="px-4 py-3 text-right flex justify-end items-center gap-3">
 
 
-                            <td class="px-4 py-3 text-right">
+                            @if($book->reading_status === 'library')
 
 
-                                <form 
-                                action="{{ route('personal-resources.destroy',$book->id) }}"
-                                method="POST">
+                            <form
+                            action="{{ route('personal-resources.add-reading',$book->id) }}"
+                            method="POST">
 
-                                @csrf
-                                @method('DELETE')
+                            @csrf
+
+                            <button
+                            class="bg-blue-600 text-white px-3 py-1 rounded">
+
+                            ➕ Ajouter à lire
+
+                            </button>
+
+                            </form>
 
 
-                                <button
-                                class="text-red-500">
-
-                                ✕
-
-                                </button>
+                            @elseif($book->reading_status === 'reading')
 
 
-                                </form>
+                            <span class="text-blue-600">
+
+                            📖 En cours
+
+                            </span>
+
+
+                            @elseif($book->reading_status === 'finished')
+
+
+                            <span class="text-green-600">
+
+                            ✅ Terminé
+
+                            </span>
+
+
+                            @endif
+
+
+
+                            <!-- Suppression -->
+
+                            <form
+                            action="{{ route('personal-resources.destroy',$book->id) }}"
+                            method="POST"
+                            onsubmit="return confirm('Voulez-vous supprimer ce livre ?');">
+
+                            @csrf
+                            @method('DELETE')
+
+
+                            <button
+                            type="submit"
+                            class="text-red-500 hover:text-red-700 text-lg"
+                            title="Supprimer">
+
+                            🗑
+
+                            </button>
+
+
+                            </form>
 
 
                             </td>
-
 
                         </tr>
 
