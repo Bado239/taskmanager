@@ -957,7 +957,222 @@
                     </div>
                     <!-- BIBLIOTHÈQUE GLOBALE CACHÉE -->
 
+                    <!-- BIBLIOTHÈQUE GLOBALE CACHÉE -->
+
                     <div id="globalLibrary"
+                    class="hidden mt-6 bg-gray-50 border rounded-xl p-5">
+
+
+                    <h3 class="font-bold text-lg mb-4 text-gray-800">
+                    📚 Bibliothèque globale
+                    </h3>
+
+
+
+                    <table class="w-full text-sm text-left">
+
+
+                    <thead class="bg-gray-200">
+
+                    <tr>
+
+                    <th class="px-4 py-3">
+                    #
+                    </th>
+
+
+                    <th class="px-4 py-3">
+                    Titre
+                    </th>
+
+
+                    <th class="px-4 py-3">
+                    Auteur
+                    </th>
+
+
+                    <th class="px-4 py-3">
+                    État
+                    </th>
+
+
+                    <th class="px-4 py-3 text-right">
+                    Action
+                    </th>
+
+
+                    </tr>
+
+                    </thead>
+
+
+
+                    <tbody>
+
+
+
+                    @foreach(
+                        $personalResources
+                        ->where('type','book')
+                        as $index=>$book
+                    )
+
+
+                    <tr class="border-b">
+
+
+
+                    <td class="px-4 py-3">
+                    {{ $index+1 }}
+                    </td>
+
+
+
+                    <td class="px-4 py-3 font-semibold">
+
+                    <a href="{{ route('personal-resources.show',$book->id) }}"
+                    class="text-blue-600 hover:underline">
+
+                    {{ $book->title }}
+
+                    </a>
+
+                    </td>
+
+
+
+
+                    <td class="px-4 py-3">
+
+                    {{ $book->author_or_source ?? '-' }}
+
+                    </td>
+
+
+
+
+
+                    <td class="px-4 py-3">
+
+
+                    @if($book->reading_status === 'finished')
+
+
+                    <span class="text-green-600 font-semibold">
+
+                    ✅ Terminé
+
+                    </span>
+
+
+
+                    @elseif($book->reading_status === 'reading')
+
+
+                    <span class="text-blue-600 font-semibold">
+
+                    📖 En lecture
+
+                    </span>
+
+
+
+                    @else
+
+
+                    <span class="text-gray-600 font-semibold">
+
+                    📚 Disponible
+
+                    </span>
+
+
+                    @endif
+
+
+
+                    </td>
+
+
+
+
+
+
+                    <td class="px-4 py-3 text-right">
+
+
+
+                    @if($book->reading_status === 'library')
+
+
+                    <form  
+                    action="{{ route('personal-resources.add-reading',$book->id) }}" 
+                    method="POST">
+
+                    @csrf
+
+
+                    <button
+
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+
+                    ➕ Ajouter à lire
+
+                    </button>
+
+
+                    </form>
+
+
+
+                    @elseif($book->reading_status === 'finished')
+
+
+                    <span class="text-green-600">
+
+                    ✔ Déjà lu
+
+                    </span>
+
+
+
+                    @else
+
+
+                    <span class="text-blue-600">
+
+                    📖 En cours
+
+                    </span>
+
+
+
+                    @endif
+
+
+
+                    </td>
+
+
+
+                    </tr>
+
+
+
+                    @endforeach
+
+
+
+                    </tbody>
+
+
+
+                    </table>
+
+
+
+                    </div>                    
+                    
                     class="hidden mt-6 bg-gray-50 border rounded-xl p-5">
 
 
@@ -1002,12 +1217,10 @@
 
 
                     @foreach(
-                    $personalResources
-                    ->where('type','book')
-                    ->where('reading_status','library')
-                    as $index=>$book
+                        $personalResources
+                        ->where('type','book')
+                        as $index=>$book
                     )
-
 
                     <tr class="border-b">
 
