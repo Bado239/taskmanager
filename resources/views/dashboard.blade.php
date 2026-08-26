@@ -906,78 +906,17 @@
 
                             </td>
 
-                            <td class="px-4 py-3 text-right flex justify-end items-center gap-3">
+                            <td class="px-4 py-3 text-right">
 
-
-                            @if($book->reading_status === 'library')
-
-
-                            <form
-                            action="{{ route('personal-resources.add-reading',$book->id) }}"
-                            method="POST">
-
-                            @csrf
-
-                            <button
-                            class="bg-blue-600 text-white px-3 py-1 rounded">
-
-                            ➕ Ajouter à lire
-
-                            </button>
-
-                            </form>
-
-
-                            @elseif($book->reading_status === 'reading')
-
+                            @if($book->reading_status === 'reading')
 
                             <span class="text-blue-600">
-
                             📖 En cours
-
                             </span>
-
-
-                            @elseif($book->reading_status === 'finished')
-
-
-                            <span class="text-green-600">
-
-                            ✅ Terminé
-
-                            </span>
-
 
                             @endif
 
-
-
-                            <!-- Suppression -->
-
-                            <form
-                            action="{{ route('personal-resources.destroy',$book->id) }}"
-                            method="POST"
-                            onsubmit="return confirm('Voulez-vous supprimer ce livre ?');">
-
-                            @csrf
-                            @method('DELETE')
-
-
-                            <button
-                            type="submit"
-                            class="text-red-500 hover:text-red-700 text-lg"
-                            title="Supprimer">
-
-                            🗑
-
-                            </button>
-
-
-                            </form>
-
-
                             </td>
-
                         </tr>
 
 
@@ -1000,8 +939,6 @@
                     </button>
 
                     </div>
-                    <!-- BIBLIOTHÈQUE GLOBALE CACHÉE -->
-
                     <!-- BIBLIOTHÈQUE GLOBALE CACHÉE -->
 
                     <div id="globalLibrary"
@@ -1055,13 +992,62 @@
                     <tbody>
 
 
+                    <td class="px-4 py-3 text-right flex justify-end items-center gap-3">
 
-                    @foreach(
-                        $personalResources
-                        ->where('type','book')
-                        as $index=>$book
-                    )
 
+                    @if($book->reading_status === 'library')
+
+                    <form  
+                    action="{{ route('personal-resources.add-reading',$book->id) }}" 
+                    method="POST">
+
+                    @csrf
+
+                    <button
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+
+                    ➕ Ajouter à lire
+
+                    </button>
+
+                    </form>
+
+
+                    @elseif($book->reading_status === 'finished')
+
+                    <span class="text-green-600">
+                    ✔ Déjà lu
+                    </span>
+
+
+                    @else
+
+                    <span class="text-blue-600">
+                    📖 En cours
+                    </span>
+
+                    @endif
+
+
+                    <form
+                    action="{{ route('personal-resources.destroy',$book->id) }}"
+                    method="POST"
+                    onsubmit="return confirm('Supprimer ce livre ?');">
+
+                    @csrf
+                    @method('DELETE')
+
+                    <button
+                    class="text-red-500 hover:text-red-700 text-lg">
+
+                    🗑
+
+                    </button>
+
+                    </form>
+
+
+                    </td>
 
                     <tr class="border-b">
 
