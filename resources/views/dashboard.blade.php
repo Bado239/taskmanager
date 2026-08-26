@@ -889,7 +889,7 @@
                             <td class="px-4 py-3">
 
 
-                                @if($book->status === 'done')
+                                @if($book->reading_status === 'finished')
 
                                 <span class="text-green-600">
                                 ✅ Terminé
@@ -1169,127 +1169,8 @@
 
                     </table>
 
-
-
                     </div>                    
                     
-                    class="hidden mt-6 bg-gray-50 border rounded-xl p-5">
-
-
-                    <h3 class="font-bold text-lg mb-4 text-gray-800">
-                    📚 Bibliothèque globale
-                    </h3>
-
-
-                    <table class="w-full text-sm text-left">
-
-
-                    <thead class="bg-gray-200">
-
-                    <tr>
-
-                    <th class="px-4 py-3">
-                    #
-                    </th>
-
-                    <th class="px-4 py-3">
-                    Titre
-                    </th>
-
-                    <th class="px-4 py-3">
-                    Auteur
-                    </th>
-
-                    <th class="px-4 py-3">
-                    État
-                    </th>
-
-                    <th class="px-4 py-3 text-right">
-                    Action
-                    </th>
-
-                    </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-
-                    @foreach(
-                        $personalResources
-                        ->where('type','book')
-                        as $index=>$book
-                    )
-
-                    <tr class="border-b">
-
-
-                    <td class="px-4 py-3">
-                    {{ $index+1 }}
-                    </td>
-
-
-                    <td class="px-4 py-3 font-semibold">
-
-                    {{ $book->title }}
-
-                    </td>
-
-
-                    <td class="px-4 py-3">
-
-                    {{ $book->author_or_source ?? '-' }}
-
-                    </td>
-
-
-                    <td class="px-4 py-3">
-
-                    📚 Disponible
-
-                    </td>
-
-
-                    <td class="px-4 py-3 text-right">
-
-
-                    <form 
-                    action="{{ route('personal-resources.add-reading',$book->id) }}"
-                    method="POST">
-
-                    @csrf
-
-                    <button
-                    class="bg-blue-600 text-white px-3 py-1 rounded">
-
-                    ➕ Ajouter à lire
-
-                    </button>
-
-                    </form>
-
-
-                    </td>
-
-
-                    </tr>
-
-
-                    @endforeach
-
-
-                    </tbody>
-
-
-                    </table>
-
-
-                    </div>
-
-
-                </div>
-
 
                 @else
 
