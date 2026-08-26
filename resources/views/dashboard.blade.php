@@ -1178,142 +1178,39 @@
     </form>
 @endforeach
 
-<footer class="mt-20 pb-8">
+<footer class="mt-auto pb-8 pt-6 text-center text-sm text-slate-600 font-medium">
 
-    <div class="relative mx-auto max-w-5xl">
+    <div class="flex justify-center px-4">
 
-        <!-- Ligne décorative -->
-        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r 
-        from-transparent via-blue-300 to-transparent"></div>
+        <div class="inline-flex flex-col sm:flex-row items-center justify-center 
+        gap-2 px-5 py-2.5 rounded-full 
+        bg-slate-100/70 
+        border border-slate-200/80 
+        shadow-sm 
+        backdrop-blur-sm">
 
+            <span class="text-slate-700">
+                Laravel Task Manager &copy; {{ date('Y') }}
+            </span>
 
-        <div class="mt-8 mx-4 rounded-2xl 
-        bg-white/80 backdrop-blur-xl 
-        border border-slate-200 
-        shadow-lg shadow-slate-200/50
-        px-8 py-6">
+            <span class="hidden sm:inline text-slate-300">
+                •
+            </span>
 
-
-            <div class="flex flex-col md:flex-row 
-            items-center justify-between gap-5">
-
-
-                <!-- Identité application -->
-                <div class="flex items-center gap-3">
-
-
-                    <div class="w-12 h-12 rounded-xl 
-                    bg-gradient-to-br from-blue-600 to-indigo-600
-                    flex items-center justify-center
-                    shadow-lg">
-
-                        <span class="text-white text-2xl">
-                            ⚡
-                        </span>
-
-                    </div>
-
-
-                    <div class="text-left">
-
-                        <h3 class="font-bold text-lg text-slate-900">
-                            TaskManagerPRO
-                        </h3>
-
-                        <p class="text-xs text-slate-500">
-                            Gestion intelligente • Organisation • Productivité
-                        </p>
-
-                    </div>
-
-
-                </div>
-
-
-
-
-
-                <!-- Copyright -->
-
-                <div class="text-center md:text-right">
-
-
-                    <p class="text-sm text-slate-600">
-
-                        © {{ date('Y') }}
-
-                        <span class="font-semibold text-slate-900">
-                            TaskManagerPRO
-                        </span>
-
-                    </p>
-
-
-                    <p class="text-sm mt-1 text-slate-500">
-
-                        Développé avec
-
-                        <span class="text-red-500 animate-pulse">
-                            ❤️
-                        </span>
-
-                        par
-
-                        <span class="font-bold text-blue-600">
-                            Bado
-                        </span>
-
-                    </p>
-
-
-                </div>
-
-
-
-            </div>
-
-
-
-
-
-            <!-- Bas footer -->
-
-            <div class="mt-5 pt-4 border-t border-slate-100 
-            flex flex-col sm:flex-row 
-            justify-center items-center gap-2">
-
-
-                <span class="text-xs text-slate-400">
-
-                    Version 1.0
-
-                </span>
-
-
-                <span class="hidden sm:block text-slate-300">
-                    •
-                </span>
-
-
-                <span class="text-xs text-slate-400">
-
-                    Une plateforme pensée pour mieux gérer vos projets
-
-                </span>
-
-
-            </div>
-
-
+            <span>
+                Conçu avec 
+                <span class="text-red-500">❤️</span> 
+                par 
+                <strong class="text-slate-900 font-semibold">
+                    Bado
+                </strong>
+            </span>
 
         </div>
 
-
     </div>
 
-
 </footer>
-
 <script>
 
 function toggleBookForm(){
