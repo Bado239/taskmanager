@@ -144,13 +144,44 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-// 🌱 Récupération des ressources pour le mode Développement Personnel
+// 🌱 Gestion bibliothèque personnelle
+
         $personalResources = collect();
+
+        $readingBooks = collect();
+
+        $globalLibraryBooks = collect();
+
+
         if ($view === 'personal') {
+
+
+            // Tous les livres actifs
             $personalResources = PersonalResource::whereRaw('is_active = true')
+                ->where('type','book')
                 ->latest()
                 ->get();
-        }                
+
+
+
+            // Bibliothèque à lire
+            $readingBooks = PersonalResource::whereRaw('is_active = true')
+                ->where('type','book')
+                ->where('reading_status','reading')
+                ->latest()
+                ->get();
+
+
+
+            // Bibliothèque globale
+            $globalLibraryBooks = PersonalResource::whereRaw('is_active = true')
+                ->where('type','book')
+                ->where('reading_status','library')
+                ->latest()
+                ->get();
+
+
+        }
         return view('dashboard', compact(
             'view',
             'filter',
@@ -168,6 +199,8 @@ class TaskController extends Controller
             'officeTasks',
             'masterTasks',
             'personalResources',
+            'readingBooks',
+            'globalLibraryBooks',
             'categories',
             'projects',
             'projectsOffice',

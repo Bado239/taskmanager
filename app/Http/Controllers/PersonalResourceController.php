@@ -157,6 +157,8 @@ class PersonalResourceController extends Controller
 
                 'status' => 'to_read',
 
+                'reading_status' => 'library',
+
 
                 'is_active' => true,
 
@@ -392,6 +394,31 @@ class PersonalResourceController extends Controller
             'progress' => $book->progress,
 
         ]);
+
+    }
+
+        /**
+     * Ajouter un livre dans la bibliothèque à lire
+     */
+    public function addReading($id)
+    {
+
+        $book = PersonalResource::findOrFail($id);
+
+
+        $book->update([
+
+            'reading_status' => 'reading',
+
+            'status' => 'to_read',
+
+        ]);
+
+
+        return back()->with(
+            'success',
+            'Livre ajouté dans la bibliothèque à lire.'
+        );
 
     }
 

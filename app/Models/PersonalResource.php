@@ -31,10 +31,15 @@ class PersonalResource extends Model
 
         'pdf_path',
 
+
         // Progression lecture
         'current_page',
 
         'progress',
+
+
+        // Gestion bibliothèque
+        'reading_status',
 
     ];
 
@@ -58,10 +63,24 @@ class PersonalResource extends Model
 
 
     /**
+     * Valeurs par défaut
+     */
+    protected $attributes = [
+
+        'reading_status' => 'library',
+
+        'progress' => 0,
+
+        'current_page' => 1,
+
+    ];
+
+
+
+
+
+    /**
      * Correction PostgreSQL BOOLEAN
-     *
-     * PostgreSQL attend true/false
-     * et non 1/0
      */
     public function setIsActiveAttribute($value)
     {
@@ -70,7 +89,6 @@ class PersonalResource extends Model
             $value ? 'true' : 'false';
 
     }
-
 
 
 }

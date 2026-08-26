@@ -170,6 +170,13 @@ Route::put('/personal-resources/{id}', [
 ])->name('personal-resources.update');
 
 
+// Ajouter un livre à la bibliothèque à lire
+Route::post('/personal-resources/{id}/add-reading', [
+    PersonalResourceController::class,
+    'addReading'
+
+])->name('personal-resources.add-reading');
+
 
 // Sauvegarder progression lecture PDF
 Route::post('/personal-resources/{id}/progress', [
