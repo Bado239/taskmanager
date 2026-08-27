@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 <title>
 Lecture : {{ $book->title }}
@@ -342,17 +343,13 @@ value="{{ $book->status }}">
 
 
 <textarea
-
-id="notes"
-
 name="notes"
-
+id="notes"
 class="flex-1 p-5 bg-yellow-50 resize-none">
 
 {{ $book->notes }}
 
 </textarea>
-
 
 <div class="p-3 flex flex-col gap-2">
 
@@ -598,7 +595,7 @@ function saveNotes(){
             "Content-Type":"application/json",
 
             "X-CSRF-TOKEN":
-            document.querySelector('meta[name="csrf-token"]').content
+            "{{ csrf_token() }}"
 
         },
 
@@ -610,13 +607,9 @@ function saveNotes(){
 
     })
 
-    .then(response=>response.json())
-
-    .then(data=>{
-
+    .then(()=>{
 
         alert("✅ Notes sauvegardées");
-
 
     })
 
@@ -628,9 +621,7 @@ function saveNotes(){
 
     });
 
-
 }
-
 
 
 
