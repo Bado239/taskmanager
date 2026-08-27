@@ -11,6 +11,24 @@ Lecture : {{ $book->title }}
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+
+.night-mode{
+
+    background:#111827 !important;
+
+}
+
+
+.night-mode #pdfViewer{
+
+    background:#000 !important;
+
+}
+
+
+</style>
+
 </head>
 
 
@@ -917,41 +935,48 @@ else{
 
 function modeNuit(){
 
-    document.getElementById('pdfZone')
-    .style.background="#111827";
+    document.body.classList.add('night-mode');
 
+    document.querySelectorAll('#pdfViewer canvas')
+    .forEach(canvas=>{
 
-    document.getElementById('pdfViewer')
-    .style.background="#000";
+        canvas.style.filter =
+        "invert(0.9) hue-rotate(180deg)";
+
+    });
 
 }
-
 
 
 function modePapier(){
 
-    document.getElementById('pdfZone')
-    .style.background="#f5f0dc";
+    document.body.classList.remove('night-mode');
 
 
-    document.getElementById('pdfViewer')
-    .style.background="#f5f0dc";
+    document.querySelectorAll('#pdfViewer canvas')
+    .forEach(canvas=>{
+
+        canvas.style.filter =
+        "sepia(25%) brightness(95%) contrast(90%)";
+
+    });
 
 }
-
 
 
 function modeNormal(){
 
-    document.getElementById('pdfZone')
-    .style.background="#374151";
+    document.querySelectorAll('#pdfViewer canvas')
+    .forEach(canvas=>{
+
+        canvas.style.filter="none";
+
+    });
 
 
-    document.getElementById('pdfViewer')
-    .style.background="transparent";
+    document.body.classList.remove('night-mode');
 
 }
-
 
 
 // ==========================
