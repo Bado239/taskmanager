@@ -231,52 +231,51 @@ class PersonalResourceController extends Controller
     /**
      * Mise à jour livre
      */
-    public function update(
-        Request $request,
-        $id
-    )
-    {
+public function update(Request $request, $id)
+{
 
-        $resource =
-            PersonalResource::findOrFail($id);
+    $resource = PersonalResource::findOrFail($id);
 
 
+    $resource->update([
 
-        $resource->update([
-
-            'notes' => $request->notes,
-
-            'status' => $request->status,
+        'notes' => $request->input('notes', $resource->notes),
 
 
-            'reading_status' => 
-
-                $request->status === 'done'
-
-                ? 'finished'
+        'status' => $request->input('status', $resource->status),
 
 
-                : (
+        'reading_status' =>
 
-                    $request->status === 'reading'
+            $request->input('status') === 'done'
 
-                    ? 'reading'
+            ? 'finished'
 
-                    : $resource->reading_status
 
-                ),
+            :
 
-        ]);
+            (
 
-        return back()
+                $request->input('status') === 'reading'
 
-            ->with(
-                'success',
-                'Modification enregistrée.'
-            );
+                ? 'reading'
 
-    }
+                : $resource->reading_status
 
+            ),
+
+    ]);
+
+
+    return response()->json([
+
+        'success'=>true,
+
+        'message'=>'Sauvegarde réussie'
+
+    ]);
+
+}
 
 
 
