@@ -130,7 +130,66 @@ class="w-[70%] flex flex-col bg-gray-700">
 
 </div>
 
+<!-- MODES DE LECTURE -->
 
+<div class="bg-gray-900 p-2 flex justify-center gap-2">
+
+
+<button
+onclick="modeNormal()"
+class="bg-gray-700 text-white px-3 py-1 rounded">
+
+☀️ Normal
+
+</button>
+
+
+<button
+onclick="modeNuit()"
+class="bg-black text-white px-3 py-1 rounded border">
+
+🌙 Nuit
+
+</button>
+
+
+<button
+onclick="modePapier()"
+class="bg-yellow-700 text-white px-3 py-1 rounded">
+
+📖 Papier
+
+</button>
+
+
+<button
+onclick="pleinEcran()"
+class="bg-blue-600 text-white px-3 py-1 rounded">
+
+⛶ Plein écran
+
+</button>
+
+
+<button
+onclick="changerZoom(-0.1)"
+class="bg-gray-700 text-white px-3 py-1 rounded">
+
+🔠 A-
+
+</button>
+
+
+<button
+onclick="changerZoom(0.1)"
+class="bg-gray-700 text-white px-3 py-1 rounded">
+
+🔠 A+
+
+</button>
+
+
+</div>
 
 <div
 
@@ -851,6 +910,114 @@ else{
 
 }
 
+// ==========================
+// MODES DE LECTURE
+// ==========================
+
+
+function modeNuit(){
+
+    document.getElementById('pdfZone')
+    .style.background="#111827";
+
+
+    document.getElementById('pdfViewer')
+    .style.background="#000";
+
+}
+
+
+
+function modePapier(){
+
+    document.getElementById('pdfZone')
+    .style.background="#f5f0dc";
+
+
+    document.getElementById('pdfViewer')
+    .style.background="#f5f0dc";
+
+}
+
+
+
+function modeNormal(){
+
+    document.getElementById('pdfZone')
+    .style.background="#374151";
+
+
+    document.getElementById('pdfViewer')
+    .style.background="transparent";
+
+}
+
+
+
+// ==========================
+// PLEIN ECRAN
+// ==========================
+
+function pleinEcran(){
+
+    let zone =
+    document.getElementById('pdfZone');
+
+
+    if(!document.fullscreenElement){
+
+        zone.requestFullscreen();
+
+    }else{
+
+        document.exitFullscreen();
+
+    }
+
+}
+
+
+
+// ==========================
+// ZOOM LECTURE
+// ==========================
+
+let zoomLecture = 1.4;
+
+
+function changerZoom(valeur){
+
+    zoomLecture += valeur;
+
+
+    if(zoomLecture < 0.8){
+
+        zoomLecture = 0.8;
+
+    }
+
+
+    if(zoomLecture > 2){
+
+        zoomLecture = 2;
+
+    }
+
+
+    document.querySelectorAll(
+    "#pdfViewer canvas"
+    ).forEach(canvas=>{
+
+        canvas.style.transform=
+        "scale("+zoomLecture/1.4+")";
+
+        canvas.style.transformOrigin=
+        "top center";
+
+    });
+
+
+}
 
 </script>
 
