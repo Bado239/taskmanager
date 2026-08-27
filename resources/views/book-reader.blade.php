@@ -485,7 +485,6 @@ pdfjsLib.getDocument(url)
 
     setTimeout(()=>{
 
-
         let page =
         document.querySelector(
         `canvas[data-page="${currentPage}"]`
@@ -494,16 +493,18 @@ pdfjsLib.getDocument(url)
 
         if(page){
 
-            page.scrollIntoView({
-                behavior:"smooth",
-                block:"start"
+            viewer.scrollTo({
+
+                top: page.offsetTop - 20,
+
+                behavior:"smooth"
+
             });
 
         }
 
 
-    },3000);
-
+    },1500);
 
 
 });
@@ -717,6 +718,7 @@ function updateProgress(page){
 
     document.getElementById('currentPage').innerHTML =
     page;
+    currentPage = page;
 
 
 
@@ -1081,6 +1083,18 @@ function changerZoom(valeur){
 
 
 }
+
+window.addEventListener("beforeunload",()=>{
+
+    let page = currentPage;
+
+    let percent =
+    Math.round((page / totalPages) * 100);
+
+
+    saveProgress(page,percent);
+
+});
 
 </script>
 
