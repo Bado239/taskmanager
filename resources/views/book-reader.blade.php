@@ -343,6 +343,8 @@ value="{{ $book->status }}">
 
 <textarea
 
+id="notes"
+
 name="notes"
 
 class="flex-1 p-5 bg-yellow-50 resize-none">
@@ -352,18 +354,17 @@ class="flex-1 p-5 bg-yellow-50 resize-none">
 </textarea>
 
 
-
 <div class="p-3 flex flex-col gap-2">
 
 
 <button
-type="submit"
-class="bg-blue-600 text-white py-2 rounded">
+type="button"
+onclick="saveNotes()"
+class="bg-blue-600 text-white px-5 py-3 rounded">
 
 💾 Sauvegarder les notes
 
 </button>
-
 
 
 @if($book->reading_status !== 'finished')
@@ -582,7 +583,53 @@ function loadPage(num){
 }
 
 
+function saveNotes(){
 
+    let notes =
+    document.getElementById('notes').value;
+
+
+    fetch("{{ route('personal-resources.update',$book->id) }}", {
+
+        method:"PUT",
+
+        headers:{
+
+            "Content-Type":"application/json",
+
+            "X-CSRF-TOKEN":
+            document.querySelector('meta[name="csrf-token"]').content
+
+        },
+
+        body:JSON.stringify({
+
+            notes:notes
+
+        })
+
+    })
+
+    .then(response=>response.json())
+
+    .then(data=>{
+
+
+        alert("✅ Notes sauvegardées");
+
+
+    })
+
+    .catch(error=>{
+
+        console.log(error);
+
+        alert("Erreur sauvegarde");
+
+    });
+
+
+}
 
 
 
