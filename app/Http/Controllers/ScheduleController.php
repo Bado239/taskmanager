@@ -32,6 +32,7 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
 
+
         $request->validate([
 
             'title' => 'required',
@@ -46,14 +47,14 @@ class ScheduleController extends Controller
 
 
 
-        // Nom fichier unique
+        // Nom unique du fichier
 
         $filename =
-        time().'_'.$file->getClientOriginalName();
+            time().'_'.$file->getClientOriginalName();
 
 
 
-        // Envoi Supabase Storage
+        // Upload dans Supabase Storage
 
         $path = Storage::disk('s3')
             ->putFileAs(
@@ -65,35 +66,36 @@ class ScheduleController extends Controller
 
 
 
-        // URL publique
+        // URL publique Supabase
 
         $url =
-        Storage::disk('s3')
-        ->url($path);
+        'https://zhlojjivmwuuqhzeqpgg.supabase.co/storage/v1/object/public/ebooks/'
+        . $path;
 
 
 
 
         Schedule::create([
 
-            'title'=>$request->title,
+            'title' => $request->title,
 
-            'file_path'=>$url,
+            'file_path' => $url,
 
-            'type'=>$file->getClientOriginalExtension(),
+            'type' => strtolower(
+                $file->getClientOriginalExtension()
+            ),
 
         ]);
 
 
 
         return back()
-        ->with(
-            'success',
-            'Emploi du temps ajouté avec succès'
-        );
+            ->with(
+                'success',
+                'Emploi du temps ajouté avec succès'
+            );
 
     }
-
 
 
 }
