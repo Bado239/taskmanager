@@ -32,6 +32,7 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
 
+    dd("FORMULAIRE RECU", $request->all(), $request->file('file'));
         $request->validate([
 
             'title' => 'required',
@@ -43,11 +44,6 @@ class ScheduleController extends Controller
 
 
         $file = $request->file('file');
-
-                dd([
-                    'titre' => $request->title,
-                    'fichier' => $file->getClientOriginalName()
-                ]);
 
 
 
