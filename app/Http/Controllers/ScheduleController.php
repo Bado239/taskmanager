@@ -32,6 +32,10 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
 
+     dd(
+        $request->all(),
+        $request->file('file')
+    );
 
         $request->validate([
 
