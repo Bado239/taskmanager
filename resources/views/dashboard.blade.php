@@ -600,6 +600,12 @@
                    class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
                    📅 Aujourd'hui
                 </a>
+                <a href="{{ route('schedule.index') }}"
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+
+                    📅 Emploi du temps
+
+                </a>
                 <a href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}" 
                    class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
                    📁 Archives

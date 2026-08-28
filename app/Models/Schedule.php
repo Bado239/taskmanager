@@ -6,5 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-    protected $fillable = ['file_path'];
+
+    protected $table = 'schedules';
+
+
+    protected $fillable = [
+
+        'title',
+
+        'file_path',
+
+        'type',
+
+        'description',
+
+    ];
+
 }

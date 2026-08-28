@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PersonalResourceController;
+use App\Http\Controllers\ScheduleController;
 
 
 /*
@@ -184,3 +185,18 @@ Route::post('/personal-resources/{id}/progress', [
     'progress'
 
 ])->name('personal-resources.progress');
+
+// Emploi du temps Master
+
+Route::get(
+    '/schedule',
+    [ScheduleController::class,'index']
+)
+->name('schedule.index');
+
+
+Route::post(
+    '/schedule',
+    [ScheduleController::class,'store']
+)
+->name('schedule.store');
