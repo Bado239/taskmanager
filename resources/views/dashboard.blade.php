@@ -480,7 +480,7 @@
 
             <div class="flex items-center gap-2">
                 <a href="{{ route('dashboard', ['view' => 'office', 'filter' => 'all', 'status' => 'active']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc] shadow-md' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
                    Toutes Actives
                 </a>
                 <a href="{{ route('dashboard', ['view' => 'office', 'filter' => 'today', 'status' => 'active']) }}" 
@@ -585,8 +585,8 @@
     @endif
 
     <!-- ================= VUE : MODE MASTER ================= -->
+    @if($view === 'master')
         <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-2xl border border-yellow-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-
             <div class="flex items-center gap-4">
 
                 <div class="w-14 h-14 rounded-full bg-white border border-yellow-200 flex items-center justify-center text-3xl shadow-sm">
@@ -598,24 +598,23 @@
                 </h1>
 
             </div>
-
             <div class="flex items-center gap-2">
                 <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-white text-gray-700 border-gray-200 hover:bg-yellow-50' }}">
                    Toutes Actives
                 </a>
                 <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'today', 'status' => 'active']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
                    📅 Aujourd'hui
                 </a>
                 <a href="{{ route('schedule.index') }}"
-                    class="px-3 py-1.5 text-xs font-bold rounded-lg border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+                    class="px-3 py-1.5 text-xs font-bold rounded-xl border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
 
                     📅 Emploi du temps
 
                 </a>
                 <a href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
+                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
                    📁 Archives
                 </a>
             </div>
