@@ -373,13 +373,8 @@ class TaskController extends Controller
             $task->project->title ?? 'Finance'
         );
 
-
-        dd($resources);
-
-
         foreach($resources as $resource)
         {
-
             CourseResource::updateOrCreate(
 
                 [
@@ -391,13 +386,11 @@ class TaskController extends Controller
                     'source' => $resource['source'],
                     'url' => $resource['url'],
                     'type' => $resource['type'],
-                    'order' => 1
+                    'order' => $resource['order'] ?? 1
                 ]
 
             );
-
         }
-
 
         return back()->with(
             'success',
