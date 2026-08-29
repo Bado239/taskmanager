@@ -15,27 +15,27 @@
 
 <div class="space-y-6 pb-12">
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-blue-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
         <div class="flex items-center gap-2">
             <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'dashboard' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'dashboard' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 📊 Dashboard
             </a>
             <a href="{{ route('dashboard', ['view' => 'office']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'office' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'office' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 💼 Mode Office
             </a>
             <a href="{{ route('dashboard', ['view' => 'master']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 🎓 Mode Master
             </a>
             <a href="{{ route('dashboard', ['view' => 'personal']) }}" 
-            class="px-4 py-2 font-bold text-xs rounded-lg transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+            class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
                 🌱 Perso
             </a>
         </div>
 
-        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center gap-2">
+        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2"
             <span>+ Nouvelle tâche 
                 @if($view === 'office') (Mode Office)
                 @elseif($view === 'master') (Mode Master)
