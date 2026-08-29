@@ -15,27 +15,27 @@
 
 <div class="space-y-6 pb-12">
     <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-blue-50 p-5 rounded-2xl border border-blue-100 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-md">
         <div class="flex items-center gap-2">
             <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'dashboard' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'dashboard' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
                 📊 Dashboard
             </a>
             <a href="{{ route('dashboard', ['view' => 'office']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'office' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'office' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
                 💼 Mode Office
             </a>
             <a href="{{ route('dashboard', ['view' => 'master']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
                 🎓 Mode Master
             </a>
             <a href="{{ route('dashboard', ['view' => 'personal']) }}" 
-            class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+            class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
                 🌱 Perso
             </a>
         </div>
 
-        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2"
+        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2">
             <span>+ Nouvelle tâche 
                 @if($view === 'office') (Mode Office)
                 @elseif($view === 'master') (Mode Master)
@@ -47,7 +47,7 @@
 
     <!-- FORMULAIRE DE CRÉATION DE TÂCHE (CACHÉ PAR DÉFAUT) -->
 <div id="taskFormContainer"
-     class="bg-white p-6 rounded-xl border border-emerald-200 shadow-md"
+     class="bg-white p-6 rounded-xl border border-emerald-200 shadow-lg hover:shadow-xl"
      style="display: none;">
 
     <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
@@ -628,19 +628,19 @@
 
         <div class="space-y-6">
             @forelse($groupedMasterTasks as $matiereName => $tasksInMatiere)
-                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-md overflow-hidden">
-                    <div class="p-4 bg-green-100 border-b border-green-200 flex items-center justify-between">
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 shadow-md overflow-hidden">
+                    <div class="p-4 bg-blue-100 border-b border-blue-200 flex items-center justify-between">
                         <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                            📚 Matière : <span class="text-green-700">{{ $matiereName }}</span>
+                            📚 Matière : <span class="text-blue-700">{{ $matiereName }}</span>
                         </h3>
-                        <span class="text-xs bg-green-200 text-green-700 font-bold px-2.5 py-1 rounded-full">
+                        <span class="text-xs bg-blue-200 text-blue-700 font-bold px-2.5 py-1 rounded-full">
                             {{ $tasksInMatiere->count() }} tâche(s)
                         </span>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-green-200 text-xs uppercase font-semibold text-green-800 border-b border-green-300">
+                            <thead class="bg-blue-200 text-xs uppercase font-semibold text-blue-800 border-b border-blue-300">
                                 <tr>
                                     <th class="px-4 py-3">Rang</th>
                                     <th class="px-4 py-3">Leçon / Étape</th>
@@ -652,7 +652,7 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($tasksInMatiere as $index => $task)
-                                    <tr class="hover:bg-green-50 transition-colors">
+                                    <tr class="hover:bg-blue-50 transition-colors">
                                         <td class="px-4 py-4 font-bold text-gray-400">#{{ $index + 1 }}</td>
                                         <td class="px-4 py-4 font-semibold text-blue-600 text-xs">
                                             📖 {{ $task->category->title ?? $task->category->name ?? 'Général' }}
