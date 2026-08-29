@@ -401,7 +401,7 @@ class TaskController extends Controller
 
                 'file_type' => $resource['file_type'] ?? 'WEB',
 
-                'is_university' => $resource['is_university'] ?? false,
+                'is_university' => ($resource['is_university'] ?? false) ? true : false,
 
                 'score' => $resource['score'] ?? 0,
 
