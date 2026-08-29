@@ -658,10 +658,27 @@
                                             📖 {{ $task->category->title ?? $task->category->name ?? 'Général' }}
                                         </td>
                                         <td class="px-4 py-4 font-bold text-gray-900">
-                                            {{ $task->title }}
+
+                                            <a href="{{ route('tasks.learning', $task->id) }}"
+                                            class="hover:text-blue-600 transition-colors">
+
+                                                {{ $task->title }}
+
+                                            </a>
+
+
                                             @if($task->document_link)
-                                                <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document / Support</a>
+
+                                                <a href="{{ $task->document_link }}"
+                                                target="_blank"
+                                                class="text-xs text-[#0052cc] underline block mt-0.5">
+
+                                                    🔗 Document / Support
+
+                                                </a>
+
                                             @endif
+
                                         </td>
                                         <td class="px-4 py-4 text-xs text-gray-600">
                                             <div>📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</div>

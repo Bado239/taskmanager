@@ -361,4 +361,11 @@ class TaskController extends Controller
 
         return back()->with('success', $message);
     }
+
+    public function learning($id)
+    {
+        $task = Task::findOrFail($id);
+
+        return view('tasks.learning', compact('task'));
+    }
 }

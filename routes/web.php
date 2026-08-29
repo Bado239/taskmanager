@@ -200,3 +200,8 @@ Route::post(
     [ScheduleController::class,'store']
 )
 ->name('schedule.store');
+
+
+Route::get('/tasks/{task}/learning',
+    [TaskController::class, 'learning']
+)->name('tasks.learning');
