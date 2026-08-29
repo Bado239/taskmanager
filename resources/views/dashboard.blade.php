@@ -621,19 +621,19 @@
 
         <div class="space-y-6">
             @forelse($groupedMasterTasks as $matiereName => $tasksInMatiere)
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-md overflow-hidden">
+                    <div class="p-4 bg-green-100 border-b border-green-200 flex items-center justify-between">
                         <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                            📚 Matière : <span class="text-[#0052cc]">{{ $matiereName }}</span>
+                            📚 Matière : <span class="text-green-700">{{ $matiereName }}</span>
                         </h3>
-                        <span class="text-xs bg-blue-100 text-[#0052cc] font-bold px-2.5 py-1 rounded-full">
+                        <span class="text-xs bg-green-200 text-green-700 font-bold px-2.5 py-1 rounded-full">
                             {{ $tasksInMatiere->count() }} tâche(s)
                         </span>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-[#f8fafc] text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
+                            <thead class="bg-green-200 text-xs uppercase font-semibold text-green-800 border-b border-green-300">
                                 <tr>
                                     <th class="px-4 py-3">Rang</th>
                                     <th class="px-4 py-3">Leçon / Étape</th>
@@ -645,7 +645,7 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($tasksInMatiere as $index => $task)
-                                    <tr class="hover:bg-gray-50 transition-colors">
+                                    <tr class="hover:bg-green-50 transition-colors">
                                         <td class="px-4 py-4 font-bold text-gray-400">#{{ $index + 1 }}</td>
                                         <td class="px-4 py-4 font-semibold text-blue-600 text-xs">
                                             📖 {{ $task->category->title ?? $task->category->name ?? 'Général' }}
