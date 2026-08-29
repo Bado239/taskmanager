@@ -585,11 +585,19 @@
     @endif
 
     <!-- ================= VUE : MODE MASTER ================= -->
-    @if($view === 'master')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                🎓 MASTER Cockpit - Suivi Académique
-            </h1>
+        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-2xl border border-yellow-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
+
+            <div class="flex items-center gap-4">
+
+                <div class="w-14 h-14 rounded-full bg-white border border-yellow-200 flex items-center justify-center text-3xl shadow-sm">
+                    🎓
+                </div>
+
+                <h1 class="text-xl font-bold text-gray-900">
+                    MASTER Cockpit - Suivi Académique
+                </h1>
+
+            </div>
 
             <div class="flex items-center gap-2">
                 <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}" 
