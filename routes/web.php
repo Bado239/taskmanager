@@ -6,6 +6,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PersonalResourceController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\CourseResourceController;
 
 
 /*
@@ -211,3 +212,16 @@ Route::get(
     [TaskController::class,'searchCourses']
 )
 ->name('tasks.searchCourses');
+
+/*
+|--------------------------------------------------------------------------
+| Evaluation des ressources de cours
+|--------------------------------------------------------------------------
+*/
+
+
+Route::post(
+    '/course-resources/{id}/relevance',
+    [CourseResourceController::class,'relevance']
+)
+->name('courses.relevance');
