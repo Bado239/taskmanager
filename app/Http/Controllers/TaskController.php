@@ -364,27 +364,45 @@ class TaskController extends Controller
         return back()->with('success', $message);
     }
 
-    public function learning($id)
-    {
-        $task = Task::with([
-            'courseResources' => function($query){
-                $query->orderBy('order')
-                    ->limit(5);
-            }
-        ])->findOrFail($id);
-
-
-        return view('tasks.learning', compact('task'));
-    }
     public function searchCourses($id, CourseSearchService $service)
     {
         $task = Task::findOrFail($id);
-
-        dd("Recherche lancée", $task);
 
 
         $resources = $service->search(
             $task->project->title ?? 'Finance'
         );
+
+
+        dd($resources);
+
+
+        foreach($resources as $resource)
+        {
+
+            CourseResource::updateOrCreate(
+
+                [
+                    'task_id' => $task->id,
+                    'title' => $resource['title']
+                ],
+
+                [
+                    'source' => $resource['source'],
+                    'url' => $resource['url'],
+                    'type' => $resource['type'],
+                    'order' => 1
+                ]
+
+            );
+
+        }
+
+
+        return back()->with(
+            'success',
+            'Nouveaux cours trouvés et ajoutés'
+        );
     }
+
 }
