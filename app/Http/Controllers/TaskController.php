@@ -369,53 +369,75 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
 
 
-        // Recherche basée sur la matière
+        // Matière recherchée
         $subject = $task->project->title ?? $task->title;
 
 
+        // Recherche Web
         $resources = $service->search($subject);
-
-
-
-        // Supprimer les anciens résultats
-        CourseResource::where('task_id', $task->id)->delete();
 
 
 
         foreach($resources as $index => $resource)
         {
 
-            CourseResource::create([
+            CourseResource::updateOrCreate(
 
-                'task_id' => $task->id,
+                [
 
-                'title' => $resource['title'],
+                    'task_id' => $task->id,
 
-                'source' => $resource['source'],
+                    'url' => $resource['url']
 
-                'url' => $resource['url'],
+                ],
 
-                'type' => $resource['type'],
 
-                'order' => $index + 1,
+                [
 
-                'file_type' => $resource['file_type'] ?? 'WEB',
+                    'title' => $resource['title'],
 
-                'is_university' => ($resource['is_university'] ?? false) ? 'true' : 'false',
+                    'source' => $resource['source'],
 
-                'score' => $resource['score'] ?? 0,
+                    'type' => $resource['type'],
 
-            ]);
+                    'order' => $index + 1,
+
+
+                    'file_type' =>
+                        $resource['file_type'] ?? 'WEB',
+
+
+
+                    'is_university' =>
+                        ($resource['is_university'] ?? false)
+                        ? true
+                        : false,
+
+
+
+                    'score' =>
+                        $resource['score'] ?? 0,
+
+
+                    'searched_at' => now()
+
+                ]
+
+            );
+
         }
 
 
 
         return back()->with(
+
             'success',
-            count($resources).' cours trouvés sur le Web'
+
+            count($resources).
+            ' nouveaux cours analysés et enregistrés'
+
         );
     }
-
 
 
     /**
