@@ -7,14 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class CourseResource extends Model
 {
     protected $fillable = [
-        'task_id',
-        'title',
-        'source',
-        'url',
-        'type',
-        'order'
-    ];
 
+        'task_id',
+
+        'title',
+
+        'source',
+
+        'url',
+
+        'type',
+
+        'order',
+
+        'file_type',
+
+        'is_university',
+
+        'score'
+
+    ];
 
     public function task()
     {

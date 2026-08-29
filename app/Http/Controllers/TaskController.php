@@ -397,10 +397,15 @@ class TaskController extends Controller
 
                 'type' => $resource['type'],
 
-                'order' => $index + 1
+                'order' => $index + 1,
+
+                'file_type' => $resource['file_type'] ?? 'WEB',
+
+                'is_university' => $resource['is_university'] ?? false,
+
+                'score' => $resource['score'] ?? 0,
 
             ]);
-
         }
 
 
