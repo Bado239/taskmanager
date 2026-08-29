@@ -9,6 +9,8 @@ use App\Models\Project;
 use App\Models\PersonalResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Services\CourseSearchService;
+use App\Models\CourseResource;
 
 class TaskController extends Controller
 {
@@ -373,5 +375,42 @@ class TaskController extends Controller
 
 
         return view('tasks.learning', compact('task'));
+    }
+    public function searchCourses($id, CourseSearchService $service)
+    {
+        $task = Task::findOrFail($id);
+
+
+        $resources = $service->search(
+            $task->project->title ?? 'Finance'
+        );
+
+
+        foreach($resources as $resource)
+        {
+
+            CourseResource::updateOrCreate(
+
+                [
+                    'task_id' => $task->id,
+                    'title' => $resource['title']
+                ],
+
+                [
+                    'source' => $resource['source'],
+                    'url' => $resource['url'],
+                    'type' => $resource['type'],
+                    'order' => 1
+                ]
+
+            );
+
+        }
+
+
+        return back()->with(
+            'success',
+            'Nouveaux cours trouvés et ajoutés'
+        );
     }
 }
