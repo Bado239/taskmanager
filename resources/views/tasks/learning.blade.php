@@ -1,34 +1,54 @@
-<!-- ================= RESSOURCES RECOMMANDÉES ================= -->
+@extends('layouts.app')
 
-<div class="bg-white rounded-2xl border border-gray-200 shadow-md p-6">
+@section('content')
 
-
-    <!-- TITRE + BOUTON RECHERCHE -->
-
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+<div class="max-w-6xl mx-auto space-y-6">
 
 
-        <div>
+    <!-- HEADER -->
 
-            <h2 class="text-xl font-bold text-gray-900">
-                🌍 Ressources recommandées
-            </h2>
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 shadow p-6">
+
+        <h1 class="text-3xl font-bold text-gray-900">
+            🎓 {{ $task->title }}
+        </h1>
+
+        <p class="text-gray-500 mt-2">
+            Espace d'apprentissage du chapitre
+        </p>
+
+    </div>
 
 
-            <p class="text-sm text-gray-500 mt-1">
-                Retrouvez les meilleurs supports pour ce chapitre.
+
+    <!-- INFORMATIONS -->
+
+    <div class="bg-white rounded-2xl border shadow-sm p-6">
+
+
+        <h2 class="text-xl font-bold mb-4">
+            📚 Informations du chapitre
+        </h2>
+
+
+        <div class="space-y-2 text-gray-700">
+
+            <p>
+                Matière :
+                <strong class="text-blue-600">
+                    {{ $task->project->title ?? 'Finance' }}
+                </strong>
+            </p>
+
+
+            <p>
+                Chapitre :
+                <strong>
+                    {{ $task->title }}
+                </strong>
             </p>
 
         </div>
-
-
-
-        <a href="{{ route('tasks.searchCourses',$task->id) }}"
-           class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-bold shadow">
-
-            🔎 Rechercher des cours
-
-        </a>
 
 
     </div>
@@ -37,116 +57,156 @@
 
 
 
-    <!-- LISTE DES COURS -->
+    <!-- RESSOURCES -->
+
+    <div class="bg-white rounded-2xl border shadow-sm p-6">
 
 
-    <div class="grid md:grid-cols-2 gap-5">
+        <div class="flex justify-between items-center mb-6">
+
+
+            <div>
+
+                <h2 class="text-xl font-bold">
+                    🌍 Ressources recommandées
+                </h2>
+
+
+                <p class="text-sm text-gray-500">
+                    Les meilleurs supports pour ce chapitre
+                </p>
+
+            </div>
+
+
+
+
+            <a href="{{ route('tasks.searchCourses',$task->id) }}"
+               class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm">
+
+                🔎 Rechercher
+
+            </a>
+
+
+        </div>
+
+
+
+
+
+        <div class="grid md:grid-cols-2 gap-5">
 
 
         @forelse($task->courseResources as $resource)
 
 
-
-        <div class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-2xl p-5 hover:shadow-lg transition">
-
-
-            <div class="flex items-start gap-3">
+            <div class="border rounded-2xl p-5 bg-blue-50 hover:shadow-lg transition">
 
 
-                <!-- ICONE -->
+                <div class="flex gap-3">
 
-                <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl">
 
-                    📘
+                    <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-xl">
+                        📘
+                    </div>
+
+
+
+                    <div>
+
+                        <h3 class="font-bold text-gray-900">
+
+                            {{ $resource->title }}
+
+                        </h3>
+
+
+                        <p class="text-sm text-gray-600 mt-2">
+
+                            🏫 {{ $resource->source }}
+
+                        </p>
+
+
+                    </div>
+
 
                 </div>
 
 
 
 
-                <div class="flex-1">
+                <div class="mt-5 flex justify-between items-center">
 
 
-                    <h3 class="font-bold text-gray-900 leading-tight">
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
 
-                        {{ $resource->title }}
+                        {{ strtoupper($resource->type) }}
 
-                    </h3>
+                    </span>
 
 
-                    <p class="text-sm text-gray-500 mt-2">
 
-                        🏫 {{ $resource->source }}
+                    <a href="{{ $resource->url }}"
+                       target="_blank"
+                       class="text-blue-600 font-bold hover:underline">
 
-                    </p>
+                        📖 Ouvrir
+
+                    </a>
 
 
                 </div>
 
 
             </div>
-
-
-
-
-
-            <div class="flex items-center justify-between mt-5">
-
-
-                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-bold">
-
-                    {{ strtoupper($resource->type) }}
-
-                </span>
-
-
-
-
-                <a href="{{ $resource->url }}"
-                   target="_blank"
-                   class="text-sm font-bold text-blue-600 hover:text-blue-800">
-
-                    📖 Ouvrir le cours
-
-                </a>
-
-
-
-            </div>
-
-
-
-        </div>
-
 
 
 
         @empty
 
 
+            <div class="col-span-2 text-center text-gray-400 py-10">
 
-        <div class="md:col-span-2 text-center py-8 text-gray-400">
+                Aucun cours trouvé.
 
-
-            <p class="font-semibold">
-                Aucun cours trouvé pour ce chapitre.
-            </p>
-
-
-            <p class="text-sm mt-2">
-                Cliquez sur "Rechercher des cours".
-            </p>
-
-
-        </div>
-
+            </div>
 
 
         @endforelse
 
 
+        </div>
+
 
     </div>
 
 
+
+
+
+    <!-- DOCUMENTS PERSONNELS -->
+
+
+    <div class="bg-white rounded-2xl border shadow-sm p-6">
+
+
+        <h2 class="text-xl font-bold mb-4">
+            📂 Mes documents
+        </h2>
+
+
+        <p class="text-gray-500">
+            Ajoutez vos propres supports de cours.
+        </p>
+
+
+    </div>
+
+
+
 </div>
+
+
+@endsection
