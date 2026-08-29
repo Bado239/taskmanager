@@ -380,37 +380,11 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
 
+        dd("Recherche lancée", $task);
+
 
         $resources = $service->search(
             $task->project->title ?? 'Finance'
-        );
-
-
-        foreach($resources as $resource)
-        {
-
-            CourseResource::updateOrCreate(
-
-                [
-                    'task_id' => $task->id,
-                    'title' => $resource['title']
-                ],
-
-                [
-                    'source' => $resource['source'],
-                    'url' => $resource['url'],
-                    'type' => $resource['type'],
-                    'order' => 1
-                ]
-
-            );
-
-        }
-
-
-        return back()->with(
-            'success',
-            'Nouveaux cours trouvés et ajoutés'
         );
     }
 }
