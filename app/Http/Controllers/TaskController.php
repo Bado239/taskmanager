@@ -373,6 +373,7 @@ class TaskController extends Controller
             $task->project->title ?? 'Finance'
         );
 
+
         foreach($resources as $resource)
         {
             CourseResource::updateOrCreate(
@@ -392,10 +393,34 @@ class TaskController extends Controller
             );
         }
 
+
         return back()->with(
             'success',
             'Nouveaux cours trouvés et ajoutés'
         );
     }
+
+
+
+
+    /**
+     * Affiche l'espace apprentissage d'un chapitre
+     */
+    public function learning($id)
+    {
+        $task = Task::with([
+            'courseResources' => function($query) {
+                $query->orderBy('order', 'asc')
+                      ->limit(5);
+            }
+        ])->findOrFail($id);
+
+
+        return view(
+            'tasks.learning',
+            compact('task')
+        );
+    }
+
 
 }
