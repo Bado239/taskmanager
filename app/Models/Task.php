@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CourseResource;
 
 class Task extends Model
 {
@@ -65,5 +66,10 @@ class Task extends Model
     public function step()
     {
         return $this->belongsTo(ProjectStep::class, 'project_step_id');
+    }
+
+    public function courseResources()
+    {
+        return $this->hasMany(CourseResource::class);
     }
 }

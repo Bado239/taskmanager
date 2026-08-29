@@ -364,7 +364,13 @@ class TaskController extends Controller
 
     public function learning($id)
     {
-        $task = Task::findOrFail($id);
+        $task = Task::with([
+            'courseResources' => function($query){
+                $query->orderBy('order')
+                    ->limit(5);
+            }
+        ])->findOrFail($id);
+
 
         return view('tasks.learning', compact('task'));
     }
