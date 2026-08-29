@@ -369,37 +369,47 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
 
 
-        $resources = $service->search(
-            $task->project->title ?? 'Finance'
-        );
+        // Recherche basée sur la matière
+        $subject = $task->project->title ?? $task->title;
 
 
-        foreach($resources as $resource)
+        $resources = $service->search($subject);
+
+
+
+        // Supprimer les anciens résultats
+        CourseResource::where('task_id', $task->id)->delete();
+
+
+
+        foreach($resources as $index => $resource)
         {
-            CourseResource::updateOrCreate(
 
-                [
-                    'task_id' => $task->id,
-                    'title' => $resource['title']
-                ],
+            CourseResource::create([
 
-                [
-                    'source' => $resource['source'],
-                    'url' => $resource['url'],
-                    'type' => $resource['type'],
-                    'order' => $resource['order'] ?? 1
-                ]
+                'task_id' => $task->id,
 
-            );
+                'title' => $resource['title'],
+
+                'source' => $resource['source'],
+
+                'url' => $resource['url'],
+
+                'type' => $resource['type'],
+
+                'order' => $index + 1
+
+            ]);
+
         }
+
 
 
         return back()->with(
             'success',
-            'Nouveaux cours trouvés et ajoutés'
+            count($resources).' cours trouvés sur le Web'
         );
     }
-
 
 
 
