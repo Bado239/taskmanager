@@ -15,18 +15,14 @@ class CourseResource extends Model
         'url',
         'type',
         'order',
-
         'file_type',
         'is_university',
-
         'score',
         'relevance',
-
         'saved',
         'searched_at',
-
         'rating',
-        'notes',
+        'notes'
 
     ];
 
@@ -45,22 +41,24 @@ class CourseResource extends Model
 
         'order' => 'integer',
 
-        'searched_at' => 'datetime',
-
     ];
 
 
+
     /**
-     * Relation avec la tâche
+     * Force PostgreSQL boolean
      */
-    public function task()
+    public function setIsUniversityAttribute($value)
     {
-
-        return $this->belongsTo(
-            Task::class
-        );
-
+        $this->attributes['is_university'] =
+            $value ? 'true' : 'false';
     }
 
+
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
+    }
 
 }

@@ -400,10 +400,10 @@ class TaskController extends Controller
                 'file_type' => $resource['file_type'] ?? 'WEB',
 
                 'is_university' => 
-                    isset($resource['is_university'])
-                    ? (bool) $resource['is_university']
-                    : false,
-
+                    filter_var(
+                        $resource['is_university'] ?? false,
+                        FILTER_VALIDATE_BOOLEAN
+                    ),
                 'score' =>
                     isset($resource['score'])
                     ? (int) $resource['score']
