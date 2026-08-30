@@ -381,6 +381,17 @@ class TaskController extends Controller
         foreach($resources as $index => $resource)
         {
 
+            // Ignorer les faux résultats
+            if(
+                empty($resource['url'])
+                || 
+                $resource['url'] === '#'
+                ||
+                ($resource['score'] ?? 0) <= 0
+            ){
+                continue;
+            }
+
             CourseResource::updateOrCreate(
 
             [
