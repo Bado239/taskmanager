@@ -27,6 +27,7 @@ class CourseResource extends Model
     ];
 
 
+
     protected $casts = [
 
         'is_university' => 'boolean',
@@ -41,18 +42,34 @@ class CourseResource extends Model
 
         'order' => 'integer',
 
+        'searched_at' => 'datetime',
+
     ];
 
 
 
+
     /**
-     * Force PostgreSQL boolean
+     * Force PostgreSQL boolean pour is_university
      */
     public function setIsUniversityAttribute($value)
     {
         $this->attributes['is_university'] =
             $value ? 'true' : 'false';
     }
+
+
+
+
+    /**
+     * Force PostgreSQL boolean pour saved
+     */
+    public function setSavedAttribute($value)
+    {
+        $this->attributes['saved'] =
+            $value ? 'true' : 'false';
+    }
+
 
 
 
