@@ -383,45 +383,35 @@ class TaskController extends Controller
 
             CourseResource::updateOrCreate(
 
-                [
+            [
+                'task_id' => $task->id,
+                'url' => $resource['url']
+            ],
 
-                    'task_id' => $task->id,
+            [
+                'title' => $resource['title'],
 
-                    'url' => $resource['url']
+                'source' => $resource['source'],
 
-                ],
+                'type' => $resource['type'],
 
+                'order' => $index + 1,
 
-                [
+                'file_type' => $resource['file_type'] ?? 'WEB',
 
-                    'title' => $resource['title'],
+                'is_university' => 
+                    isset($resource['is_university'])
+                    ? (bool) $resource['is_university']
+                    : false,
 
-                    'source' => $resource['source'],
+                'score' =>
+                    isset($resource['score'])
+                    ? (int) $resource['score']
+                    : 0,
 
-                    'type' => $resource['type'],
+                'searched_at'=>now()
 
-                    'order' => $index + 1,
-
-
-                    'file_type' =>
-                        $resource['file_type'] ?? 'WEB',
-
-
-
-                    'is_university' =>
-                        ($resource['is_university'] ?? false)
-                        ? true
-                        : false,
-
-
-
-                    'score' =>
-                        $resource['score'] ?? 0,
-
-
-                    'searched_at' => now()
-
-                ]
+            ]
 
             );
 

@@ -225,3 +225,20 @@ Route::post(
     [CourseResourceController::class,'relevance']
 )
 ->name('courses.relevance');
+
+Route::post(
+    '/course-resource/{id}/rate',
+    [CourseResourceController::class,'rate']
+)->name('course.rate');
+
+
+Route::post(
+    '/course-resource/{id}/save',
+    [CourseResourceController::class,'save']
+)->name('course.save');
+
+
+Route::post(
+    '/course-resource/{id}/note',
+    [CourseResourceController::class,'note']
+)->name('course.note');

@@ -22,11 +22,9 @@
 
 
 
-
 <!-- INFORMATIONS -->
 
 <div class="bg-white rounded-2xl border shadow-sm p-6">
-
 
 <h2 class="text-xl font-bold mb-4">
 📚 Informations du chapitre
@@ -60,9 +58,7 @@ Chapitre :
 
 
 
-
-
-<!-- RESSOURCES WEB -->
+<!-- RESSOURCES -->
 
 <div class="bg-white rounded-2xl border shadow-sm p-6">
 
@@ -105,17 +101,17 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold t
 @forelse($task->courseResources as $resource)
 
 
+
 <div class="border rounded-2xl p-5 bg-white shadow-sm hover:shadow-lg transition">
 
 
-
 <!-- TITRE -->
-
 
 <div class="flex gap-3">
 
 
 <div class="bg-blue-600 text-white w-12 h-12 rounded-xl flex items-center justify-center text-xl">
+
 
 @if($resource->file_type === 'PDF')
 
@@ -126,6 +122,7 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold t
 🌐
 
 @endif
+
 
 </div>
 
@@ -157,9 +154,7 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold t
 
 
 
-
-
-<!-- BADGES -->
+<!-- INFORMATIONS -->
 
 
 <div class="flex flex-wrap gap-2 mt-5">
@@ -185,16 +180,25 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold t
 
 
 
-
 <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">
 
-⭐ Score {{ $resource->score }}/100
+⭐ Score IA : {{ $resource->score }}/100
 
 </span>
 
 
-</div>
+@if($resource->rating > 0)
 
+<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">
+
+👤 Votre note : {{ $resource->rating }}/5
+
+</span>
+
+@endif
+
+
+</div>
 
 
 
@@ -211,10 +215,25 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold t
 target="_blank"
 class="text-blue-600 font-bold hover:underline">
 
-📖 Ouvrir
+📖 Ouvrir le cours
 
 </a>
 
+
+
+<form method="POST"
+action="{{ route('course.save',$resource->id) }}">
+
+@csrf
+
+<button
+class="text-sm bg-gray-100 px-3 py-2 rounded-lg font-bold">
+
+💾 Sauvegarder
+
+</button>
+
+</form>
 
 
 
@@ -224,49 +243,74 @@ class="text-blue-600 font-bold hover:underline">
 
 
 
-<!-- EVALUATION -->
+
+
+<!-- NOTATION -->
 
 
 <div class="mt-5 border-t pt-4">
 
 
-<p class="text-xs text-gray-500 mb-2">
+<p class="text-xs text-gray-500 mb-3">
 
 Votre évaluation :
 
 </p>
 
 
-<div class="flex gap-2">
+
+<div class="flex gap-2 flex-wrap">
 
 
 <form method="POST"
-action="{{ route('courses.relevance',$resource->id) }}">
+action="{{ route('course.rate',$resource->id) }}">
 
 @csrf
 
 
-<button name="value"
-value="3"
+<button name="rating"
+value="5"
 class="px-3 py-2 bg-green-100 text-green-700 rounded-lg text-xs font-bold">
 
-⭐⭐⭐ Très pertinent
+⭐⭐⭐⭐⭐ Excellent
 
 </button>
 
 
+</form>
 
-<button name="value"
-value="2"
+
+
+
+
+<form method="POST"
+action="{{ route('course.rate',$resource->id) }}">
+
+@csrf
+
+
+<button name="rating"
+value="3"
 class="px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">
 
-⭐⭐ Pertinent
+⭐⭐⭐ Bon
 
 </button>
 
 
+</form>
 
-<button name="value"
+
+
+
+
+<form method="POST"
+action="{{ route('course.rate',$resource->id) }}">
+
+@csrf
+
+
+<button name="rating"
 value="1"
 class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold">
 
@@ -278,10 +322,53 @@ class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold">
 </form>
 
 
+
 </div>
 
 
 </div>
+
+
+
+
+
+
+
+<!-- NOTE PERSONNELLE -->
+
+
+<div class="mt-5">
+
+
+<form method="POST"
+action="{{ route('course.note',$resource->id) }}">
+
+@csrf
+
+
+<textarea
+name="notes"
+rows="2"
+class="w-full border rounded-xl p-3 text-sm"
+placeholder="Ajouter une note personnelle...">{{ $resource->notes }}</textarea>
+
+
+
+<button
+class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold">
+
+📝 Enregistrer la note
+
+</button>
+
+
+
+</form>
+
+
+</div>
+
+
 
 
 
@@ -296,9 +383,13 @@ class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold">
 
 <div class="col-span-2 text-center py-10 text-gray-400">
 
+
 Aucun cours trouvé.
 
+<br>
+
 Cliquez sur 🔎 Nouvelle recherche.
+
 
 </div>
 
