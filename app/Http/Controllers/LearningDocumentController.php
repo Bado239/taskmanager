@@ -29,13 +29,11 @@ class LearningDocumentController extends Controller
 
 
 
-        // Gestion PDF / Word
-        if($request->hasFile('file'))
-        {
+        if ($request->hasFile('file')) {
 
             $filePath = $request
                 ->file('file')
-                ->store('documents','public');
+                ->store('documents', 'public');
 
         }
 
@@ -63,5 +61,4 @@ class LearningDocumentController extends Controller
         );
 
     }
-
 }
