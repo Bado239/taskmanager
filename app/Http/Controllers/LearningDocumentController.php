@@ -8,29 +8,50 @@ use Illuminate\Http\Request;
 class LearningDocumentController extends Controller
 {
 
-
     public function store(Request $request)
     {
 
         $request->validate([
 
-            'title'=>'required',
+            'task_id' => 'required',
+            'title' => 'required',
+            'type' => 'required',
 
-            'type'=>'required',
+            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+
+            'url' => 'nullable|url',
 
         ]);
 
 
 
+        $filePath = null;
+
+
+
+        // Gestion PDF / Word
+        if($request->hasFile('file'))
+        {
+
+            $filePath = $request
+                ->file('file')
+                ->store('documents','public');
+
+        }
+
+
+
         LearningDocument::create([
 
-            'task_id'=>$request->task_id,
+            'task_id' => $request->task_id,
 
-            'title'=>$request->title,
+            'title' => $request->title,
 
-            'type'=>$request->type,
+            'type' => $request->type,
 
-            'url'=>$request->url,
+            'file_path' => $filePath,
+
+            'url' => $request->url,
 
         ]);
 
@@ -38,10 +59,9 @@ class LearningDocumentController extends Controller
 
         return back()->with(
             'success',
-            'Document ajouté'
+            'Document ajouté avec succès'
         );
 
     }
-
 
 }
