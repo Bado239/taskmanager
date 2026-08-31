@@ -369,10 +369,10 @@ class TaskController extends Controller
         \App\Services\CourseSearchService $service
     )
     {
+
         $task = Task::findOrFail($id);
 
 
-        // Matière + chapitre
         $subject = trim(
             ($task->project_name ?? '')
             .' '.
@@ -380,44 +380,46 @@ class TaskController extends Controller
         );
 
 
-        // Recherche
         $resources = $service->search($subject);
-        dd($subject, $resources);
 
-        // Nettoyer anciens résultats
-        CourseResource::where(
+
+
+        // supprimer anciens résultats
+        \App\Models\CourseResource::where(
             'task_id',
             $task->id
         )->delete();
 
 
-        // Enregistrer résultats
-    foreach($resources as $resource)
-    {
-        CourseResource::create([
 
-            'task_id' => $task->id,
+        foreach($resources as $resource)
+        {
 
-            'title' => $resource['title'],
+            \App\Models\CourseResource::create([
 
-            'source' => $resource['source'],
+                'task_id'=>$task->id,
 
-            'url' => $resource['url'],
+                'title'=>$resource['title'],
 
-            'type' => $resource['type'],
+                'source'=>$resource['source'],
 
-            'file_type' => $resource['file_type'],
+                'url'=>$resource['url'],
 
-            'is_university' =>
-                $resource['is_university'],
+                'type'=>$resource['type'],
 
-            'score' =>
-                $resource['score'],
+                'file_type'=>$resource['file_type'],
 
-            'searched_at' => now(),
+                'is_university'=>
+                    $resource['is_university']
+                    ? 'true'
+                    : 'false',
 
-        ]);
-    }
+                'score'=>$resource['score'],
+
+            ]);
+
+        }
+
 
 
         return redirect()
@@ -425,8 +427,8 @@ class TaskController extends Controller
                 'tasks.learning',
                 $task->id
             );
-    }
 
+    }
 
 
     /**
