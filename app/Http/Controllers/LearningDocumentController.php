@@ -32,34 +32,16 @@ class LearningDocumentController extends Controller
 
 
 
+        // Upload PDF / Word vers Supabase Storage
         if ($request->hasFile('file')) {
 
 
-            $file = $request->file('file');
-
-
-            $filename = $file->hashName();
-
-
-            $destination = storage_path('app/public/documents');
-
-
-            // créer le dossier si nécessaire
-            if (!file_exists($destination)) {
-
-                mkdir($destination, 0755, true);
-
-            }
-
-
-            // déplacement réel du fichier
-            $file->move(
-                $destination,
-                $filename
+            $filePath = Storage::disk('s3')->putFile(
+                'learning-documents',
+                $request->file('file'),
+                'public'
             );
 
-
-            $filePath = 'documents/'.$filename;
 
         }
 
@@ -87,4 +69,5 @@ class LearningDocumentController extends Controller
         );
 
     }
+
 }

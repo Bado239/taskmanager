@@ -407,14 +407,13 @@ class="text-blue-600 font-bold">
 
 @elseif($document->file_path)
 
-<a href="{{ asset('storage/'.$document->file_path) }}"
+<a href="{{ Storage::disk('s3')->url($document->file_path) }}"
 target="_blank"
 class="text-blue-600 font-bold">
 
 📄 Ouvrir fichier
 
 </a>
-
 @endif
 
 </td>
