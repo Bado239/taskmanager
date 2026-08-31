@@ -35,7 +35,11 @@ class LearningDocumentController extends Controller
         // Si c'est un fichier PDF ou Word
         if ($request->hasFile('file')) {
 
-
+            dd(
+                $request->file('file'),
+                $request->hasFile('file')
+            );
+            
             $filePath = $request
                 ->file('file')
                 ->store('documents', 'public');
