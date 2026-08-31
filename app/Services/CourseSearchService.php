@@ -12,7 +12,7 @@ class CourseSearchService
     public function search($subject)
     {
 
-        $query = "cours Master 1 {$subject} PDF universitaire";
+        $query = $this->buildQuery($subject);
 
 
 
@@ -381,58 +381,68 @@ class CourseSearchService
     private function calculateScore($title,$url)
     {
 
-
         $score = 0;
 
 
-
         $text = strtolower(
-
             $title.' '.$url
-
         );
 
 
 
-
-
+        // PDF
         if(str_contains($text,'pdf'))
         {
-            $score += 30;
+            $score += 25;
         }
 
 
-
-
-
+        // Université
         if(
             str_contains($text,'univ')
             ||
-            str_contains($text,'universite')
-            ||
             str_contains($text,'.edu')
+            ||
+            str_contains($text,'ac.')
         )
         {
-            $score += 30;
+            $score += 35;
         }
 
 
-
-
-
-        if(str_contains($text,'master'))
+        // Niveau
+        if(
+            str_contains($text,'master')
+            ||
+            str_contains($text,'m1')
+        )
         {
-            $score += 15;
+            $score += 20;
         }
 
 
-
-
-
+        // Cours
         if(
             str_contains($text,'cours')
             ||
             str_contains($text,'course')
+            ||
+            str_contains($text,'lecture')
+            ||
+            str_contains($text,'polycopi')
+        )
+        {
+            $score += 15;
+        }
+
+
+        // Econométrie spécifique
+        if(
+            str_contains($text,'logit')
+            ||
+            str_contains($text,'probit')
+            ||
+            str_contains($text,'qualitative')
         )
         {
             $score += 15;
@@ -440,10 +450,60 @@ class CourseSearchService
 
 
 
+        return min($score,100);
+
+    }
+        /**
+     * Construction intelligente de requête
+     */
+    private function buildQuery($subject)
+    {
+
+        $text = strtolower($subject);
 
 
-        return $score;
+        $expansions = [
 
+            'econometrie des variables qualitatives' =>
+            'économétrie qualitative logit probit modèles à choix discret cours master pdf université',
+
+
+            'econometrie' =>
+            'économétrie statistique appliquée regression cours master pdf université',
+
+
+            'finance' =>
+            'finance entreprise finance marché finance internationale cours master 1 pdf université',
+
+
+            'microeconomie' =>
+            'microéconomie théorie consommateur producteur cours master pdf université',
+
+
+            'macroeconomie' =>
+            'macroéconomie croissance inflation politique économique cours master pdf université',
+
+
+            'statistique' =>
+            'statistiques probabilités estimation cours master pdf université'
+
+        ];
+
+
+
+        foreach($expansions as $key=>$value)
+        {
+
+            if(str_contains($text,$key))
+            {
+                return $value . " Master 1 cours PDF universitaire";
+            }
+
+        }
+
+
+
+        return $subject . " Master 1 cours PDF universitaire";
 
     }
 
