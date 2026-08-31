@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Client\ConnectionException;
 use Symfony\Component\DomCrawler\Crawler;
 
 class CourseSearchService
@@ -15,12 +14,10 @@ class CourseSearchService
         $query = $this->buildQuery($subject);
 
 
-
         try {
 
-
             $response = Http::timeout(30)
-                ->retry(2, 1000)
+                ->retry(2,1000)
                 ->withHeaders([
 
                     'User-Agent' =>
@@ -30,20 +27,31 @@ class CourseSearchService
                 ->get(
                     'https://duckduckgo.com/html/',
                     [
-                        'q' => $query
+                        'q'=>$query
                     ]
                 );
 
 
+            \Log::info(
+                "DuckDuckGo status : ".$response->status()
+            );
 
-        } catch (ConnectionException $e) {
+            \Log::info(
+                "DuckDuckGo length : ".strlen($response->body())
+            );
 
 
-            return [];
+        } catch (\Exception $e) {
 
+
+            \Log::error(
+                "Recherche erreur : ".$e->getMessage()
+            );
+
+
+            return $this->fallbackSearch($subject);
 
         }
-
 
 
 
@@ -59,17 +67,13 @@ class CourseSearchService
         );
 
 
-
         $courses = [];
-
 
 
 
         if(!$crawler->filter('.result')->count())
         {
-
             return $this->fallbackSearch($subject);
-
         }
 
 
@@ -82,44 +86,33 @@ class CourseSearchService
             {
 
 
-                if(count($courses) >= 10)
+                if(count($courses)>=10)
                 {
                     return;
                 }
 
 
 
-
-                if(
-                    !$node->filter('.result__a')->count()
-                )
+                if(!$node->filter('.result__a')->count())
                 {
                     return;
                 }
-
-
 
 
 
                 $title = trim(
-
                     $node
                     ->filter('.result__a')
                     ->text()
-
                 );
-
 
 
 
                 $url = $this->cleanUrl(
-
                     $node
                     ->filter('.result__a')
                     ->attr('href')
-
                 );
-
 
 
 
@@ -130,13 +123,10 @@ class CourseSearchService
 
 
 
-
-
                 $host = parse_url(
                     $url,
                     PHP_URL_HOST
                 );
-
 
 
 
@@ -148,54 +138,30 @@ class CourseSearchService
 
 
 
-
-                $score = $this->calculateScore(
-                    $title,
-                    $url
-                );
-
-
-
-
-
                 $courses[] = [
 
-                    'title' => $title,
+                    'title'=>$title,
 
-
-                    'source' => str_replace(
+                    'source'=>str_replace(
                         'www.',
                         '',
                         $host
                     ),
 
+                    'url'=>$url,
 
+                    'type'=>'Cours Web',
 
-                    'url' => $url,
+                    'file_type'=>$this->detectFileType($url),
 
+                    'is_university'=>$this->isUniversity($url),
 
-
-                    'type' =>
-                    'Cours Web',
-
-
-
-                    'file_type' =>
-                    $this->detectFileType($url),
-
-
-
-                    'is_university' =>
-                    $this->isUniversity($url),
-
-
-
-                    'score' =>
-                    $score
-
+                    'score'=>$this->calculateScore(
+                        $title,
+                        $url
+                    )
 
                 ];
-
 
 
             }
@@ -203,11 +169,6 @@ class CourseSearchService
         );
 
 
-
-
-
-
-        // supprimer les doublons
 
         $courses = collect($courses)
             ->unique('url')
@@ -216,26 +177,17 @@ class CourseSearchService
 
 
 
-
-
-
-        // classer par qualité
-
         usort(
 
             $courses,
 
             function($a,$b){
 
-                return $b['score']
-                    <=>
-                    $a['score'];
+                return $b['score'] <=> $a['score'];
 
             }
 
         );
-
-
 
 
 
@@ -245,27 +197,19 @@ class CourseSearchService
         }
 
 
+
         return array_slice(
             $courses,
             0,
             5
         );
+
+
     }
 
 
 
 
-
-
-
-
-    /**
-     * Nettoyage URL DuckDuckGo
-     */
-
-/**
- * Nettoyage URL DuckDuckGo
- */
     private function cleanUrl($url)
     {
 
@@ -275,15 +219,13 @@ class CourseSearchService
         }
 
 
-        // URL relative DuckDuckGo
-        if(str_starts_with($url, '//'))
+        if(str_starts_with($url,'//'))
         {
-            $url = 'https:' . $url;
+            $url='https:'.$url;
         }
 
 
-
-        $parts = parse_url($url);
+        $parts=parse_url($url);
 
 
         if(isset($parts['query']))
@@ -297,11 +239,9 @@ class CourseSearchService
 
             if(isset($query['uddg']))
             {
-
                 return urldecode(
                     $query['uddg']
                 );
-
             }
 
         }
@@ -315,12 +255,6 @@ class CourseSearchService
 
 
 
-
-
-    /**
-     * Détection PDF ou WEB
-     */
-
     private function detectFileType($url)
     {
 
@@ -328,9 +262,7 @@ class CourseSearchService
             strtolower($url),
             '.pdf'
         )
-
         ? 'PDF'
-
         : 'WEB';
 
     }
@@ -339,34 +271,17 @@ class CourseSearchService
 
 
 
-
-
-
-    /**
-     * Détection université
-     */
-
     private function isUniversity($url)
     {
 
-        $text = strtolower($url);
-
+        $text=strtolower($url);
 
 
         return
-
             str_contains($text,'univ')
-
             ||
-
-            str_contains($text,'universite')
-
-            ||
-
             str_contains($text,'.edu')
-
             ||
-
             str_contains($text,'ac.');
 
     }
@@ -375,33 +290,23 @@ class CourseSearchService
 
 
 
-
-
-
-    /**
-     * Score qualité
-     */
-
     private function calculateScore($title,$url)
     {
 
-        $score = 0;
+        $score=0;
 
 
-        $text = strtolower(
+        $text=strtolower(
             $title.' '.$url
         );
 
 
-
-        // PDF
         if(str_contains($text,'pdf'))
         {
-            $score += 25;
+            $score+=25;
         }
 
 
-        // Université
         if(
             str_contains($text,'univ')
             ||
@@ -410,86 +315,62 @@ class CourseSearchService
             str_contains($text,'ac.')
         )
         {
-            $score += 35;
+            $score+=35;
         }
 
 
-        // Niveau
         if(
             str_contains($text,'master')
             ||
             str_contains($text,'m1')
         )
         {
-            $score += 20;
+            $score+=20;
         }
 
 
-        // Cours
-        if(
-            str_contains($text,'cours')
-            ||
-            str_contains($text,'course')
-            ||
-            str_contains($text,'lecture')
-            ||
-            str_contains($text,'polycopi')
-        )
+        if(str_contains($text,'cours'))
         {
-            $score += 15;
+            $score+=15;
         }
-
-
-        // Econométrie spécifique
-        if(
-            str_contains($text,'logit')
-            ||
-            str_contains($text,'probit')
-            ||
-            str_contains($text,'qualitative')
-        )
-        {
-            $score += 15;
-        }
-
 
 
         return min($score,100);
 
     }
-        /**
-     * Construction intelligente de requête
-     */
+
+
+
+
+
     private function buildQuery($subject)
     {
 
-        $text = strtolower($subject);
+        $text=strtolower($subject);
 
 
-        $expansions = [
-
-            'econometrie des variables qualitatives' =>
-            'économétrie qualitative logit probit modèles à choix discret cours master pdf université',
+        $expansions=[
 
 
-            'econometrie' =>
-            'économétrie statistique appliquée regression cours master pdf université',
-
-
-            'finance' =>
+            'finance'=>
             'finance entreprise finance marché finance internationale cours master 1 pdf université',
 
 
-            'microeconomie' =>
-            'microéconomie théorie consommateur producteur cours master pdf université',
+            'econometrie'=>
+            'économétrie logit probit modèles qualitatifs cours master pdf université',
 
 
-            'macroeconomie' =>
-            'macroéconomie croissance inflation politique économique cours master pdf université',
+            'microeconomie'=>
+            'microéconomie cours master pdf université',
 
 
-            'statistique' =>
-            'statistiques probabilités estimation cours master pdf université'
+            'macroeconomie'=>
+            'macroéconomie cours master pdf université',
+
+
+            'statistique'=>
+            'statistiques probabilités cours master pdf université'
+
 
         ];
 
@@ -500,31 +381,48 @@ class CourseSearchService
 
             if(str_contains($text,$key))
             {
-                return $value . " Master 1 cours PDF universitaire";
+                return $value.' Master 1 PDF';
             }
 
         }
 
 
-
-        return $subject . " Master 1 cours PDF universitaire";
+        return $subject.' Master 1 cours PDF universitaire';
 
     }
 
 
+
+
+
     private function fallbackSearch($subject)
     {
+
         return [
+
             [
+
                 'title'=>'Cours Master 1 '.$subject,
-                'source'=>'Recherche Web',
-                'url'=>'https://www.google.com/search?q='.urlencode($subject.' cours PDF'),
+
+                'source'=>'Google Recherche',
+
+                'url'=>
+                'https://www.google.com/search?q='
+                .urlencode($subject.' cours PDF'),
+
+
                 'type'=>'Cours Web',
+
                 'file_type'=>'WEB',
+
                 'is_university'=>false,
-                'score'=>50,
+
+                'score'=>50
+
             ]
+
         ];
+
     }
 
 
