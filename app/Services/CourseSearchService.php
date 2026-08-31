@@ -49,16 +49,8 @@ class CourseSearchService
 
         if(!$response->successful())
         {
-
-            return [];
-
-        }
-
-        if(!$response->successful())
-        {
             return $this->fallbackSearch($subject);
         }
-
 
 
 
@@ -76,10 +68,9 @@ class CourseSearchService
         if(!$crawler->filter('.result')->count())
         {
 
-            return [];
+            return $this->fallbackSearch($subject);
 
         }
-
 
 
 
@@ -248,12 +239,17 @@ class CourseSearchService
 
 
 
+        if(empty($courses))
+        {
+            return $this->fallbackSearch($subject);
+        }
+
+
         return array_slice(
             $courses,
             0,
             5
         );
-
     }
 
 
