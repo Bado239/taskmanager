@@ -385,7 +385,7 @@ class TaskController extends Controller
 
         // Recherche Web
         $resources = $service->search('Finance');
-
+        dd($resources);
 
         // Supprimer anciens résultats
         \App\Models\CourseResource::where(
