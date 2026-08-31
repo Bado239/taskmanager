@@ -404,8 +404,18 @@ class="text-blue-600 font-bold">
 
 </a>
 
-@endif
 
+@elseif($document->file_path)
+
+<a href="{{ asset('storage/'.$document->file_path) }}"
+target="_blank"
+class="text-blue-600 font-bold">
+
+📄 Ouvrir fichier
+
+</a>
+
+@endif
 
 </td>
 
