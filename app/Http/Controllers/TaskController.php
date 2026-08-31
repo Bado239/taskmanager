@@ -382,7 +382,7 @@ class TaskController extends Controller
 
         // Recherche
         $resources = $service->search($subject);
-
+        dd($subject, $resources);
 
         // Nettoyer anciens résultats
         CourseResource::where(
