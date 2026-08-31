@@ -54,6 +54,11 @@ class CourseSearchService
 
         }
 
+        if(!$response->successful())
+        {
+            return $this->fallbackSearch($subject);
+        }
+
 
 
 
@@ -508,6 +513,22 @@ class CourseSearchService
 
         return $subject . " Master 1 cours PDF universitaire";
 
+    }
+
+
+    private function fallbackSearch($subject)
+    {
+        return [
+            [
+                'title'=>'Cours Master 1 '.$subject,
+                'source'=>'Recherche Web',
+                'url'=>'https://www.google.com/search?q='.urlencode($subject.' cours PDF'),
+                'type'=>'Cours Web',
+                'file_type'=>'WEB',
+                'is_university'=>false,
+                'score'=>50,
+            ]
+        ];
     }
 
 
