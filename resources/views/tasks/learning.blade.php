@@ -415,6 +415,23 @@ class="text-blue-600 font-bold">
 
 </a>
 
+<form method="POST"
+action="{{ route('learning-documents.destroy',$document->id) }}"
+class="inline">
+
+@csrf
+@method('DELETE')
+
+<button
+onclick="return confirm('Supprimer ce document ?')"
+class="text-red-600 font-bold ml-3">
+
+🗑 Supprimer
+
+</button>
+
+</form>
+
 @endif
 
 </td>

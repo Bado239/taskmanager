@@ -70,4 +70,32 @@ class LearningDocumentController extends Controller
 
     }
 
+    public function destroy($id)
+    {
+
+        $document = LearningDocument::findOrFail($id);
+
+
+        // Supprimer le fichier dans Supabase
+        if($document->file_path)
+        {
+
+            Storage::disk('s3')
+                ->delete($document->file_path);
+
+        }
+
+
+        // Supprimer la ligne en base
+        $document->delete();
+
+
+
+        return back()->with(
+            'success',
+            'Document supprimé avec succès'
+        );
+
+    }
+
 }

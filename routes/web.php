@@ -250,3 +250,9 @@ Route::post(
     '/learning-documents',
     [LearningDocumentController::class,'store']
 )->name('learning-documents.store');
+
+
+Route::delete(
+    '/learning-documents/{id}',
+    [App\Http\Controllers\LearningDocumentController::class, 'destroy']
+)->name('learning-documents.destroy');
