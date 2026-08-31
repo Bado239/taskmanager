@@ -7,6 +7,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PersonalResourceController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CourseResourceController;
+use App\Http\Controllers\LearningDocumentController;
 
 
 /*
@@ -242,3 +243,10 @@ Route::post(
     '/course-resource/{id}/note',
     [CourseResourceController::class,'note']
 )->name('course.note');
+
+
+
+Route::post(
+    '/learning-documents',
+    [LearningDocumentController::class,'store']
+)->name('learning-documents.store');

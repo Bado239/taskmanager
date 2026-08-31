@@ -244,6 +244,10 @@ class="space-y-4">
 
 @csrf
 
+<input type="hidden"
+name="task_id"
+value="{{ $task->id }}">
+
 
 
 <input type="text"
