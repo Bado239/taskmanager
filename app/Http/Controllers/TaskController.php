@@ -364,83 +364,80 @@ class TaskController extends Controller
         return back()->with('success', $message);
     }
 
-    public function searchCourses($id, CourseSearchService $service)
+    public function searchCourses(
+        $id,
+        \App\Services\CourseSearchService $service
+    )
     {
+
         $task = Task::findOrFail($id);
 
 
-        // Matière recherchée
-        $subject = $task->project->title ?? $task->title;
+
+        // Matière + chapitre
+        $subject = trim(
+            ($task->project_name ?? '')
+            .' '.
+            ($task->title ?? '')
+        );
+
 
 
         // Recherche Web
         $resources = $service->search($subject);
+        dd($subject, $resources);
+
+
+        // Supprimer anciens résultats
+        \App\Models\CourseResource::where(
+            'task_id',
+            $task->id
+        )->delete();
 
 
 
-        foreach($resources as $index => $resource)
+        // Enregistrer les nouveaux cours
+        foreach($resources as $resource)
         {
 
-            // Ignorer les faux résultats
-            if(
-                empty($resource['url'])
-                || 
-                $resource['url'] === '#'
-                ||
-                ($resource['score'] ?? 0) <= 0
-            ){
-                continue;
-            }
+            \App\Models\CourseResource::create([
 
-            CourseResource::updateOrCreate(
-
-            [
                 'task_id' => $task->id,
-                'url' => $resource['url']
-            ],
 
-            [
                 'title' => $resource['title'],
 
                 'source' => $resource['source'],
 
+                'url' => $resource['url'],
+
                 'type' => $resource['type'],
 
-                'order' => $index + 1,
+                'file_type' => $resource['file_type'],
 
-                'file_type' => $resource['file_type'] ?? 'WEB',
+                'is_university' =>
+                    $resource['is_university'],
 
-                'is_university' => 
-                    filter_var(
-                        $resource['is_university'] ?? false,
-                        FILTER_VALIDATE_BOOLEAN
-                    ),
                 'score' =>
-                    isset($resource['score'])
-                    ? (int) $resource['score']
-                    : 0,
+                    $resource['score'],
 
-                'searched_at'=>now()
-
-            ]
-
-            );
+            ]);
 
         }
 
 
 
-        return back()->with(
+        return redirect()
+            ->route(
+                'tasks.learning',
+                $task->id
+            )
+            ->with(
+                'success',
+                count($resources)
+                .' cours trouvés'
+            );
 
-            'success',
-
-            count($resources).
-            ' nouveaux cours analysés et enregistrés'
-
-        );
     }
-
-
     /**
      * Affiche l'espace apprentissage d'un chapitre
      */

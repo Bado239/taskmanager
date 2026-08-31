@@ -10,21 +10,36 @@ class CourseResource extends Model
     protected $fillable = [
 
         'task_id',
+
         'title',
+
         'source',
+
         'url',
+
         'type',
+
         'order',
+
         'file_type',
+
         'is_university',
+
         'score',
+
         'relevance',
+
         'saved',
+
         'searched_at',
+
         'rating',
+
         'notes'
 
     ];
+
+
 
 
 
@@ -49,33 +64,78 @@ class CourseResource extends Model
 
 
 
+
+
+
     /**
-     * Force PostgreSQL boolean pour is_university
+     * Relation avec la tâche
      */
-    public function setIsUniversityAttribute($value)
+    public function task()
     {
-        $this->attributes['is_university'] =
-            $value ? 'true' : 'false';
+
+        return $this->belongsTo(
+            Task::class
+        );
+
     }
 
 
 
 
+
+
+
     /**
-     * Force PostgreSQL boolean pour saved
+     * Recherche associée à une tâche
+     */
+    public function scopeForTask($query, $taskId)
+    {
+
+        return $query->where(
+            'task_id',
+            $taskId
+        );
+
+    }
+
+
+
+
+
+
+
+    /**
+     * Enregistrer proprement le statut sauvegardé
      */
     public function setSavedAttribute($value)
     {
+
         $this->attributes['saved'] =
-            $value ? 'true' : 'false';
+            filter_var(
+                $value,
+                FILTER_VALIDATE_BOOLEAN
+            );
+
     }
 
 
 
 
-    public function task()
+
+
+
+    /**
+     * Enregistrer proprement le statut université
+     */
+    public function setIsUniversityAttribute($value)
     {
-        return $this->belongsTo(Task::class);
+
+        $this->attributes['is_university'] =
+            filter_var(
+                $value,
+                FILTER_VALIDATE_BOOLEAN
+            );
+
     }
 
 }
