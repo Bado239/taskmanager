@@ -6,157 +6,124 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Client\ConnectionException;
 use Symfony\Component\DomCrawler\Crawler;
 
-
 class CourseSearchService
 {
 
     public function search($subject)
     {
 
-        $queries = [
-
-            "Master 1 {$subject} cours PDF",
-
-            "{$subject} Master PDF",
-
-            "{$subject} cours universitaire",
-
-            "{$subject} syllabus Master",
-
-            "{$subject} lecture notes Master PDF"
-
-        ];
-
-
-        $allCourses = [];
-
-
-        foreach($queries as $query)
-        {
-
-            $results = $this->duckDuckGoSearch($query);
-
-
-            $allCourses = array_merge(
-                $allCourses,
-                $results
-            );
-
-        }
+        $query = "cours Master 1 {$subject} PDF universitaire";
 
 
 
-        if(count($allCourses) == 0)
-        {
-
-            return $this->defaultCourses($subject);
-
-        }
+        try {
 
 
+            $response = Http::timeout(30)
+                ->retry(2, 1000)
+                ->withHeaders([
 
+                    'User-Agent' =>
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
-        return collect($allCourses)
-
-            ->unique('url')
-
-            ->filter(function($course){
-
-                // On garde uniquement les résultats pertinents
-
-                return $course['score'] >= 20;
-
-            })
-
-            ->sortByDesc('score')
-
-            ->take(5)
-
-            ->values()
-
-            ->toArray();
-
-
-    }
-
-
-
-
-
-
-
-        private function duckDuckGoSearch($query)
-        {
-
-            try {
-
-                $response = Http::timeout(10)
-                    ->retry(2,500)
-                    ->withHeaders([
-                        'User-Agent'=>'Mozilla/5.0'
-                    ])
-                    ->get(
-                        'https://duckduckgo.com/html/',
-                        [
-                            'q'=>$query
-                        ]
-                    );
-
-            }
-
-            catch(ConnectionException $e)
-            {
-                return [];
-            }
-
-
-            if(!$response->successful())
-            {
-                return [];
-            }
-
-
-
-            $crawler = new Crawler($response->body());
-
-
-            $courses=[];
-
-
-
-            $crawler->filter('.result')->each(function($node) use (&$courses)
-            {
-
-
-                if(count($courses)>=15)
-                {
-                    return;
-                }
-
-
-
-                if(!$node->filter('a.result__a')->count())
-                {
-                    return;
-                }
-
-
-
-                $title = trim(
-                    $node
-                    ->filter('a.result__a')
-                    ->text()
+                ])
+                ->get(
+                    'https://duckduckgo.com/html/',
+                    [
+                        'q' => $query
+                    ]
                 );
 
 
 
-                $link = $node
-                    ->filter('a.result__a')
-                    ->attr('href');
+        } catch (ConnectionException $e) {
+
+
+            return [];
+
+
+        }
 
 
 
-                $url = $this->cleanUrl($link);
+
+        if(!$response->successful())
+        {
+
+            return [];
+
+        }
+
+
+
+
+        $crawler = new Crawler(
+            $response->body()
+        );
+
+
+
+        $courses = [];
+
+
+
+
+        if(!$crawler->filter('.result')->count())
+        {
+
+            return [];
+
+        }
+
+
+
+
+
+        $crawler->filter('.result')->each(
+
+            function($node) use (&$courses)
+
+            {
+
+
+                if(count($courses) >= 10)
+                {
+                    return;
+                }
+
+
+
+
+                if(
+                    !$node->filter('.result__a')->count()
+                )
+                {
+                    return;
+                }
+
+
+
+
+
+                $title = trim(
+
+                    $node
+                    ->filter('.result__a')
+                    ->text()
+
+                );
+
+
+
+
+                $url = $this->cleanUrl(
+
+                    $node
+                    ->filter('.result__a')
+                    ->attr('href')
+
+                );
+
 
 
 
@@ -167,7 +134,13 @@ class CourseSearchService
 
 
 
-                $host=parse_url($url,PHP_URL_HOST);
+
+
+                $host = parse_url(
+                    $url,
+                    PHP_URL_HOST
+                );
+
 
 
 
@@ -178,80 +151,103 @@ class CourseSearchService
 
 
 
-                $courses[]=[
 
 
-                    'title'=>$title,
+                $score = $this->calculateScore(
+                    $title,
+                    $url
+                );
 
 
-                    'source'=>str_replace(
+
+
+
+                $courses[] = [
+
+                    'title' => $title,
+
+
+                    'source' => str_replace(
                         'www.',
                         '',
                         $host
                     ),
 
 
-                    'url'=>$url,
+
+                    'url' => $url,
 
 
-                    'type'=>'Cours Web',
+
+                    'type' =>
+                    'Cours Web',
 
 
-                    'file_type'=>$this->detectFileType($url),
+
+                    'file_type' =>
+                    $this->detectFileType($url),
 
 
-                    'is_university'=>
-                        $this->isUniversity($url),
+
+                    'is_university' =>
+                    $this->isUniversity($url),
 
 
-                    'score'=>
-                        $this->calculateScore(
-                            $title,
-                            $url
-                        )
+
+                    'score' =>
+                    $score
 
 
                 ];
 
 
-            });
 
+            }
 
-
-            return $courses;
-
-        }
-
+        );
 
 
 
 
 
 
-    private function defaultCourses($subject)
-    {
+        // supprimer les doublons
 
-        return [
+        $courses = collect($courses)
+            ->unique('url')
+            ->values()
+            ->toArray();
 
-            [
 
-                'title'=>"Aucun cours trouvé pour {$subject}",
 
-                'source'=>"Recherche Web",
 
-                'url'=>"#",
 
-                'type'=>"Recherche",
 
-                'file_type'=>"WEB",
+        // classer par qualité
 
-                'is_university'=>false,
+        usort(
 
-                'score'=>0
+            $courses,
 
-            ]
+            function($a,$b){
 
-        ];
+                return $b['score']
+                    <=>
+                    $a['score'];
+
+            }
+
+        );
+
+
+
+
+
+        return array_slice(
+            $courses,
+            0,
+            5
+        );
 
     }
 
@@ -262,6 +258,10 @@ class CourseSearchService
 
 
 
+    /**
+     * Nettoyage URL DuckDuckGo
+     */
+
     private function cleanUrl($url)
     {
 
@@ -271,27 +271,35 @@ class CourseSearchService
         }
 
 
+
         if(str_contains($url,'uddg='))
         {
 
+
             parse_str(
-                parse_url($url,PHP_URL_QUERY),
+
+                parse_url(
+                    $url,
+                    PHP_URL_QUERY
+                ),
+
                 $query
+
             );
+
 
 
             if(isset($query['uddg']))
             {
-                return urldecode($query['uddg']);
+
+                return urldecode(
+                    $query['uddg']
+                );
+
             }
 
         }
 
-
-        if(str_starts_with($url,'//'))
-        {
-            return 'https:'.$url;
-        }
 
 
         return $url;
@@ -304,23 +312,22 @@ class CourseSearchService
 
 
 
+
+    /**
+     * Détection PDF ou WEB
+     */
+
     private function detectFileType($url)
     {
 
-
-        if(str_contains(
+        return str_contains(
             strtolower($url),
             '.pdf'
-        ))
-        {
+        )
 
-            return "PDF";
+        ? 'PDF'
 
-        }
-
-
-        return "WEB";
-
+        : 'WEB';
 
     }
 
@@ -331,6 +338,9 @@ class CourseSearchService
 
 
 
+    /**
+     * Détection université
+     */
 
     private function isUniversity($url)
     {
@@ -338,21 +348,22 @@ class CourseSearchService
         $text = strtolower($url);
 
 
+
         return
 
-        str_contains($text,'univ')
+            str_contains($text,'univ')
 
-        ||
+            ||
 
-        str_contains($text,'universite')
+            str_contains($text,'universite')
 
-        ||
+            ||
 
-        str_contains($text,'.edu')
+            str_contains($text,'.edu')
 
-        ||
+            ||
 
-        str_contains($text,'ac.');
+            str_contains($text,'ac.');
 
     }
 
@@ -363,6 +374,9 @@ class CourseSearchService
 
 
 
+    /**
+     * Score qualité
+     */
 
     private function calculateScore($title,$url)
     {
@@ -371,29 +385,26 @@ class CourseSearchService
         $score = 0;
 
 
+
         $text = strtolower(
+
             $title.' '.$url
+
         );
 
 
 
 
-        // PDF
-        if(
-            str_contains($text,'pdf')
-            ||
-            str_contains($text,'.pdf')
-        )
+
+        if(str_contains($text,'pdf'))
         {
-
-            $score += 40;
-
+            $score += 30;
         }
 
 
 
 
-        // Université
+
         if(
             str_contains($text,'univ')
             ||
@@ -402,43 +413,32 @@ class CourseSearchService
             str_contains($text,'.edu')
         )
         {
-
             $score += 30;
-
         }
 
 
 
 
-
-        // Niveau Master
 
         if(str_contains($text,'master'))
         {
-
-            $score +=20;
-
+            $score += 15;
         }
 
 
 
 
-        // Cours
 
         if(
             str_contains($text,'cours')
             ||
             str_contains($text,'course')
-            ||
-            str_contains($text,'syllabus')
-            ||
-            str_contains($text,'lecture')
         )
         {
-
-            $score +=20;
-
+            $score += 15;
         }
+
+
 
 
 
