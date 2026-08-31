@@ -72,4 +72,11 @@ class Task extends Model
     {
         return $this->hasMany(CourseResource::class);
     }
+
+    public function learningDocuments()
+    {
+        return $this->hasMany(
+            LearningDocument::class
+        );
+    }
 }
