@@ -375,10 +375,7 @@ class TaskController extends Controller
 
         $subject = trim(
             ($task->project_name ?? '')
-            .' '.
-            ($task->title ?? '')
         );
-
 
         $resources = $service->search($subject);
 
