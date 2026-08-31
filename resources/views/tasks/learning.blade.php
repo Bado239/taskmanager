@@ -327,6 +327,103 @@ class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold">
 
 
 </form>
+@if($task->learningDocuments->count() > 0)
+
+<div class="mt-6">
+
+<h3 class="font-bold mb-3">
+📚 Documents ajoutés
+</h3>
+
+
+<table class="w-full border-collapse">
+
+<thead>
+
+<tr class="bg-gray-100">
+
+<th class="p-3 text-left">
+Document
+</th>
+
+<th class="p-3 text-left">
+Type
+</th>
+
+<th class="p-3 text-left">
+Action
+</th>
+
+</tr>
+
+</thead>
+
+
+<tbody>
+
+
+@foreach($task->learningDocuments as $document)
+
+<tr class="border-b">
+
+
+<td class="p-3 font-bold">
+
+{{ $document->title }}
+
+</td>
+
+
+
+<td class="p-3">
+
+@if($document->type == 'link')
+
+🌐 Lien Internet
+
+@else
+
+📄 PDF / Word
+
+@endif
+
+</td>
+
+
+
+<td class="p-3">
+
+
+@if($document->url)
+
+<a href="{{ $document->url }}"
+target="_blank"
+class="text-blue-600 font-bold">
+
+🔗 Ouvrir
+
+</a>
+
+@endif
+
+
+</td>
+
+
+</tr>
+
+
+@endforeach
+
+
+</tbody>
+
+</table>
+
+
+</div>
+
+@endif
 
 
 </div>
