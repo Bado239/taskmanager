@@ -395,37 +395,32 @@ class TaskController extends Controller
 
 
         // Enregistrer les nouveaux cours
-        foreach($resources as $resource)
-        {
+    foreach($resources as $resource)
+    {
+        \DB::table('course_resources')->insert([
 
-            \App\Models\CourseResource::create([
+            'task_id' => $task->id,
 
-                'task_id' => $task->id,
+            'title' => $resource['title'],
 
-                'title' => $resource['title'],
+            'source' => $resource['source'],
 
-                'source' => $resource['source'],
+            'url' => $resource['url'],
 
-                'url' => $resource['url'],
+            'type' => $resource['type'],
 
-                'type' => $resource['type'],
+            'file_type' => $resource['file_type'],
 
-                'file_type' => $resource['file_type'],
+            'is_university' => $resource['is_university'],
 
-                'is_university' =>
-                    $resource['is_university'],
+            'score' => $resource['score'],
 
-                'score' =>
-                    $resource['score'],
+            'created_at' => now(),
 
-            ]);
+            'updated_at' => now(),
 
-        }
-
-        dd(
-            CourseResource::where('task_id',$task->id)->get()
-        );
-
+        ]);
+    }
 
 
         return redirect()
