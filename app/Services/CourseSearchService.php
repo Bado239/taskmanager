@@ -262,6 +262,9 @@ class CourseSearchService
      * Nettoyage URL DuckDuckGo
      */
 
+/**
+ * Nettoyage URL DuckDuckGo
+ */
     private function cleanUrl($url)
     {
 
@@ -271,22 +274,24 @@ class CourseSearchService
         }
 
 
+        // URL relative DuckDuckGo
+        if(str_starts_with($url, '//'))
+        {
+            $url = 'https:' . $url;
+        }
 
-        if(str_contains($url,'uddg='))
+
+
+        $parts = parse_url($url);
+
+
+        if(isset($parts['query']))
         {
 
-
             parse_str(
-
-                parse_url(
-                    $url,
-                    PHP_URL_QUERY
-                ),
-
+                $parts['query'],
                 $query
-
             );
-
 
 
             if(isset($query['uddg']))
@@ -301,11 +306,9 @@ class CourseSearchService
         }
 
 
-
         return $url;
 
     }
-
 
 
 
