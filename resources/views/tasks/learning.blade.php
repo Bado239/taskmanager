@@ -258,22 +258,32 @@ required>
 
 
 
-<select name="type"
-class="w-full border rounded-xl p-3">
+<div class="flex gap-4">
+
+    <button 
+    type="button"
+    onclick="document.getElementById('file').click()"
+    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold">
+
+        📄 PDF / Word
+    </button>
 
 
-<option value="pdf">
-📄 PDF / Word
-</option>
+    <button 
+    type="button"
+    onclick="document.getElementById('url').focus()"
+    class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-bold">
+
+        🌐 Lien Internet
+    </button>
+
+</div>
 
 
-<option value="link">
-🌐 Lien Internet
-</option>
-
-
-</select>
-
+<input type="hidden"
+name="type"
+id="type"
+value="pdf">
 
 
 
@@ -287,10 +297,10 @@ Fichier PDF ou Word
 
 
 <input type="file"
+id="file"
 name="file"
 accept=".pdf,.doc,.docx"
-class="w-full border rounded-xl p-3">
-
+class="hidden">
 
 </div>
 
@@ -307,10 +317,10 @@ Lien Internet
 
 
 <input type="url"
+id="url"
 name="url"
 placeholder="https://..."
 class="w-full border rounded-xl p-3">
-
 
 </div>
 
