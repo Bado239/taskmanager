@@ -369,9 +369,7 @@ class TaskController extends Controller
         \App\Services\CourseSearchService $service
     )
     {
-
         $task = Task::findOrFail($id);
-
 
 
         // Matière + chapitre
@@ -382,22 +380,21 @@ class TaskController extends Controller
         );
 
 
+        // Recherche
+        $resources = $service->search($subject);
 
-        // Recherche Web
-        $resources = $service->search('Finance');
 
-        // Supprimer anciens résultats
-        \App\Models\CourseResource::where(
+        // Nettoyer anciens résultats
+        CourseResource::where(
             'task_id',
             $task->id
         )->delete();
 
 
-
-        // Enregistrer les nouveaux cours
+        // Enregistrer résultats
     foreach($resources as $resource)
     {
-        \DB::table('course_resources')->insert([
+        CourseResource::create([
 
             'task_id' => $task->id,
 
@@ -411,13 +408,13 @@ class TaskController extends Controller
 
             'file_type' => $resource['file_type'],
 
-            'is_university' => $resource['is_university'],
+            'is_university' =>
+                $resource['is_university'],
 
-            'score' => $resource['score'],
+            'score' =>
+                $resource['score'],
 
-            'created_at' => now(),
-
-            'updated_at' => now(),
+            'searched_at' => now(),
 
         ]);
     }
@@ -427,32 +424,32 @@ class TaskController extends Controller
             ->route(
                 'tasks.learning',
                 $task->id
-            )
-            ->with(
-                'success',
-                count($resources)
-                .' cours trouvés'
             );
-
     }
+
+
+
     /**
      * Affiche l'espace apprentissage d'un chapitre
      */
     public function learning($id)
     {
-        $task = Task::with([
-            'courseResources' => function($query) {
-                $query->orderBy('order', 'asc')
-                      ->limit(5);
-            }
-        ])->findOrFail($id);
+        $task = Task::findOrFail($id);
+
+
+        $resources = CourseResource::where('task_id', $id)
+            ->orderBy('score', 'desc')
+            ->limit(5)
+            ->get();
 
 
         return view(
             'tasks.learning',
-            compact('task')
+            compact(
+                'task',
+                'resources'
+            )
         );
     }
-
 
 }

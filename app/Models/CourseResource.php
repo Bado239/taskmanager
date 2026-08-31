@@ -10,37 +10,21 @@ class CourseResource extends Model
     protected $fillable = [
 
         'task_id',
-
         'title',
-
         'source',
-
         'url',
-
         'type',
-
         'order',
-
         'file_type',
-
         'is_university',
-
         'score',
-
         'relevance',
-
         'saved',
-
         'searched_at',
-
         'rating',
-
         'notes'
 
     ];
-
-
-
 
 
     protected $casts = [
@@ -62,9 +46,24 @@ class CourseResource extends Model
     ];
 
 
+    /**
+     * Correction PostgreSQL BOOLEAN
+     */
+    public function setIsUniversityAttribute($value)
+    {
+        $this->attributes['is_university'] =
+            $value ? 'true' : 'false';
+    }
 
 
-
+    /**
+     * Correction PostgreSQL BOOLEAN
+     */
+    public function setSavedAttribute($value)
+    {
+        $this->attributes['saved'] =
+            $value ? 'true' : 'false';
+    }
 
 
     /**
@@ -72,70 +71,21 @@ class CourseResource extends Model
      */
     public function task()
     {
-
         return $this->belongsTo(
             Task::class
         );
-
     }
 
 
-
-
-
-
-
     /**
-     * Recherche associée à une tâche
+     * Filtrer les ressources d'une tâche
      */
     public function scopeForTask($query, $taskId)
     {
-
         return $query->where(
             'task_id',
             $taskId
         );
-
-    }
-
-
-
-
-
-
-
-    /**
-     * Enregistrer proprement le statut sauvegardé
-     */
-    public function setSavedAttribute($value)
-    {
-
-        $this->attributes['saved'] =
-            filter_var(
-                $value,
-                FILTER_VALIDATE_BOOLEAN
-            );
-
-    }
-
-
-
-
-
-
-
-    /**
-     * Enregistrer proprement le statut université
-     */
-    public function setIsUniversityAttribute($value)
-    {
-
-        $this->attributes['is_university'] =
-            filter_var(
-                $value,
-                FILTER_VALIDATE_BOOLEAN
-            );
-
     }
 
 }
