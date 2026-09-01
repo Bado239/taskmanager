@@ -175,6 +175,15 @@ class CourseSearchService
             ->values()
             ->toArray();
 
+        // Si moins de 5 résultats, refaire une recherche générale
+
+        if(count($courses) < 5)
+        {
+
+            return $this->secondSearch($subject);
+
+        }
+
 
 
         usort(
@@ -346,51 +355,29 @@ class CourseSearchService
     private function buildQuery($subject)
     {
 
-        $text=strtolower($subject);
+        $text = strtolower($subject);
 
 
-        $expansions=[
+        // Nettoyage des mots inutiles
+        $text = str_replace(
+            [
+                'apprendre',
+                'chapitre',
+                'introductif'
+            ],
+            '',
+            $text
+        );
 
 
-            'finance'=>
-            'finance entreprise finance marché finance internationale cours master 1 pdf université',
-
-
-            'econometrie'=>
-            'économétrie logit probit modèles qualitatifs cours master pdf université',
-
-
-            'microeconomie'=>
-            'microéconomie cours master pdf université',
-
-
-            'macroeconomie'=>
-            'macroéconomie cours master pdf université',
-
-
-            'statistique'=>
-            'statistiques probabilités cours master pdf université'
-
-
-        ];
+        $text = trim($text);
 
 
 
-        foreach($expansions as $key=>$value)
-        {
+        return "Cours Master 1 ".$text." au Sénégal PDF université";
 
-            if(str_contains($text,$key))
-            {
-                return $value.' Master 1 PDF';
-            }
-
-        }
-
-
-        return $subject.' Master 1 cours PDF universitaire';
 
     }
-
 
 
 
@@ -422,6 +409,37 @@ class CourseSearchService
             ]
 
         ];
+
+    }
+
+    private function secondSearch($subject)
+    {
+
+        $query = "Cours Master 1 ".$subject." PDF universitaire";
+
+
+        $response = Http::timeout(30)
+            ->withHeaders([
+                'User-Agent'=>'Mozilla/5.0'
+            ])
+            ->get(
+                'https://duckduckgo.com/html/',
+                [
+                    'q'=>$query
+                ]
+            );
+
+
+        if(!$response->successful())
+        {
+            return [];
+        }
+
+
+        // ici on réutilise votre logique actuelle
+        return $this->extractResults(
+            $response->body()
+        );
 
     }
 
