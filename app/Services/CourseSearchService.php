@@ -383,28 +383,12 @@ class CourseSearchService
 
 
 
-    private function buildQuery($subject, $chapter = null)
+    private function buildQuery($subject)
     {
 
-        $query = "Cours Master 1 ";
-
-        // Matière
-        $query .= $subject;
-
-
-        // Chapitre
-        if($chapter){
-            $query .= " Chapitre ".$chapter;
-        }
-
-
-        $query .= " PDF cours université Sénégal";
-
-
-        return $query;
+        return $subject . " PDF cours université Sénégal";
 
     }
-
     private function fallbackSearch($subject)
     {
         return [
