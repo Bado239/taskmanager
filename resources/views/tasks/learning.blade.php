@@ -331,6 +331,9 @@ class="text-blue-600 font-bold">
 
 </a>
 
+@endif
+
+
 <form method="POST"
 action="{{ route('learning-documents.destroy',$document->id) }}"
 class="inline">
@@ -347,8 +350,6 @@ class="text-red-600 font-bold ml-3">
 </button>
 
 </form>
-
-@endif
 
 </td>
 
