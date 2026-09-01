@@ -16,9 +16,8 @@ class DocumentReaderService
         if($document->file_path)
         {
 
-            $url = config('filesystems.disks.s3.url')
-                .'/'.$document->file_path;
-
+            $url = "https://zhlojjivmwuuqhzeqpgg.supabase.co/storage/v1/object/public/ebooks/"
+                .$document->file_path;
 
             $content = Http::get($url)->body();
 
