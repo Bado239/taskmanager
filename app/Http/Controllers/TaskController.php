@@ -375,44 +375,69 @@ class TaskController extends Controller
         ])->findOrFail($id);
 
 
+        // Construction de la recherche
         $subject = trim(
-            ($task->project->title ?? '')
+            ($task->project->title ?? $task->project_name ?? '')
             .' '
             .($task->category->name ?? '')
             .' '
             .($task->title ?? '')
         );
 
-        dd($subject);
 
-
+        // Recherche des vrais cours
         $resources = $service->search($subject);
 
 
-        CourseResource::where('task_id',$task->id)->delete();
+
+        // Supprimer les anciens résultats
+        CourseResource::where('task_id', $task->id)->delete();
 
 
-        foreach($resources as $resource)
+
+        // Enregistrer uniquement les vrais résultats
+        if(is_array($resources))
         {
 
-            CourseResource::create([
+            foreach($resources as $resource)
+            {
 
-                'task_id'=>$task->id,
-                'title'=>$resource['title'],
-                'source'=>$resource['source'],
-                'url'=>$resource['url'],
-                'type'=>$resource['type'],
-                'file_type'=>$resource['file_type'],
-                'is_university'=>$resource['is_university'],
-                'score'=>$resource['score'],
+                CourseResource::create([
 
-            ]);
+                    'task_id' => $task->id,
+
+                    'title' => $resource['title'] ?? 'Cours sans titre',
+
+                    'source' => $resource['source'] ?? 'Web',
+
+                    'url' => $resource['url'] ?? null,
+
+                    'type' => $resource['type'] ?? 'Cours Web',
+
+                    'file_type' => $resource['file_type'] ?? 'WEB',
+
+                    'is_university' => $resource['is_university'] ?? false,
+
+                    'score' => $resource['score'] ?? 0,
+
+                ]);
+
+            }
 
         }
 
 
-        return back();
-    }
+
+        return redirect()
+            ->route('tasks.learning',$task->id)
+            ->with(
+                'success',
+                'Cours actualisés avec succès'
+            );
+
+    }    
+
+
     /**
      * Affiche l'espace apprentissage d'un chapitre
      */
