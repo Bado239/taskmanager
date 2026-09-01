@@ -237,12 +237,26 @@ Ajoutez vos propres supports de cours (PDF, Word ou lien Internet).
 
 
 
+<button 
+type="button"
+onclick="document.getElementById('documentForm').classList.toggle('hidden')"
+class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold">
+
+➕ Ajouter un document
+
+</button>
+
+
+<div id="documentForm" class="hidden mt-5">
+
+
 <form method="POST"
 action="{{ route('learning-documents.store') }}"
 enctype="multipart/form-data"
 class="space-y-4">
 
 @csrf
+
 
 <input type="hidden"
 name="task_id"
@@ -258,85 +272,135 @@ required>
 
 
 
-<div class="flex gap-4">
+<select name="type"
+class="w-full border rounded-xl p-3">
 
-    <button 
-    type="button"
-    onclick="document.getElementById('file').click()"
-    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold">
+<option value="pdf">
+📄 PDF / Word
+</option>
 
-        📄 PDF / Word
-    </button>
+<option value="link">
+🌐 Lien Internet
+</option>
 
-
-    <button 
-    type="button"
-    onclick="document.getElementById('url').focus()"
-    class="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-bold">
-
-        🌐 Lien Internet
-    </button>
-
-</div>
-
-
-<input type="hidden"
-name="type"
-id="type"
-value="pdf">
+</select>
 
 
 
-<div>
+<div class="border rounded-xl p-4">
 
-<label class="text-sm text-gray-600">
-
-Fichier PDF ou Word
-
+<label class="block text-sm text-gray-600 mb-2">
+Ajouter un fichier PDF ou Word
 </label>
-
 
 <input type="file"
-id="file"
 name="file"
 accept=".pdf,.doc,.docx"
-class="hidden">
+class="w-full">
+
 
 </div>
 
 
 
+<div class="border rounded-xl p-4">
 
-<div>
-
-<label class="text-sm text-gray-600">
-
-Lien Internet
-
+<label class="block text-sm text-gray-600 mb-2">
+Ajouter un lien Internet
 </label>
 
-
 <input type="url"
-id="url"
 name="url"
 placeholder="https://..."
 class="w-full border rounded-xl p-3">
 
+
 </div>
 
 
 
-
 <button
-class="bg-blue-600 text-white px-5 py-3 rounded-xl font-bold">
+type="submit"
+class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold">
 
-➕ Ajouter le document
+💾 Enregistrer le document
 
 </button>
 
 
+</form>
+
+
+</div>
+
+<div id="documentForm" class="hidden mt-5">
+
+
+<form method="POST"
+action="{{ route('learning-documents.store') }}"
+enctype="multipart/form-data"
+class="space-y-4">
+
+@csrf
+
+
+<input type="hidden"
+name="task_id"
+value="{{ $task->id }}">
+
+
+
+<input type="text"
+name="title"
+placeholder="Titre du document"
+class="w-full border rounded-xl p-3"
+required>
+
+
+
+<select name="type"
+class="w-full border rounded-xl p-3">
+
+<option value="pdf">
+📄 PDF / Word
+</option>
+
+<option value="link">
+🌐 Lien Internet
+</option>
+
+</select>
+
+
+
+<input type="file"
+name="file"
+accept=".pdf,.doc,.docx"
+class="w-full border rounded-xl p-3">
+
+
+
+<input type="url"
+name="url"
+placeholder="Lien Internet (optionnel)"
+class="w-full border rounded-xl p-3">
+
+
+
+<button
+class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold">
+
+💾 Enregistrer le document
+
+</button>
+
 
 </form>
+
+
+</div>
+
+
 @if($task->learningDocuments->count() > 0)
 
 <div class="mt-6">
