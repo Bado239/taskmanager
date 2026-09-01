@@ -82,6 +82,11 @@ class Task extends Model
 
     public function generatedCourse()
     {
-        return $this->hasOne(GeneratedCourse::class);
-    }
+
+        return $this->hasOne(
+        GeneratedCourse::class
+        );
+
+    }    
+
 }

@@ -384,6 +384,22 @@ Générez automatiquement un cours complet à partir de vos documents.
 
 </p>
 
+@if(session('success'))
+
+<div class="mt-4 bg-green-100 text-green-700 p-3 rounded-xl">
+{{ session('success') }}
+</div>
+
+@endif
+
+
+@if(session('error'))
+
+<div class="mt-4 bg-red-100 text-red-700 p-3 rounded-xl">
+{{ session('error') }}
+</div>
+
+@endif
 
 <form method="POST"
 action="{{ route('learning.generate',$task->id) }}">
@@ -413,12 +429,11 @@ class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl fo
 </h2>
 
 
-<div class="prose">
+<div class="prose max-w-none">
 
-{!! nl2br($task->generatedCourse->content) !!}
+{!! nl2br(e($task->generatedCourse->content)) !!}
 
 </div>
-
 
 </div>
 

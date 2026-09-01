@@ -8,6 +8,8 @@ use App\Http\Controllers\PersonalResourceController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CourseResourceController;
 use App\Http\Controllers\LearningDocumentController;
+use App\Http\Controllers\GeneratedCourseController;
+
 
 
 /*
@@ -257,3 +259,15 @@ Route::post(
 [App\Http\Controllers\LearningAIController::class,'generate']
 )
 ->name('learning.generate');
+
+
+
+Route::post(
+    '/tasks/{task}/generate-course',
+    [GeneratedCourseController::class,'generate']
+)->name('tasks.generate.course');
+
+Route::post(
+    '/learning/{task}/generate',
+    [TaskController::class,'generate']
+)->name('learning.generate');

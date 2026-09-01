@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+
 
 class GeneratedCourse extends Model
 {
 
-protected $fillable = [
+
+protected $fillable=[
 
 'task_id',
 'title',
@@ -16,9 +19,13 @@ protected $fillable = [
 ];
 
 
+
 public function task()
 {
-    return $this->belongsTo(Task::class);
+
+return $this->belongsTo(Task::class);
+
 }
+
 
 }

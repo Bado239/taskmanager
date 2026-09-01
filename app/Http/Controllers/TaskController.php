@@ -11,6 +11,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Services\CourseSearchService;
 use App\Models\CourseResource;
+use App\Services\DocumentReaderService;
+use App\Services\AICourseGeneratorService;
+use App\Models\GeneratedCourse;
 
 class TaskController extends Controller
 {
@@ -446,11 +449,16 @@ class TaskController extends Controller
         $task = Task::with([
             'project',
             'category',
+
             'courseResources' => function($query){
                 $query->orderBy('score','desc')
                     ->limit(5);
             },
-            'learningDocuments'
+
+            'learningDocuments',
+
+            'generatedCourse'
+
         ])->findOrFail($id);
 
 
@@ -458,6 +466,62 @@ class TaskController extends Controller
             'tasks.learning',
             compact('task')
         );
+    }
+
+    public function generate(
+    $id,
+    DocumentReaderService $reader,
+    AICourseGeneratorService $ai
+    )
+    {
+
+        $task = Task::with('learningDocuments')
+            ->findOrFail($id);
+
+
+        $text = "";
+
+
+        foreach($task->learningDocuments as $document)
+        {
+            $text .= "\n\n".$reader->read($document);
+        }
+
+
+        if(strlen($text) < 100)
+        {
+            return back()->with(
+                'error',
+                'Aucun contenu exploitable trouvé dans les documents.'
+            );
+        }
+
+
+        $content = $ai->generate(
+            $text,
+            $task->project->title.' - '.$task->title
+        );
+
+
+        GeneratedCourse::updateOrCreate(
+
+            [
+                'task_id'=>$task->id
+            ],
+
+            [
+                'title'=>$task->title,
+                'content'=>$content
+            ]
+
+        );
+
+
+        return back()->with(
+            'success',
+            'Cours généré avec succès.'
+        );
+
     }
 
 }
