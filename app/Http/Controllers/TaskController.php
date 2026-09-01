@@ -469,52 +469,63 @@ class TaskController extends Controller
     }
 
     public function generate(
-    $id,
-    DocumentReaderService $reader,
-    AICourseGeneratorService $ai
+        Task $task,
+        DocumentReaderService $reader,
+        AICourseGeneratorService $ai
     )
     {
 
-        $task = Task::with('learningDocuments')
-            ->findOrFail($id);
 
-
-        $text = "";
+        $text="";
 
 
         foreach($task->learningDocuments as $document)
         {
-            $text .= "\n\n".$reader->read($document);
+
+            $text .= "\n\n";
+
+            $text .= $reader->read($document);
+
         }
 
 
-        if(strlen($text) < 100)
+
+        if(strlen($text)<100)
         {
+
             return back()->with(
                 'error',
-                'Aucun contenu exploitable trouvé dans les documents.'
+                'Aucun contenu exploitable trouvé.'
             );
+
         }
+
 
 
         $content = $ai->generate(
             $text,
-            $task->project->title.' - '.$task->title
+            $task->title
         );
 
 
-        GeneratedCourse::updateOrCreate(
+
+
+        \App\Models\GeneratedCourse::updateOrCreate(
 
             [
                 'task_id'=>$task->id
             ],
 
             [
+
                 'title'=>$task->title,
+
                 'content'=>$content
+
             ]
 
         );
+
 
 
         return back()->with(
@@ -522,6 +533,6 @@ class TaskController extends Controller
             'Cours généré avec succès.'
         );
 
-    }
 
+    }
 }

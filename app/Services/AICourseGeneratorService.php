@@ -9,11 +9,10 @@ class AICourseGeneratorService
 {
 
 
-    public function generate($text, $title)
+    public function generate($text,$title)
     {
 
 
-        // Limitation du document
         $text = mb_substr($text,0,50000);
 
 
@@ -22,7 +21,7 @@ class AICourseGeneratorService
 
 Tu es un professeur universitaire.
 
-Crée un cours complet de niveau Master 1.
+Rédige un cours complet de niveau Master 1.
 
 
 Titre du chapitre :
@@ -32,48 +31,74 @@ $title
 
 Structure obligatoire :
 
+
 # Introduction
 
 # Objectifs pédagogiques
 
 # Définitions essentielles
 
-# Développement du cours
+# Développement détaillé du cours
 
-# Explications détaillées
-
-# Exemples
+# Exemples pratiques
 
 # Résumé
 
 # Questions de révision
 
 
-Document source :
+Documents sources :
+
 
 $text
+
 
 ";
 
 
 
-        $response = Http::timeout(600)
-            ->post(
-                'http://localhost:11434/api/generate',
+        $response = Http::timeout(300)
+
+        ->withHeaders([
+            'Content-Type'=>'application/json',
+        ])
+
+        ->post(
+
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key='
+        .config('services.gemini.key'),
+
+
+        [
+
+            'contents'=>[
+
                 [
 
-                    'model'=>'qwen2.5:7b',
+                    'parts'=>[
 
-                    'prompt'=>$prompt,
+                        [
 
-                    'stream'=>false,
+                            'text'=>$prompt
 
-                    'options'=>[
-                        'temperature'=>0.3
+                        ]
+
                     ]
 
                 ]
-            );
+
+            ],
+
+            'generationConfig'=>[
+
+                'temperature'=>0.4,
+
+                'maxOutputTokens'=>8000
+
+            ]
+
+        ]);
+
 
 
 
@@ -88,7 +113,8 @@ $text
 
 
 
-        return $response->json('response');
+        return $response
+        ->json('candidates.0.content.parts.0.text');
 
 
     }
