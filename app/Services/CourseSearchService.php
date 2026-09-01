@@ -355,63 +355,47 @@ class CourseSearchService
     private function buildQuery($subject)
     {
 
-        $text = strtolower($subject);
-
-
-        // Nettoyage des mots inutiles
-        $text = str_replace(
-            [
-                'apprendre',
-                'chapitre',
-                'introductif'
-            ],
-            '',
-            $text
-        );
-
-
-        $text = trim($text);
-
+        $text = trim($subject);
 
 
         return "Cours Master 1 ".$text." au Sénégal PDF université";
 
-
     }
-
 
 
 
     private function fallbackSearch($subject)
     {
-
         return [
 
             [
+                'title' =>
+                'Cours Master 1 '.$subject,
 
-                'title'=>'Cours Master 1 '.$subject,
+                'source' =>
+                'Recherche Web',
 
-                'source'=>'Google Recherche',
+                'url' =>
+                'https://duckduckgo.com/?q='
+                .urlencode(
+                    'Cours Master 1 '.$subject.' PDF université Sénégal'
+                ),
 
-                'url'=>
-                'https://www.google.com/search?q='
-                .urlencode($subject.' cours PDF'),
+                'type' =>
+                'Cours Web',
 
+                'file_type' =>
+                'WEB',
 
-                'type'=>'Cours Web',
+                'is_university' =>
+                false,
 
-                'file_type'=>'WEB',
-
-                'is_university'=>false,
-
-                'score'=>50
-
+                'score' =>
+                50,
             ]
 
         ];
-
     }
-
     private function secondSearch($subject)
     {
 

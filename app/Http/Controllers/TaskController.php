@@ -370,11 +370,15 @@ class TaskController extends Controller
     )
     {
 
-        $task = Task::findOrFail($id);
+        $task = Task::with('category')->findOrFail($id);
 
 
         $subject = trim(
             ($task->project_name ?? '')
+            .' '
+            .($task->category ? 'Chapitre '.$task->category->name : '')
+            .' '
+            .($task->title ?? '')
         );
 
         $resources = $service->search($subject);
@@ -433,21 +437,20 @@ class TaskController extends Controller
      */
     public function learning($id)
     {
-        $task = Task::findOrFail($id);
-
-
-        $resources = CourseResource::where('task_id', $id)
-            ->orderBy('score', 'desc')
-            ->limit(5)
-            ->get();
+        $task = Task::with([
+            'project',
+            'category',
+            'courseResources' => function($query){
+                $query->orderBy('score','desc')
+                    ->limit(5);
+            },
+            'learningDocuments'
+        ])->findOrFail($id);
 
 
         return view(
             'tasks.learning',
-            compact(
-                'task',
-                'resources'
-            )
+            compact('task')
         );
     }
 
