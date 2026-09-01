@@ -383,6 +383,8 @@ class TaskController extends Controller
             .($task->title ?? '')
         );
 
+        dd($subject);
+
 
         $resources = $service->search($subject);
 
