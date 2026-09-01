@@ -302,20 +302,22 @@ class CourseSearchService
     private function calculateScore($title,$url)
     {
 
-        $score=0;
+        $score = 0;
 
 
-        $text=strtolower(
+        $text = strtolower(
             $title.' '.$url
         );
 
 
+        // PDF
         if(str_contains($text,'pdf'))
         {
-            $score+=25;
+            $score += 25;
         }
 
 
+        // Université
         if(
             str_contains($text,'univ')
             ||
@@ -324,23 +326,53 @@ class CourseSearchService
             str_contains($text,'ac.')
         )
         {
-            $score+=35;
+            $score += 35;
         }
 
 
+        // Niveau Master
         if(
             str_contains($text,'master')
             ||
             str_contains($text,'m1')
         )
         {
-            $score+=20;
+            $score += 20;
         }
 
 
-        if(str_contains($text,'cours'))
+        // Cours
+        if(
+            str_contains($text,'cours')
+            ||
+            str_contains($text,'course')
+            ||
+            str_contains($text,'lecture')
+        )
         {
-            $score+=15;
+            $score += 15;
+        }
+
+
+        // Sénégal / UCAD
+        if(
+            str_contains($text,'ucad')
+            ||
+            str_contains($text,'dakar')
+            ||
+            str_contains($text,'senegal')
+            ||
+            str_contains($text,'sn')
+        )
+        {
+            $score += 20;
+        }
+
+
+        // PDF direct
+        if(str_ends_with($text,'.pdf'))
+        {
+            $score += 30;
         }
 
 
@@ -351,12 +383,27 @@ class CourseSearchService
 
 
 
-
-    private function buildQuery($subject)
+    private function buildQuery($subject, $chapter = null)
     {
-        return "Cours Master 1 ".$subject." au Sénégal PDF université";
-    }
 
+        $query = "Cours Master 1 ";
+
+        // Matière
+        $query .= $subject;
+
+
+        // Chapitre
+        if($chapter){
+            $query .= " Chapitre ".$chapter;
+        }
+
+
+        $query .= " PDF cours université Sénégal";
+
+
+        return $query;
+
+    }
 
     private function fallbackSearch($subject)
     {

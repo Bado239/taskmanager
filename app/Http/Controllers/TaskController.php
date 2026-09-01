@@ -374,7 +374,8 @@ class TaskController extends Controller
 
 
         $subject = trim(
-            ($task->project_name ?? '')
+            'Cours Master 1 '
+            .($task->project_name ?? '')
             .' '
             .($task->category->name ?? '')
             .' '
