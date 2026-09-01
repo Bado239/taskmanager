@@ -266,8 +266,3 @@ Route::post(
     '/tasks/{task}/generate-course',
     [GeneratedCourseController::class,'generate']
 )->name('tasks.generate.course');
-
-Route::post(
-    '/learning/{task}/generate',
-    [TaskController::class,'generate']
-)->name('learning.generate');
