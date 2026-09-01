@@ -354,14 +354,8 @@ class CourseSearchService
 
     private function buildQuery($subject)
     {
-
-        $text = trim($subject);
-
-
-        return "Cours Master 1 ".$text." au Sénégal PDF université";
-
+        return "Cours Master 1 ".$subject." au Sénégal PDF université";
     }
-
 
 
     private function fallbackSearch($subject)
