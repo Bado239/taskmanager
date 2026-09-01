@@ -250,3 +250,10 @@ Route::delete(
     '/learning-documents/{id}',
     [App\Http\Controllers\LearningDocumentController::class, 'destroy']
 )->name('learning-documents.destroy');
+
+
+Route::post(
+'/tasks/{task}/generate-course',
+[App\Http\Controllers\LearningAIController::class,'generate']
+)
+->name('learning.generate');

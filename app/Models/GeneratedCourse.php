@@ -7,16 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class GeneratedCourse extends Model
 {
 
-    protected $fillable=[
-    'task_id',
-    'title',
-    'content'
-    ];
+protected $fillable = [
+
+'task_id',
+'title',
+'content'
+
+];
 
 
-    public function task()
-    {
+public function task()
+{
     return $this->belongsTo(Task::class);
-    }
+}
 
 }

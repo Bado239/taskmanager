@@ -79,4 +79,9 @@ class Task extends Model
             LearningDocument::class
         );
     }
+
+    public function generatedCourse()
+    {
+        return $this->hasOne(GeneratedCourse::class);
+    }
 }

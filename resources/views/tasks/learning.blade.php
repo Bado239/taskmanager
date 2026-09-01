@@ -385,14 +385,44 @@ Générez automatiquement un cours complet à partir de vos documents.
 </p>
 
 
+<form method="POST"
+action="{{ route('learning.generate',$task->id) }}">
+
+@csrf
+
+
 <button
-disabled
-class="mt-4 bg-purple-600 text-white px-6 py-3 rounded-xl font-bold opacity-50">
+class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold">
 
 🤖 Générer le cours avec IA
 
 </button>
 
+
+</form>
+
+@if($task->generatedCourse)
+
+<div class="bg-white border rounded-2xl p-6">
+
+
+<h2 class="text-xl font-bold mb-4">
+
+📖 Cours généré par IA
+
+</h2>
+
+
+<div class="prose">
+
+{!! nl2br($task->generatedCourse->content) !!}
+
+</div>
+
+
+</div>
+
+@endif
 
 </div>
 
