@@ -369,7 +369,10 @@ class TaskController extends Controller
         \App\Services\CourseSearchService $service
     )
     {
-        $task = Task::findOrFail($id);
+        $task = Task::with([
+            'project',
+            'category'
+        ])->findOrFail($id);
 
 
         $subject = trim(
@@ -384,32 +387,21 @@ class TaskController extends Controller
         $resources = $service->search($subject);
 
 
-
-        // supprimer les anciens résultats
         CourseResource::where('task_id',$task->id)->delete();
 
 
-
-        // enregistrer les nouveaux résultats
         foreach($resources as $resource)
         {
 
             CourseResource::create([
 
                 'task_id'=>$task->id,
-
                 'title'=>$resource['title'],
-
                 'source'=>$resource['source'],
-
                 'url'=>$resource['url'],
-
                 'type'=>$resource['type'],
-
                 'file_type'=>$resource['file_type'],
-
                 'is_university'=>$resource['is_university'],
-
                 'score'=>$resource['score'],
 
             ]);
@@ -417,10 +409,8 @@ class TaskController extends Controller
         }
 
 
-
         return back();
     }
-
     /**
      * Affiche l'espace apprentissage d'un chapitre
      */
