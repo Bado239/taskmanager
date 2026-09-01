@@ -4,74 +4,91 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 
+
 class AICourseGeneratorService
 {
 
-    public function generate($text,$title)
+
+    public function generate($text, $title)
     {
 
-        $response = Http::withToken(
-            config('services.openai.key')
-        )
-        ->timeout(120)
-        ->post(
-            'https://api.openai.com/v1/chat/completions',
-            [
 
-                'model'=>'gpt-4o-mini',
-
-                'messages'=>[
-
-                    [
-                        'role'=>'system',
-                        'content'=>
-                        "Tu es un professeur universitaire.
-                        Transforme les documents fournis en un cours complet, structuré et pédagogique."
-                    ],
+        // Limitation du document
+        $text = mb_substr($text,0,50000);
 
 
-                    [
-                        'role'=>'user',
-                        'content'=>
 
-                        "Matière : ".$title."
+        $prompt = "
 
-                        À partir du document ci-dessous, crée un cours complet avec :
+Tu es un professeur universitaire.
 
-                        - Introduction
-                        - Objectifs pédagogiques
-                        - Définitions importantes
-                        - Développement détaillé des parties
-                        - Exemples
-                        - Points clés à retenir
-                        - Résumé final
-                        - Questions de révision
+Crée un cours complet de niveau Master 1.
 
 
-                        DOCUMENT :
+Titre du chapitre :
 
-                        ".$text
+$title
 
+
+Structure obligatoire :
+
+# Introduction
+
+# Objectifs pédagogiques
+
+# Définitions essentielles
+
+# Développement du cours
+
+# Explications détaillées
+
+# Exemples
+
+# Résumé
+
+# Questions de révision
+
+
+Document source :
+
+$text
+
+";
+
+
+
+        $response = Http::timeout(600)
+            ->post(
+                'http://localhost:11434/api/generate',
+                [
+
+                    'model'=>'qwen2.5:7b',
+
+                    'prompt'=>$prompt,
+
+                    'stream'=>false,
+
+                    'options'=>[
+                        'temperature'=>0.3
                     ]
 
-                ],
+                ]
+            );
 
-                'temperature'=>0.4
-
-            ]
-        );
 
 
         if(!$response->successful())
         {
+
             throw new \Exception(
                 $response->body()
             );
+
         }
 
 
-        return $response
-            ->json('choices.0.message.content');
+
+        return $response->json('response');
 
 
     }
