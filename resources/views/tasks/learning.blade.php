@@ -60,41 +60,6 @@ Chapitre :
 
 <!-- RESSOURCES -->
 
-<div class="bg-white rounded-2xl border shadow-sm p-6">
-
-
-<div class="flex justify-between items-center mb-6">
-
-
-<div>
-
-<h2 class="text-xl font-bold">
-🌍 Ressources recommandées
-</h2>
-
-
-<p class="text-sm text-gray-500">
-Cours trouvés automatiquement sur le Web
-</p>
-
-</div>
-
-
-
-<a href="{{ route('tasks.searchCourses',$task->id) }}"
-class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm">
-
-🔎 Nouvelle recherche
-
-</a>
-
-
-</div>
-
-
-
-
-
 <table class="w-full border-collapse">
 
 <thead>

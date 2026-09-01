@@ -208,12 +208,6 @@ Route::get('/tasks/{task}/learning',
     [TaskController::class, 'learning']
 )->name('tasks.learning');
 
-Route::get(
-    '/tasks/{task}/search-courses',
-    [TaskController::class,'searchCourses']
-)
-->name('tasks.searchCourses');
-
 /*
 |--------------------------------------------------------------------------
 | Evaluation des ressources de cours
