@@ -266,3 +266,9 @@ Route::post(
     '/tasks/{task}/generate-course',
     [GeneratedCourseController::class,'generate']
 )->name('tasks.generate.course');
+
+
+Route::get(
+    '/learning-document/{document}/view',
+    [LearningDocumentController::class,'view']
+)->name('learning-documents.view');

@@ -3,99 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\LearningDocument;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+
 
 class LearningDocumentController extends Controller
 {
 
-    public function store(Request $request)
+
+    public function view(LearningDocument $document)
     {
 
-        $request->validate([
 
-            'task_id' => 'required',
-
-            'title' => 'required',
-
-            'type' => 'required',
-
-            'file' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
-
-            'url' => 'nullable|url',
-
-        ]);
+        $url = "https://zhlojjivmwuuqhzeqpgg.supabase.co/storage/v1/object/public/ebooks/"
+        .$document->file_path;
 
 
 
-        $filePath = null;
-
-
-
-        // Upload PDF / Word vers Supabase Storage
-        if ($request->hasFile('file')) {
-
-
-            $filePath = Storage::disk('s3')->putFile(
-                'learning-documents',
-                $request->file('file'),
-                'public'
-            );
-
-
-        }
-
-
-
-        LearningDocument::create([
-
-            'task_id' => $request->task_id,
-
-            'title' => $request->title,
-
-            'type' => $request->type,
-
-            'file_path' => $filePath,
-
-            'url' => $request->url,
-
-        ]);
-
-
-
-        return back()->with(
-            'success',
-            'Document ajouté avec succès'
+        return view(
+            'learning-documents.view',
+            compact(
+                'document',
+                'url'
+            )
         );
+
 
     }
 
-    public function destroy($id)
-    {
-
-        $document = LearningDocument::findOrFail($id);
-
-
-        // Supprimer le fichier dans Supabase
-        if($document->file_path)
-        {
-
-            Storage::disk('s3')
-                ->delete($document->file_path);
-
-        }
-
-
-        // Supprimer la ligne en base
-        $document->delete();
-
-
-
-        return back()->with(
-            'success',
-            'Document supprimé avec succès'
-        );
-
-    }
 
 }

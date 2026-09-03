@@ -295,14 +295,12 @@ class="text-blue-600 font-bold">
 
 
 
-<a href="https://zhlojjivmwuuqhzeqpgg.supabase.co/storage/v1/object/public/ebooks/{{ $document->file_path }}"
-target="_blank"
+<a href="{{ route('learning-documents.view',$document->id) }}"
 class="text-blue-600 font-bold">
 
-📄 Ouvrir fichier
+📖 Lire le document
 
 </a>
-
 
 
 @endif
