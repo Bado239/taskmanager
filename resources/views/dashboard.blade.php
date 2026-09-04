@@ -277,7 +277,7 @@
             {{-- DATES ET HEURES LIÉES REACTIVEMENT VIA ALPINE.JS --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
-                <input type="date" name="date_prevue" x-model="dueDate" @change="updateExecutionDate()" 
+                <input type="date" name="date_prevue" x-model="dueDate"
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
@@ -289,7 +289,7 @@
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
-                <input type="time" name="start_time" x-model="startTime" @change="updateEndTime()" 
+                <input type="time" name="start_time" x-model="startTime"
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
             <div>
