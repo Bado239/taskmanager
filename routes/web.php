@@ -64,12 +64,22 @@ Route::post('/tasks', [
 ])->name('tasks.store');
 
 
+Route::get('/tasks/{id}/edit', [
+    TaskController::class,
+    'edit'
+])->name('tasks.edit');
+
+
+Route::put('/tasks/{id}', [
+    TaskController::class,
+    'update'
+])->name('tasks.update');
+
 
 Route::post('/tasks/{id}/archive', [
     TaskController::class,
     'archive'
 ])->name('tasks.archive');
-
 
 
 Route::get('/tasks', function () {

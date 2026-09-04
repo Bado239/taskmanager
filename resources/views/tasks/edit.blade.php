@@ -73,21 +73,54 @@
                         value="{{ old('document_link', $task->document_link) }}">
                 </div>
 
-                <!-- DATE PRÉVUE -->
+                <!-- DATE D'EXÉCUTION -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Date prévue (Optionnelle)</label>
-                    <input type="date" name="date_prevue" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('date_prevue', $task->date_prevue ? \Illuminate\Support\Carbon::parse($task->date_prevue)->format('Y-m-d') : '') }}">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Date d'exécution (Optionnelle)
+                    </label>
+
+                    <input type="date"
+                        name="execution_date"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value="{{ old('execution_date', $task->execution_date ? \Illuminate\Support\Carbon::parse($task->execution_date)->format('Y-m-d') : '') }}">
+                </div>
+
+                <!-- DATE D'ÉCHÉANCE -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Date d'échéance (Optionnelle)
+                    </label>
+
+                    <input type="date"
+                        name="date_prevue"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                        value="{{ old('date_prevue', $task->date_prevue ? \Illuminate\Support\Carbon::parse($task->date_prevue)->format('Y-m-d') : '') }}">
                 </div>
 
                 <!-- BLOC HEURES -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">De (Heure début)</label>
-                        <input type="time" name="heure_debut" id="heure_debut" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('heure_debut', $task->heure_debut ? \Illuminate\Support\Carbon::parse($task->heure_debut)->format('H:i') : '') }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            De (Heure début)
+                        </label>
+
+                        <input type="time"
+                            name="start_time"
+                            id="heure_debut"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            value="{{ old('start_time', $task->heure_debut ? \Illuminate\Support\Carbon::parse($task->heure_debut)->format('H:i') : '') }}">
                     </div>
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">À (Heure fin)</label>
-                        <input type="time" name="heure_fin" id="heure_fin" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500" value="{{ old('heure_fin', $task->heure_fin ? \Illuminate\Support\Carbon::parse($task->heure_fin)->format('H:i') : '') }}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            À (Heure fin)
+                        </label>
+
+                        <input type="time"
+                            name="end_time"
+                            id="heure_fin"
+                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                            value="{{ old('end_time', $task->heure_fin ? \Illuminate\Support\Carbon::parse($task->heure_fin)->format('H:i') : '') }}">
                     </div>
                 </div>
 
@@ -96,7 +129,8 @@
                     <button type="submit" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-md shadow transition">
                         Enregistrer les modifications
                     </button>
-                    <a href="{{ route('tasks.index') }}" class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 px-4 rounded-md shadow transition border border-gray-300">
+                    <a href="{{ route('dashboard', ['view' => $task->type]) }}"
+                    class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 px-4 rounded-md shadow transition border border-gray-300">
                         Annuler
                     </a>
                 </div>
@@ -120,20 +154,4 @@
         </div>
     </footer>
 
-    <!-- SCRIPT AUTOMATIQUE DES +2 HEURES -->
-    <script>
-        document.getElementById('heure_debut').addEventListener('change', function() {
-            const heureDebutVal = this.value;
-            if (heureDebutVal) {
-                let [heures, minutes] = heureDebutVal.split(':').map(Number);
-                heures += 2;
-                if (heures >= 24) {
-                    heures -= 24;
-                }
-                const heuresFormattees = String(heures).padStart(2, '0');
-                const minutesFormattees = String(minutes).padStart(2, '0');
-                document.getElementById('heure_fin').value = `${heuresFormattees}:${minutesFormattees}`;
-            }
-        });
-    </script>
 </x-app-layout>
