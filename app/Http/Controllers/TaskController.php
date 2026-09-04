@@ -34,16 +34,19 @@ class TaskController extends Controller
         session(['active_view' => $view]);
         $currentMode = session('current_mode', 'office');
 
-        $today = Carbon::today()->format('Y-m-d');
+        $today = Carbon::now()->format('Y-m-d');
+        $currentTime = Carbon::now()->format('H:i');
 
-        // Archivage automatique uniquement lorsque l'échéance est dépassée.
-        // Sans échéance, la tâche reste active.
-        Task::where('is_archived', 0)
-            ->whereNotNull('date_prevue')
-            ->whereDate('date_prevue', '<', $today)
-            ->update([
-                'is_archived' => 1
-            ]);
+        // Automatisation de l'archivage
+        $tasksToCheck = Task::where('is_archived', 0)->get();
+        foreach ($tasksToCheck as $task) {
+            $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
+            $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
+
+            if ($isFinishedToday || $isValidatedPassed) {
+                $task->update(['is_archived' => 1]);
+            }
+        }
 
         // Listes des projets : Actifs OU encore rattachés à des tâches non archivées
         $projectsOffice = Project::where('type', 'office')->where(function($q) {
@@ -296,84 +299,16 @@ class TaskController extends Controller
             ->with('success', 'Livrable enregistré avec succès !');
     }
 
-/**
- * Affiche le formulaire de modification d'une tâche
- */
-public function edit($id)
-{
-    $task = Task::findOrFail($id);
+    /**
+     * Archive manuellement une tâche
+     */
+    public function archive($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->update(['is_archived' => 1]);
 
-    $projects = Project::where('type', $task->type)
-        ->where('is_active', true)
-        ->get();
-
-    $categories = Category::where('type', $task->type)
-        ->get();
-
-    return view('tasks.edit', compact(
-        'task',
-        'projects',
-        'categories'
-    ));
-}
-
-
-/**
- * Met à jour une tâche existante
- */
-public function update(Request $request, $id)
-{
-    $task = Task::findOrFail($id);
-
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'project_id' => 'nullable|exists:projects,id',
-        'category_id' => 'nullable|exists:categories,id',
-        'document_link' => 'nullable|url',
-        'date_prevue' => 'nullable|date',
-        'execution_date' => 'nullable|date',
-        'start_time' => 'nullable|date_format:H:i',
-        'end_time' => 'nullable|date_format:H:i',
-        'document_status' => 'nullable|in:todo,in_progress,done',
-        'priority' => 'nullable|in:high,medium,low',
-    ]);
-
-    $projectName = null;
-
-    if ($request->filled('project_id')) {
-        $projectName = Project::find($request->project_id)?->title;
+        return redirect()->back()->with('success', 'Tâche archivée avec succès !');
     }
-
-    $task->update([
-        'title' => $request->title,
-        'project_id' => $request->project_id ?: null,
-        'project_name' => $projectName,
-        'category_id' => $request->category_id ?: null,
-        'document_link' => $request->document_link ?: null,
-        'date_prevue' => $request->date_prevue ?: null,
-        'execution_date' => $request->execution_date ?: null,
-        'heure_debut' => $request->start_time ?: null,
-        'heure_fin' => $request->end_time ?: null,
-        'document_status' => $request->document_status ?? $task->document_status,
-        'priority' => $request->priority ?? $task->priority,
-    ]);
-
-    return redirect()
-        ->route('dashboard', ['view' => $task->type])
-        ->with('success', 'Tâche modifiée avec succès !');
-}
-
-
-/**
- * Archive manuellement une tâche
- */
-public function archive($id)
-{
-    $task = Task::findOrFail($id);
-    $task->update(['is_archived' => 1]);
-
-    return redirect()->back()->with('success', 'Tâche archivée avec succès !');
-}
 
     /**
      * Supprime une tâche

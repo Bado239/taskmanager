@@ -6,11 +6,11 @@
     // Fusion et déduplication des projets et catégories pour les deux modes
     $allProjects =$projectsOffice->concat($projectsMaster)->unique('id');$allCategories = $categoriesOffice->concat($categoriesMaster)->unique('id');
 
-// Dates et heures facultatives
-    $defaultDueDate = '';
-    $defaultExecutionDate = '';
-    $defaultStartTime = '';
-    $defaultEndTime = '';
+    // Calcul initial des dates et heures par défaut (Échéance J+4, Exécution J+2)
+    $today = \Carbon\Carbon::now();
+    $defaultDueDate =$today->copy()->addDays(4)->format('Y-m-d');
+    $defaultExecutionDate =$today->copy()->addDays(2)->format('Y-m-d');
+    $defaultStartTime = '09:00';$defaultEndTime = '11:00';
 @endphp
 
 <div class="space-y-6 pb-12">
@@ -277,7 +277,7 @@
             {{-- DATES ET HEURES LIÉES REACTIVEMENT VIA ALPINE.JS --}}
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Échéance</label>
-                <input type="date" name="date_prevue" x-model="dueDate"
+                <input type="date" name="date_prevue" x-model="dueDate" @change="updateExecutionDate()" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
 
@@ -289,7 +289,7 @@
 
             <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Heure de début</label>
-                <input type="time" name="start_time" x-model="startTime"
+                <input type="time" name="start_time" x-model="startTime" @change="updateEndTime()" 
                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
             </div>
             <div>
@@ -440,36 +440,18 @@
                                     <td class="px-4 py-4 text-xs text-gray-600">
                                         {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}
                                     </td>
-                                    <td class="px-4 py-4 text-right">
-                                        <div class="flex items-center justify-end gap-3">
-
-                                            @if(!$task->is_archived)
-                                                <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit"
-                                                            onclick="return confirm('Archiver cette tâche ?')"
-                                                            class="text-xs text-amber-600 hover:text-amber-800 font-semibold">
-                                                        Archiver
-                                                    </button>
-                                                </form>
-                                            @endif
-
-                                            <a href="{{ route('tasks.edit', $task->id) }}"
-                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
-                                                ✏️ Modifier
-                                            </a>
-
-                                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
+                                    <td class="px-4 py-4 text-right space-x-2">
+                                        @if(!$task->is_archived)
+                                            <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        onclick="return confirm('Supprimer cette tâche ?')"
-                                                        class="text-xs text-red-500 hover:text-red-700 font-semibold">
-                                                    Supprimer
-                                                </button>
+                                                <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
                                             </form>
-
-                                        </div>
+                                        @endif
+                                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">Supprimer</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @empty
@@ -567,33 +549,13 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 text-xs text-gray-600">
-                                            <div>
-                                                📅 {{ $task->execution_date
-                                                    ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y')
-                                                    : 'Non définie' }}
-                                            </div>
-
+                                            <div>📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</div>
                                             @if($task->heure_debut || $task->heure_fin)
-                                                <div class="text-gray-500 font-semibold mt-0.5">
-                                                    ⏰
-                                                    {{ $task->heure_debut
-                                                        ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i')
-                                                        : 'Non définie' }}
-                                                    à
-                                                    {{ $task->heure_fin
-                                                        ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i')
-                                                        : 'Non définie' }}
-                                                </div>
-                                            @else
-                                                <div class="text-gray-400 mt-0.5">
-                                                    ⏰ Non définie
-                                                </div>
+                                                <div class="text-gray-500 font-semibold">⏰ {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i' ) : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}</div>
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 text-xs text-gray-500">
-                                            {{ $task->date_prevue
-                                                ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y')
-                                                : 'Non définie' }}
+                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td class="px-4 py-4 text-right space-x-2">
                                             @if(!$task->is_archived)
