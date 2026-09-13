@@ -10,6 +10,7 @@ use App\Http\Controllers\CourseResourceController;
 use App\Http\Controllers\LearningDocumentController;
 use App\Http\Controllers\GeneratedCourseController;
 use App\Http\Controllers\DictionaryController;
+use App\Http\Controllers\BookTextReaderController;
 
 
 
@@ -280,3 +281,10 @@ Route::get(
     '/dictionary/{word}',
     [DictionaryController::class,'search']
 )->name('dictionary.search');
+
+
+
+Route::get(
+    '/book-text/{id}',
+    [BookTextReaderController::class,'show']
+)->name('book.text');

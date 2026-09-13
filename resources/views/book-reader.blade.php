@@ -697,12 +697,7 @@ function loadPage(num){
 
 
     
-       console.log(
-        "textLayer créé page",
-        num,
-        textLayer.querySelectorAll("span").length
-        );
-
+       
         textLayer.style.width = canvas.width+"px";
         textLayer.style.height = canvas.height+"px";
 
