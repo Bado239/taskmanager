@@ -20,7 +20,7 @@ Lecture : {{ $book->title }}
     width:100%;
     height:100%;
     overflow:hidden;
-    opacity:1;
+    opacity:0.01;
     z-index:20;
     color:transparent;
     pointer-events:auto;
@@ -652,7 +652,7 @@ function showDefinition(word){
         return;
     }
 
-    fetch('/dictionary/'+word)
+    fetch('/dictionary/'+encodeURIComponent(word))
     .then(response=>response.json())
     .then(data=>{
 
@@ -688,6 +688,12 @@ document.addEventListener('click', function(e){
     if(span){
 
         let word = span.textContent.trim();
+
+        // PDF.js peut regrouper plusieurs mots dans un même span
+        if(word.includes(' ')){
+            return;
+        }
+
         word = cleanWord(word);
 
         if(word.length > 1){
