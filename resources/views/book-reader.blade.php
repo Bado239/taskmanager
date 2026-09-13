@@ -20,7 +20,7 @@ Lecture : {{ $book->title }}
     width:100%;
     height:100%;
     overflow:hidden;
-    opacity:0.01;
+    opacity:1;
     z-index:20;
     color:transparent;
     pointer-events:auto;
@@ -307,8 +307,10 @@ pdfjsLib.getDocument(url)
     document.getElementById('totalPages').innerHTML = totalPages;
     document.getElementById('topTotal').innerHTML = totalPages;
 
-    // CHARGER LA PAGE ACTUELLE (uniquement une fois le PDF chargé)
-    loadPage(currentPage);
+    // CHARGER LES PAGES POUR UN DEFILÉ LIBRE COMME UN LIVRE
+    for(let i = 1; i <= totalPages; i++){
+        loadPage(i);
+    }
 
     // REVENIR A LA DERNIERE PAGE LUE
     setTimeout(()=>{
@@ -328,6 +330,10 @@ pdfjsLib.getDocument(url)
 
 
 function loadPage(num){
+
+    if(!pdfDoc){
+        return;
+    }
 
     pdfDoc.getPage(num)
     .then(page=>{
@@ -537,7 +543,10 @@ function zoomOut(){
 function reloadPages(){
 
     viewer.innerHTML = "";
-    loadPage(currentPage);
+
+    for(let i = 1; i <= totalPages; i++){
+        loadPage(i);
+    }
 
 }
 
@@ -689,7 +698,6 @@ document.addEventListener('click', function(e){
 
         let word = span.textContent.trim();
 
-        // PDF.js peut regrouper plusieurs mots dans un même span
         if(word.includes(' ')){
             return;
         }
