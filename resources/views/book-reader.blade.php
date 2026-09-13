@@ -415,7 +415,31 @@ class="bg-orange-500 text-white py-2 rounded">
 </div>
 
 
+<div id="definitionBox"
 
+class="hidden fixed right-5 top-20 bg-white shadow-xl rounded-xl p-5 w-80 z-50">
+
+
+<h3 class="font-bold text-lg">
+📖 Définition
+</h3>
+
+
+<p id="definitionText"
+class="mt-3 text-gray-700">
+</p>
+
+
+<button
+onclick="closeDefinition()"
+class="mt-4 bg-blue-600 text-white px-4 py-2 rounded">
+
+Fermer
+
+</button>
+
+
+</div>
 
 
 
@@ -517,6 +541,71 @@ pdfjsLib.getDocument(url)
 
 function loadPage(num){
 
+
+pdfDoc.getPage(num)
+
+.then(page=>{
+
+
+page.getTextContent()
+
+.then(textContent=>{
+
+
+let div = document.createElement('div');
+
+
+div.dataset.page=num;
+
+
+div.className =
+"bg-white shadow mx-auto mb-8 p-10 text-xl leading-relaxed";
+
+
+
+textContent.items.forEach(item=>{
+
+
+let span=document.createElement('span');
+
+
+span.innerText =
+item.str + " ";
+
+
+
+span.className =
+"dictionary-word cursor-pointer hover:bg-yellow-200";
+
+
+
+span.onclick=function(){
+
+showDefinition(item.str);
+
+};
+
+
+
+div.appendChild(span);
+
+
+
+});
+
+
+
+viewer.appendChild(div);
+
+
+
+});
+
+
+});
+
+
+}
 
 
     pdfDoc.getPage(num)
@@ -1095,6 +1184,48 @@ window.addEventListener("beforeunload",()=>{
     saveProgress(page,percent);
 
 });
+
+
+function showDefinition(word)
+{
+
+
+fetch('/dictionary/'+word)
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+document.getElementById(
+"definitionText"
+).innerHTML =
+
+"<b>"+data.word+"</b><br><br>"
++
+data.definition;
+
+
+document
+.getElementById("definitionBox")
+.classList.remove("hidden");
+
+
+});
+
+
+}
+
+
+
+function closeDefinition()
+{
+
+document
+.getElementById("definitionBox")
+.classList.add("hidden");
+
+}
 
 </script>
 
