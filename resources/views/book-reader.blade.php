@@ -1224,8 +1224,6 @@ document
 
 }
 
-</script>
-
 document.addEventListener(
 'click',
 function(e){
@@ -1248,6 +1246,10 @@ showDefinition(word);
 
 
 });
+
+
+</script>
+
 
 
 </body>
