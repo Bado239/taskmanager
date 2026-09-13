@@ -21,18 +21,39 @@ Lecture : {{ $book->title }}
 
     left:0;
 
-    right:0;
+    width:100%;
 
-    bottom:0;
+    height:100%;
 
     overflow:hidden;
 
-    opacity:0.01;
+    opacity:1;
 
-    z-index:10;
+    z-index:20;
+
+    color:transparent;
 
 }
 
+
+.textLayer span {
+
+    position:absolute;
+
+    cursor:pointer;
+
+    color:transparent;
+
+    user-select:text;
+
+}
+
+
+.textLayer span:hover {
+
+    background:rgba(255,255,0,0.4);
+
+}
 
 
 .textLayer span {
@@ -1033,12 +1054,7 @@ function reloadPages(){
     viewer.innerHTML="";
 
 
-    for(let i=1;i<=totalPages;i++){
-
-        loadPage(i);
-
-    }
-
+    loadPage(currentPage);
 
 }
 
@@ -1309,7 +1325,7 @@ document.addEventListener(
 function(e){
 
 
-let span = e.target.closest('.textLayer span');
+let span = e.target.closest('.textLayer span, .textLayer div');
 
 
 if(span){
@@ -1324,12 +1340,7 @@ let word = span.textContent
  Nettoyage complet
 */
 
-word = word
-.replace(/[.,;:!?()"'«»]/g,'')
-.replace(/\s+/g,'')
-.trim()
-.toLowerCase();
-
+word = cleanWord(word);
 
 
 console.log("Mot envoyé :", word);
@@ -1347,6 +1358,19 @@ if(word.length > 1){
 
 
 });
+
+function cleanWord(word)
+{
+
+return word
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"")
+.replace(/[.,;:!?()"'«»]/g,'')
+.trim()
+.toLowerCase();
+
+}
+
 
 </script>
 
