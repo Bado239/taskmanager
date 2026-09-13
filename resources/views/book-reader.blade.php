@@ -495,13 +495,9 @@ pdfjsLib.getDocument(url)
 
 
 
-    // CHARGER TOUT LE LIVRE
+    // CHARGER LA PAGE ACTUELLE
 
-    for(let i=1; i<=totalPages; i++){
-
-        loadPage(i);
-
-    }
+    loadPage(currentPage);
 
 
 
@@ -542,91 +538,21 @@ pdfjsLib.getDocument(url)
 function loadPage(num){
 
 
-pdfDoc.getPage(num)
-
-.then(page=>{
-
-
-page.getTextContent()
-
-.then(textContent=>{
-
-
-let div = document.createElement('div');
-
-
-div.dataset.page=num;
-
-
-div.className =
-"bg-white shadow mx-auto mb-8 p-10 text-xl leading-relaxed";
-
-
-
-textContent.items.forEach(item=>{
-
-
-let span=document.createElement('span');
-
-
-span.innerText =
-item.str + " ";
-
-
-
-span.className =
-"dictionary-word cursor-pointer hover:bg-yellow-200";
-
-
-
-span.onclick=function(){
-
-showDefinition(item.str);
-
-};
-
-
-
-div.appendChild(span);
-
-
-
-});
-
-
-
-viewer.appendChild(div);
-
-
-
-});
-
-
-});
-
-
-}
-
-
     pdfDoc.getPage(num)
 
     .then(page=>{
 
 
-        let viewport =
-        page.getViewport({
-            scale:zoom
+        let viewport = page.getViewport({
+            scale: zoom
         });
 
 
 
-        let canvas =
-        document.createElement('canvas');
+        let canvas = document.createElement('canvas');
 
 
-
-        canvas.dataset.page=num;
-
+        canvas.dataset.page = num;
 
 
         canvas.className =
@@ -636,7 +562,6 @@ viewer.appendChild(div);
 
         canvas.width =
         viewport.width;
-
 
 
         canvas.height =
@@ -655,16 +580,15 @@ viewer.appendChild(div);
 
         page.render({
 
-            canvasContext:ctx,
+            canvasContext: ctx,
 
-            viewport:viewport
+            viewport: viewport
 
         });
 
 
 
     });
-
 
 
 }
