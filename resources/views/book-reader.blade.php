@@ -527,10 +527,10 @@ let pdfDoc = null;
 
 let totalPages = 0;
 
-let currentPage = {{ $book->current_page ?? 1 }};
+let currentPage = {{ $book->current_page ?? 2 }};
 
 let lastSavedPage = currentPage;
-let zoom = 1.4;
+loadPage(currentPage);
 
 
 const viewer = document.getElementById('pdfViewer');
@@ -969,8 +969,11 @@ function nextPage(){
 
     if(currentPage < totalPages){
 
-        currentPage++;
+            currentPage++;
 
+            if(currentPage < 2){
+                currentPage = 2;
+            }
         let page =
         document.querySelector(
             `canvas[data-page="${currentPage}"]`
