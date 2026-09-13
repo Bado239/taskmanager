@@ -13,34 +13,47 @@ Lecture : {{ $book->title }}
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-.textLayer{
+.textLayer {
 
-position:absolute;
+    position:absolute;
 
-color:transparent;
+    top:0;
 
-z-index:2;
+    left:0;
 
-pointer-events:auto;
+    right:0;
+
+    bottom:0;
+
+    overflow:hidden;
+
+    opacity:0.01;
+
+    z-index:10;
+
+}
+
+
+
+.textLayer span {
+
+    position:absolute;
+
+    cursor:pointer;
+
+    pointer-events:auto;
 
 }
 
 
-.textLayer span{
 
-cursor:pointer;
+.textLayer span:hover {
 
-pointer-events:auto;
+    background:yellow;
 
-}
-
-
-.textLayer span{
-
-cursor:pointer;
+    color:black;
 
 }
-
 
 .textLayer span:hover{
 
@@ -665,7 +678,10 @@ function loadPage(num){
         });
 
 
-        pageContainer.appendChild(textLayer);
+       pageContainer.appendChild(textLayer);
+
+        textLayer.style.width = canvas.width+"px";
+        textLayer.style.height = canvas.height+"px";
 
 
 
