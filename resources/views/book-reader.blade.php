@@ -21,6 +21,17 @@ color:transparent;
 
 z-index:2;
 
+pointer-events:auto;
+
+}
+
+
+.textLayer span{
+
+cursor:pointer;
+
+pointer-events:auto;
+
 }
 
 
@@ -643,6 +654,8 @@ function loadPage(num){
 
         textContentSource:textContent,
 
+        textContent:textContent,
+
         container:textLayer,
 
         viewport:viewport,
@@ -650,7 +663,6 @@ function loadPage(num){
         textDivs:[]
 
         });
-
 
 
         pageContainer.appendChild(textLayer);
@@ -1229,28 +1241,44 @@ document.addEventListener(
 function(e){
 
 
-if(e.target.closest('.textLayer span')){
+let span = e.target.closest('.textLayer span');
 
 
-let word = e.target.textContent
-    .trim()
-    .replace(/[.,;:!?()"'«»]/g,'');
+if(span){
 
 
-// prendre uniquement le premier mot
-word = word.split(/\s+/)[0];
+let word = span.textContent
+    .trim();
 
 
-console.log("Mot sélectionné :", word);
+
+/*
+ Nettoyage complet
+*/
+
+word = word
+.replace(/[.,;:!?()"'«»]/g,'')
+.replace(/\s+/g,'')
+.trim()
+.toLowerCase();
 
 
-showDefinition(word);
+
+console.log("Mot envoyé :", word);
+
+
+
+if(word.length > 1){
+
+    showDefinition(word);
+
+}
+
 
 }
 
 
 });
-
 
 </script>
 

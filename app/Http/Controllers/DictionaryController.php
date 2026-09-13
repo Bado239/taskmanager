@@ -13,7 +13,7 @@ class DictionaryController extends Controller
     {
 
 
-        // Nettoyage
+        // Nettoyage du mot
 
         $word = strtolower(trim($word));
 
@@ -26,57 +26,127 @@ class DictionaryController extends Controller
 
 
 
-        if(!$word)
+        if(empty($word))
         {
             return response()->json([
-                "definition"=>"Mot invalide"
+
+                "word" => "",
+
+                "definition" => "Mot invalide."
+
             ]);
         }
 
 
 
-        // Appel dictionnaire gratuit
-
-        $response = Http::timeout(10)
-            ->get(
-                "https://api.dictionaryapi.dev/api/v2/entries/fr/".$word
-            );
+        try {
 
 
+            // Appel dictionnaire gratuit
 
-        if($response->successful())
-        {
-
-
-            $data = $response->json();
+            $response = Http::timeout(30)
+                ->retry(2,1000)
+                ->get(
+                    "https://api.dictionaryapi.dev/api/v2/entries/fr/".$word
+                );
 
 
 
-            return response()->json([
+            if($response->successful())
+            {
 
-                "word"=>$word,
+
+                $data = $response->json();
 
 
-                "definition" =>
+
+                $definition =
                 $data[0]['meanings'][0]['definitions'][0]['definition']
-                ?? 
-                "Définition non disponible."
+                ?? null;
 
-            ]);
 
+
+                if($definition)
+                {
+
+                    return response()->json([
+
+                        "word"=>$word,
+
+                        "definition"=>$definition
+
+                    ]);
+
+                }
+
+
+            }
+
+
+
+        } catch(\Exception $e) {
+
+
+            // Si API indisponible
 
         }
 
 
 
-        // Si le dictionnaire ne connait pas le mot
+
+        /*
+        |
+        | Dictionnaire local de secours
+        |
+        */
+
+
+        $local = [
+
+
+            "moisson" =>
+            "Récolte des céréales arrivées à maturité.",
+
+
+            "moissonneur" =>
+            "Personne qui récolte les céréales.",
+
+
+            "faucille" =>
+            "Outil courbé utilisé pour couper les plantes.",
+
+
+            "prestesse" =>
+            "Rapidité et habileté dans l'action.",
+
+
+            "bienveillance" =>
+            "Disposition à vouloir le bien des autres.",
+
+
+            "serein" =>
+            "Calme et tranquille."
+
+
+        ];
+
+
 
         return response()->json([
 
+
             "word"=>$word,
 
+
             "definition"=>
-            "Ce mot est absent du dictionnaire. Une explication contextuelle sera proposée."
+
+            $local[$word]
+
+            ??
+
+            "Définition non disponible. Ce mot nécessite une explication contextuelle."
+
+
 
         ]);
 

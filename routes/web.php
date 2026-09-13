@@ -277,6 +277,6 @@ Route::get(
 
 
 Route::get(
-'/dictionary/{word}',
-[DictionaryController::class,'search']
-);
+    '/dictionary/{word}',
+    [DictionaryController::class,'search']
+)->name('dictionary.search');
