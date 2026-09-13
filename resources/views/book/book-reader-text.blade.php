@@ -31,18 +31,25 @@ $words = preg_split('/(\s+)/',$text);
 
 @foreach($words as $word)
 
+@php
+$cleanWord = trim($word);
+@endphp
+
+
+@if($cleanWord != '')
 
 <span 
-class="word cursor-pointer hover:bg-yellow-200"
-onclick="definition('{{ trim($word) }}')">
+class="word"
+data-word="{{ $cleanWord }}">
 
 {{ $word }}
 
 </span>
 
+@endif
+
 
 @endforeach
-
 
 </div>
 
@@ -103,6 +110,53 @@ document
 
 
 }
+
+
+</script>
+
+<script>
+
+document.querySelectorAll('.word')
+.forEach(function(element){
+
+
+element.addEventListener('click',function(){
+
+
+let word = this.dataset.word;
+
+
+
+word = word.replace(
+/[.,;:!?()"'«»]/g,
+''
+);
+
+
+
+console.log("Mot cliqué :",word);
+
+
+
+fetch('/dictionary/'+word)
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+alert(
+data.word+"\n\n"+data.definition
+);
+
+
+});
+
+
+});
+
+
+});
 
 
 </script>
