@@ -2,44 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Http;
+
 
 class DictionaryController extends Controller
 {
 
-public function search($word)
-{
+
+    public function search($word)
+    {
 
 
-$data=[
+        // Nettoyage
+
+        $word = strtolower(trim($word));
 
 
-"moissonneur" =>
-"Personne qui récolte les céréales.",
+        $word = preg_replace(
+            '/[^a-zàâçéèêëîïôùûüÿñæœ-]/u',
+            '',
+            $word
+        );
 
 
-"prestesse" =>
-"Rapidité et habileté dans l'action.",
+
+        if(!$word)
+        {
+            return response()->json([
+                "definition"=>"Mot invalide"
+            ]);
+        }
 
 
-"faucille" =>
-"Outil utilisé pour couper les plantes."
+
+        // Appel dictionnaire gratuit
+
+        $response = Http::timeout(10)
+            ->get(
+                "https://api.dictionaryapi.dev/api/v2/entries/fr/".$word
+            );
 
 
-];
+
+        if($response->successful())
+        {
 
 
-return response()->json([
-
-"word"=>$word,
-
-"definition" =>
-$data[strtolower($word)]
-?? 
-"Aucune définition trouvée."
-
-]);
+            $data = $response->json();
 
 
-}
+
+            return response()->json([
+
+                "word"=>$word,
+
+
+                "definition" =>
+                $data[0]['meanings'][0]['definitions'][0]['definition']
+                ?? 
+                "Définition non disponible."
+
+            ]);
+
+
+        }
+
+
+
+        // Si le dictionnaire ne connait pas le mot
+
+        return response()->json([
+
+            "word"=>$word,
+
+            "definition"=>
+            "Ce mot est absent du dictionnaire. Une explication contextuelle sera proposée."
+
+        ]);
+
+
+
+    }
+
 
 }

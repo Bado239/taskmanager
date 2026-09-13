@@ -1232,15 +1232,19 @@ function(e){
 if(e.target.closest('.textLayer span')){
 
 
-let word =
-e.target.innerText.trim();
+let word = e.target.textContent
+    .trim()
+    .replace(/[.,;:!?()"'«»]/g,'');
 
 
-console.log("Mot sélectionné :",word);
+// prendre uniquement le premier mot
+word = word.split(/\s+/)[0];
+
+
+console.log("Mot sélectionné :", word);
 
 
 showDefinition(word);
-
 
 }
 
