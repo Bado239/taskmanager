@@ -59,8 +59,16 @@ data-word="{{ $cleanWord }}">
 
 
 <div id="popup"
-class="fixed right-5 top-20 bg-white shadow-xl rounded-xl p-5 hidden">
+class="fixed right-5 top-20 bg-white shadow-xl rounded-xl p-5 hidden w-80 z-50">
 
+
+<button 
+onclick="document.getElementById('popup').classList.add('hidden')"
+class="float-right text-red-600">
+
+✖
+
+</button>
 
 <h3 class="font-bold">
 📖 Définition
@@ -77,26 +85,43 @@ class="fixed right-5 top-20 bg-white shadow-xl rounded-xl p-5 hidden">
 
 <script>
 
-
-function definition(word)
-{
+document.addEventListener("DOMContentLoaded", function(){
 
 
-word = word.replace(/[.,;:!?()]/g,'');
+document.querySelectorAll('.word')
+.forEach(function(element){
+
+
+element.addEventListener('click', function(){
+
+
+let word = this.dataset.word;
+
+
+word = word.replace(
+/[.,;:!?()"'«»]/g,
+''
+);
 
 
 
-fetch('/dictionary/'+word)
-
-.then(r=>r.json())
-
-.then(data=>{
+console.log("Mot sélectionné :", word);
 
 
-document
-.getElementById('definition')
-.innerHTML =
-"<b>"+data.word+"</b><br><br>"+
+
+fetch('/dictionary/' + encodeURIComponent(word))
+
+
+.then(response => response.json())
+
+
+.then(data => {
+
+
+document.getElementById('definition').innerHTML =
+
+"<b>" + data.word + "</b><br><br>" +
+
 data.definition;
 
 
@@ -109,57 +134,14 @@ document
 });
 
 
-}
+});
 
+
+});
+
+
+});
 
 </script>
-
-<script>
-
-document.querySelectorAll('.word')
-.forEach(function(element){
-
-
-element.addEventListener('click',function(){
-
-
-let word = this.dataset.word;
-
-
-
-word = word.replace(
-/[.,;:!?()"'«»]/g,
-''
-);
-
-
-
-console.log("Mot cliqué :",word);
-
-
-
-fetch('/dictionary/'+word)
-
-.then(response=>response.json())
-
-.then(data=>{
-
-
-alert(
-data.word+"\n\n"+data.definition
-);
-
-
-});
-
-
-});
-
-
-});
-
-
-</script>
-
 
 @endsection
