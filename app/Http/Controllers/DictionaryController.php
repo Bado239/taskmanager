@@ -2,55 +2,199 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DictionaryWord;
+use App\Models\CourseResource;
+use App\Services\CourseSearchService;
+use Illuminate\Http\Request;
 
-
-class DictionaryController extends Controller
+class CourseResourceController extends Controller
 {
 
-
-public function search($word)
-{
+    protected CourseSearchService $searchService;
 
 
-$word = strtolower(trim($word));
-
-
-$result = DictionaryWord::where(
-'word',
-$word
-)->first();
+    public function __construct(
+        CourseSearchService $searchService
+    )
+    {
+        $this->searchService = $searchService;
+    }
 
 
 
-if($result)
-{
+    /**
+     * Recherche automatique des cours
+     */
+    public function searchCourses($taskId)
+    {
 
-
-return response()->json([
-
-"word"=>$word,
-
-"definition"=>$result->definition
-
-]);
-
-
-}
+        $task = \App\Models\Task::findOrFail($taskId);
 
 
 
-return response()->json([
-
-"word"=>$word,
-
-"definition"=>"Mot non encore enregistré dans votre dictionnaire."
-
-]);
-
-
-}
+        /*
+        Matière recherchée
+        */
+        $subject = $task->subject
+            ?? $task->title
+            ?? '';
 
 
+
+        /*
+        Construction requête intelligente
+        */
+        $query = $subject . ' Master 1 cours PDF universitaire';
+
+
+
+        /*
+        Appel moteur DuckDuckGo
+        */
+        $results = $this->searchService
+            ->search($subject);
+
+
+
+        /*
+        Suppression anciens résultats
+        */
+        CourseResource::where(
+            'task_id',
+            $task->id
+        )->delete();
+
+
+
+        /*
+        Enregistrement nouveaux cours
+        */
+        foreach($results as $course)
+        {
+
+            CourseResource::create([
+
+                'task_id' => $task->id,
+
+                'title' =>
+                    $course['title'],
+
+                'url' =>
+                    $course['url'],
+
+                'source' =>
+                    $course['source'],
+
+                'type' =>
+                    $course['type'],
+
+                'file_type' =>
+                    $course['file_type'],
+
+                'is_university' =>
+                    $course['is_university'],
+
+                'score' =>
+                    $course['score'],
+
+                'saved' =>
+                    false,
+
+            ]);
+
+        }
+
+
+
+        return redirect()
+            ->route(
+                'tasks.learning',
+                $task->id
+            )
+            ->with(
+                'success',
+                'Recherche terminée'
+            );
+
+    }
+
+
+
+
+    /**
+     * Noter la pertinence d'un cours
+     */
+    public function rate(Request $request, $id)
+    {
+
+        $resource = CourseResource::findOrFail($id);
+
+
+        $resource->update([
+
+            'rating' => (int) $request->rating
+
+        ]);
+
+
+        return back()->with(
+            'success',
+            'Évaluation enregistrée'
+        );
+
+    }
+
+
+
+
+
+    /**
+     * Sauvegarder un cours
+     */
+    public function save($id)
+    {
+
+        $resource = CourseResource::findOrFail($id);
+
+
+        $resource->update([
+
+            'saved' => true
+
+        ]);
+
+
+        return back()->with(
+            'success',
+            'Cours ajouté aux favoris'
+        );
+
+    }
+
+
+
+
+
+    /**
+     * Ajouter une note personnelle
+     */
+    public function note(Request $request, $id)
+    {
+
+        $resource = CourseResource::findOrFail($id);
+
+
+        $resource->update([
+
+            'notes' => $request->notes
+
+        ]);
+
+
+        return back()->with(
+            'success',
+            'Note sauvegardée'
+        );
+
+    }
 
 }
