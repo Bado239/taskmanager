@@ -598,9 +598,18 @@ function loadPage(num){
 
 
         let canvas = document.createElement('canvas');
+
+
         let pageContainer = document.createElement('div');
 
+
         pageContainer.style.position = "relative";
+
+        pageContainer.style.width = viewport.width+"px";
+
+        pageContainer.style.height = viewport.height+"px";
+
+        pageContainer.style.margin = "0 auto 30px auto";
 
         pageContainer.style.marginBottom = "30px";
 
@@ -647,20 +656,26 @@ function loadPage(num){
 
         let textLayer = document.createElement('div');
 
-
         textLayer.className = "textLayer";
 
 
-        textLayer.style.position = "absolute";
+        Object.assign(textLayer.style, {
 
-        textLayer.style.top = "0";
+            position:"absolute",
 
-        textLayer.style.left = "0";
+            top:"0",
 
-        textLayer.style.width = viewport.width+"px";
+            left:"0",
 
-        textLayer.style.height = viewport.height+"px";
+            width: viewport.width + "px",
 
+            height: viewport.height + "px",
+
+            pointerEvents:"auto",
+
+            zIndex:"10"
+
+        });
 
 
         pdfjsLib.renderTextLayer({
@@ -1211,8 +1226,25 @@ window.addEventListener("beforeunload",()=>{
 });
 
 
+let dictionaryCache = {};
+
+
 function showDefinition(word)
 {
+
+
+if(dictionaryCache[word])
+{
+
+displayDefinition(
+word,
+dictionaryCache[word]
+);
+
+return;
+
+}
+
 
 
 fetch('/dictionary/'+word)
@@ -1222,18 +1254,13 @@ fetch('/dictionary/'+word)
 .then(data=>{
 
 
-document.getElementById(
-"definitionText"
-).innerHTML =
-
-"<b>"+data.word+"</b><br><br>"
-+
-data.definition;
+dictionaryCache[word]=data.definition;
 
 
-document
-.getElementById("definitionBox")
-.classList.remove("hidden");
+displayDefinition(
+data.word,
+data.definition
+);
 
 
 });
@@ -1241,6 +1268,28 @@ document
 
 }
 
+
+
+
+function displayDefinition(word,definition)
+{
+
+document.getElementById(
+"definitionText"
+).innerHTML =
+
+"<b>"+word+"</b><br><br>"
++
+definition;
+
+
+
+document
+.getElementById("definitionBox")
+.classList.remove("hidden");
+
+
+}
 
 
 function closeDefinition()
