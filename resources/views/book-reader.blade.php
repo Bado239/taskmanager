@@ -13,6 +13,30 @@ Lecture : {{ $book->title }}
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+.textLayer{
+
+position:absolute;
+
+color:transparent;
+
+z-index:2;
+
+}
+
+
+.textLayer span{
+
+cursor:pointer;
+
+}
+
+
+.textLayer span:hover{
+
+background:rgba(255,255,0,0.4);
+
+}
+
 
 .night-mode{
 
@@ -550,6 +574,11 @@ function loadPage(num){
 
 
         let canvas = document.createElement('canvas');
+        let pageContainer = document.createElement('div');
+
+        pageContainer.style.position = "relative";
+
+        pageContainer.style.marginBottom = "30px";
 
 
         canvas.dataset.page = num;
@@ -569,7 +598,9 @@ function loadPage(num){
 
 
 
-        viewer.appendChild(canvas);
+        pageContainer.appendChild(canvas);
+
+        viewer.appendChild(pageContainer);
 
 
 
@@ -583,6 +614,48 @@ function loadPage(num){
             canvasContext: ctx,
 
             viewport: viewport
+
+        });
+
+        page.getTextContent()
+        .then(textContent => {
+
+
+        let textLayer = document.createElement('div');
+
+
+        textLayer.className = "textLayer";
+
+
+        textLayer.style.position = "absolute";
+
+        textLayer.style.top = "0";
+
+        textLayer.style.left = "0";
+
+        textLayer.style.width = viewport.width+"px";
+
+        textLayer.style.height = viewport.height+"px";
+
+
+
+        pdfjsLib.renderTextLayer({
+
+        textContentSource:textContent,
+
+        container:textLayer,
+
+        viewport:viewport,
+
+        textDivs:[]
+
+        });
+
+
+
+        pageContainer.appendChild(textLayer);
+
+
 
         });
 
@@ -1152,6 +1225,29 @@ document
 }
 
 </script>
+
+document.addEventListener(
+'click',
+function(e){
+
+
+if(e.target.closest('.textLayer span')){
+
+
+let word =
+e.target.innerText.trim();
+
+
+console.log("Mot sélectionné :",word);
+
+
+showDefinition(word);
+
+
+}
+
+
+});
 
 
 </body>
