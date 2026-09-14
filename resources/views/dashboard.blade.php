@@ -415,7 +415,7 @@
                         class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
                     <option value="">-- Sélectionner --</option>
                     <template x-for="category in filteredCategories" :key="category.id">
-                        <option :value="category.id" x-text="category.title || category.name"></option>
+                        <option :value="category.id" x-text="category.name"></option>
                     </template>
                     <option value="new">➕ Créer une nouvelle...</option>
                 </select>
@@ -1520,18 +1520,22 @@ async function editTask(id) {
 
 
         // PROJET
-        alpineData.selectedProject = task.project_id ?? '';
-
+        alpineData.selectedProject = String(task.project_id ?? '');
 
 
         // CATEGORIE
-        alpineData.selectedCategory = task.category_id ?? '';
-
+        alpineData.selectedCategory = String(task.category_id ?? '');
 
 
         // DOCUMENT
         document.querySelector('input[name="document_link"]').value =
             task.document_link ?? '';
+
+        document.querySelector('input[name="date_prevue"]').value =
+            task.date_prevue ?? '';
+
+        document.querySelector('input[name="execution_date"]').value =
+            task.execution_date ?? '';
 
 
 
@@ -1568,15 +1572,6 @@ async function editTask(id) {
         // PRIORITE
         document.querySelector('select[name="priority"]').value =
             task.priority ?? 'medium';
-
-
-
-        // Rafraîchir les select Alpine
-        document.querySelector('select[name="project_id"]')
-            ?.dispatchEvent(new Event('change'));
-
-        document.querySelector('select[name="category_id"]')
-            ?.dispatchEvent(new Event('change'));
 
 
 
