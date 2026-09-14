@@ -82,15 +82,36 @@
 
                     @if(!$isMaster)
                         <!-- Formulaire Office -->
-                        <form action="{{ route('tasks.store') }}" method="POST" class="space-y-4">
+                        <form 
+                            @if(isset($editTask))
+                                action="{{ route('tasks.update',$editTask->id) }}"
+                            @else
+                                action="{{ route('tasks.store') }}"
+                            @endif
+
+                            method="POST" 
+                            class="space-y-4">
+
+                            @csrf
+
+                            @if(isset($editTask))
+                                @method('PUT')
+                            @endif
                             @csrf
                             <input type="hidden" name="type" value="office">
 
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nom du Livrable</label>
-                                <input type="text" name="title" required class="w-full text-sm border-gray-200 rounded-xl shadow-sm focus:border-[#1862ff] focus:ring-1 focus:ring-[#1862ff] px-4 py-2.5" placeholder="Ex: Rapport mensuel...">
-                            </div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                                    Nom du Livrable
+                                </label>
 
+                                <input type="text"
+                                    name="title"
+                                    value="{{ isset($editTask) ? $editTask->title : '' }}"
+                                    required
+                                    class="w-full text-sm border-gray-200 rounded-xl shadow-sm focus:border-[#1862ff] focus:ring-1 focus:ring-[#1862ff] px-4 py-2.5"
+                                    placeholder="Ex: Rapport mensuel...">
+                            </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Lien de Travail</label>
                                 <input type="url" name="document_link" class="w-full text-sm border-gray-200 rounded-xl shadow-sm focus:border-[#1862ff] focus:ring-1 focus:ring-[#1862ff] px-4 py-2.5" placeholder="Drive, Notion, GitHub...">
@@ -167,19 +188,48 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full py-3 px-4 rounded-xl font-bold text-xs text-white {{ $themeBtn }} transition-all shadow-sm">
-                                Enregistrer la donnée
+                            <button type="submit" 
+                            class="w-full py-3 px-4 rounded-xl font-bold text-xs text-white {{ $themeBtn }} transition-all shadow-sm">
+
+                            @if(isset($editTask))
+                                💾 Enregistrer les modifications
+                            @else
+                                💾 Enregistrer la donnée
+                            @endif
+
                             </button>
                         </form>
                     @else
                         <!-- Formulaire Master -->
-                        <form action="{{ route('tasks.store') }}" method="POST" class="space-y-4">
+                            <form 
+                            @if(isset($editTask))
+                                action="{{ route('tasks.update',$editTask->id) }}"
+                            @else
+                                action="{{ route('tasks.store') }}"
+                            @endif
+
+                            method="POST" 
+                            class="space-y-4">
+
                             @csrf
+
+                            @if(isset($editTask))
+                                @method('PUT')
+                            @endif
                             <input type="hidden" name="type" value="master">
 
                             <div>
-                                <label class="block text-xs font-bold text-purple-600 uppercase tracking-wider mb-1.5">Leçon ou Matière</label>
-                                <input type="text" name="title" required class="w-full text-sm border-gray-200 rounded-xl focus:ring-purple-500 px-4 py-2.5" placeholder="Ex: Calcul Stochastique">
+                                <label class="block text-xs font-bold text-purple-600 uppercase tracking-wider mb-1.5">
+                                    Leçon ou Matière
+                                </label>
+
+                                <input 
+                                    type="text" 
+                                    name="title"
+                                    value="{{ isset($editTask) ? $editTask->title : '' }}"
+                                    required 
+                                    class="w-full text-sm border-gray-200 rounded-xl focus:ring-purple-500 px-4 py-2.5" 
+                                    placeholder="Ex: Calcul Stochastique">
                             </div>
 
                             <div>
