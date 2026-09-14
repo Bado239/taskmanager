@@ -75,117 +75,281 @@
     <form id="taskForm"
         action="{{ route('tasks.store') }}"
         method="POST"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4">            
-        method="POST"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="hidden" name="_method" id="methodField">
-        <input type="hidden" name="edit_id" id="editTaskId">
-
-        @csrf
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
 
         x-data="{
+
             currentMode: '{{ $currentType }}',
+
             selectedProject: '',
             selectedCategory: '',
+
             dueDate: '{{ $defaultDueDate }}',
             executionDate: '{{ $defaultExecutionDate }}',
+
             startTime: '{{ $defaultStartTime }}',
             endTime: '{{ $defaultEndTime }}',
 
+
             projects: @js($allProjects->where('is_active', true)->values()),
+
             categories: @js($allCategories->values()),
 
+
+
             get filteredProjects() {
-                return this.projects.filter(project =>
+
+                return this.projects.filter(project => 
                     project.type === this.currentMode
                 );
+
             },
+
+
 
             get filteredCategories() {
-                return this.categories.filter(category =>
+
+                return this.categories.filter(category => 
                     category.type === this.currentMode
                 );
+
             },
+
+
 
             updateExecutionDate() {
+
                 if (!this.dueDate) return;
+
                 const date = new Date(this.dueDate);
+
                 date.setDate(date.getDate() - 2);
+
                 this.executionDate = date.toISOString().split('T')[0];
+
             },
+
+
 
             updateEndTime() {
+
                 if (!this.startTime) return;
+
                 const parts = this.startTime.split(':');
+
                 let hours = parseInt(parts[0], 10) + 2;
-                if (hours > 23) hours = 23;
-                this.endTime = String(hours).padStart(2, '0') + ':' + parts[1];
+
+                if (hours > 23) {
+
+                    hours = 23;
+
+                }
+
+                this.endTime =
+                    String(hours).padStart(2,'0')
+                    + ':'
+                    + parts[1];
+
             },
+
+
 
             async deleteProject(projectId) {
+
+
                 if (!confirm('Voulez-vous vraiment archiver ce projet ?')) return;
 
+
+
                 try {
+
+
                     const response = await fetch(`/projects/${projectId}`, {
+
+
                         method: 'DELETE',
+
+
                         headers: {
+
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+
                             'Accept': 'application/json',
+
                             'X-Requested-With': 'XMLHttpRequest'
+
                         }
+
                     });
+
+
 
                     const data = await response.json();
 
+
+
                     if (!response.ok) {
-                        throw new Error(data.message || 'Erreur lors de la suppression.');
+
+                        throw new Error(
+                            data.message || 
+                            'Erreur lors de la suppression.'
+                        );
+
                     }
 
-                    this.projects = this.projects.filter(project => String(project.id) !== String(projectId));
+
+
+                    this.projects = this.projects.filter(project =>
+                        String(project.id) !== String(projectId)
+                    );
+
+
 
                     if (String(this.selectedProject) === String(projectId)) {
+
                         this.selectedProject = '';
+
                     }
 
-                    alert(data.message || 'Projet archivé avec succès.');
-                } catch (error) {
-                    alert(error.message || 'Une erreur est survenue.');
+
+
+                    alert(
+                        data.message || 
+                        'Projet archivé avec succès.'
+                    );
+
+
+
+                } catch(error) {
+
+
+                    alert(
+                        error.message || 
+                        'Une erreur est survenue.'
+                    );
+
+
                 }
+
+
             },
 
+
+
+
             async deleteCategory(categoryId) {
+
+
                 if (!confirm('Voulez-vous vraiment supprimer cette étape ?')) return;
 
+
+
                 try {
+
+
+
                     const response = await fetch(`/categories/${categoryId}`, {
+
+
                         method: 'DELETE',
+
+
                         headers: {
+
+
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+
                             'Accept': 'application/json',
+
                             'X-Requested-With': 'XMLHttpRequest'
+
+
                         }
+
+
                     });
+
+
+
 
                     const data = await response.json();
 
+
+
+
                     if (!response.ok) {
-                        throw new Error(data.message || 'Erreur lors de la suppression.');
+
+
+                        throw new Error(
+                            data.message || 
+                            'Erreur lors de la suppression.'
+                        );
+
+
                     }
 
-                    this.categories = this.categories.filter(category => String(category.id) !== String(categoryId));
+
+
+
+
+                    this.categories = this.categories.filter(category =>
+                        String(category.id) !== String(categoryId)
+                    );
+
+
+
 
                     if (String(this.selectedCategory) === String(categoryId)) {
+
+
                         this.selectedCategory = '';
+
                     }
 
-                    alert(data.message || 'Étape supprimée avec succès.');
-                } catch (error) {
-                    alert(error.message || 'Une erreur est survenue.');
+
+
+
+
+                    alert(
+                        data.message || 
+                        'Étape supprimée avec succès.'
+                    );
+
+
+
+
+                } catch(error) {
+
+
+
+                    alert(
+                        error.message || 
+                        'Une erreur est survenue.'
+                    );
+
+
                 }
+
+
             }
+
+
         }">
 
+
         @csrf
+
+
+        <input type="hidden" 
+            name="_method" 
+            id="methodField"
+            value="POST">
+
+
+        <input type="hidden" 
+            name="edit_id" 
+            id="editTaskId">
+
 
         {{-- DESTINATION --}}
         @if($view === 'dashboard')
@@ -1345,13 +1509,13 @@ async function editTask(id) {
         document.querySelector('input[name="title"]').value = task.title;
 
 
-        // projet
         document.querySelector('select[name="project_id"]').value = task.project_id ?? '';
 
+        document.querySelector('select[name="project_id"]').dispatchEvent(new Event('change'));
 
-        // catégorie
         document.querySelector('select[name="category_id"]').value = task.category_id ?? '';
 
+        document.querySelector('select[name="category_id"]').dispatchEvent(new Event('change'));
 
         // document
         document.querySelector('input[name="document_link"]').value = task.document_link ?? '';
@@ -1382,6 +1546,9 @@ async function editTask(id) {
         // priorité
         document.querySelector('select[name="priority"]').value =
             task.priority ?? 'medium';
+
+        document.querySelector('#taskFormContainer h2').innerHTML =
+        "✏️ Modifier la tâche";
 
 
 
