@@ -260,8 +260,8 @@
                 </div>
 
                 <!-- Section de Droite : Leaderboard d'activités -->
-                <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-[#fafbfe]">
+                <div class="lg:col-span-2 bg-white rounded-2xl border border-blue-100 shadow-lg overflow-hidden">
+                    <div class="px-6 py-4 border-b border-blue-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
                         <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">📊 Top Activités du jour</h2>
                         <span class="text-xs font-bold text-[#1862ff] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">
                             {{ $todayTasks->count() }} au programme
@@ -279,7 +279,7 @@
                     <div class="divide-y divide-gray-100">
                         @php $index = 1; @endphp
                         @forelse($todayTasks as $task)
-                            <div class="grid grid-cols-12 px-6 py-4 items-center hover:bg-[#fafbfe] transition-all">
+                            <div class="grid grid-cols-12 px-6 py-4 items-center hover:bg-blue-50/60 transition-all border-l-4 border-transparent hover:border-blue-500">
                                 
                                 <!-- Index / Rang -->
                                 <div class="col-span-1">
