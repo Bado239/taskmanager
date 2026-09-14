@@ -442,10 +442,13 @@
                                     </td>
                                     <td class="px-4 py-4 text-right space-x-2">
 
-                                        <a href="{{ route('tasks.edit', $task->id) }}"
+                                        <button type="button"
+                                        onclick="editTask({{ $task->id }})"
                                         class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+
                                             Modifier
-                                        </a>
+
+                                        </button>
 
                                         @if(!$task->is_archived)
                                             <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
@@ -566,10 +569,13 @@
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td class="px-4 py-4 text-right space-x-2">
-                                            <a href="{{ route('tasks.edit', $task->id) }}"
+                                            <button type="button"
+                                            onclick="editTask({{ $task->id }})"
                                             class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+
                                                 Modifier
-                                            </a>
+
+                                            </button>
                                             @if(!$task->is_archived)
                                                 <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                     @csrf
@@ -704,10 +710,13 @@
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td class="px-4 py-4 text-right space-x-2">
-                                            <a href="{{ route('tasks.edit', $task->id) }}"
-                                                class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                            <button type="button"
+                                            onclick="editTask({{ $task->id }})"
+                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+
                                                 Modifier
-                                            </a>
+
+                                            </button>
                                             @if(!$task->is_archived)
                                                 <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                     @csrf
