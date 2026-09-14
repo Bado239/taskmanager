@@ -441,13 +441,21 @@
                                         {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}
                                     </td>
                                     <td class="px-4 py-4 text-right space-x-2">
+
+                                        <a href="{{ route('tasks.edit', $task->id) }}"
+                                        class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                            Modifier
+                                        </a>
+
                                         @if(!$task->is_archived)
                                             <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
+                                                <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">
+                                                    Archiver
+                                                </button>
                                             </form>
                                         @endif
-                                        <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
+                                    <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">Supprimer</button>
@@ -558,6 +566,10 @@
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td class="px-4 py-4 text-right space-x-2">
+                                            <a href="{{ route('tasks.edit', $task->id) }}"
+                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                                Modifier
+                                            </a>
                                             @if(!$task->is_archived)
                                                 <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                     @csrf
@@ -692,6 +704,10 @@
                                             {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
                                         </td>
                                         <td class="px-4 py-4 text-right space-x-2">
+                                            <a href="{{ route('tasks.edit', $task->id) }}"
+                                                class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                                Modifier
+                                            </a>
                                             @if(!$task->is_archived)
                                                 <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
                                                     @csrf

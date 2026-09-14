@@ -37,16 +37,6 @@ class TaskController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $currentTime = Carbon::now()->format('H:i');
 
-        // Automatisation de l'archivage
-        $tasksToCheck = Task::where('is_archived', 0)->get();
-        foreach ($tasksToCheck as $task) {
-            $isFinishedToday = ($task->execution_date === $today && $task->heure_fin && $task->heure_fin <= $currentTime);
-            $isValidatedPassed = ($task->document_status === 'done' && $task->execution_date && $task->execution_date < $today);
-
-            if ($isFinishedToday || $isValidatedPassed) {
-                $task->update(['is_archived' => 1]);
-            }
-        }
 
         // Listes des projets : Actifs OU encore rattachés à des tâches non archivées
         $projectsOffice = Project::where('type', 'office')->where(function($q) {
@@ -466,6 +456,57 @@ class TaskController extends Controller
             'tasks.learning',
             compact('task')
         );
+    }
+
+    public function edit($id)
+    {
+        $task = Task::with(['project','category'])->findOrFail($id);
+
+        $projects = Project::where('type',$task->type)->get();
+        $categories = Category::where('type',$task->type)->get();
+
+        return view('tasks.edit', compact(
+            'task',
+            'projects',
+            'categories'
+        ));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+
+        $task->update([
+
+            'title' => $request->title,
+
+            'project_id' => $request->project_id,
+
+            'project_name' => optional(Project::find($request->project_id))->title,
+
+            'category_id' => $request->category_id,
+
+            'document_status' => $request->document_status,
+
+            'priority' => $request->priority,
+
+            'date_prevue' => $request->date_prevue,
+
+            'execution_date' => $request->execution_date,
+
+            'heure_debut' => $request->heure_debut,
+
+            'heure_fin' => $request->heure_fin,
+
+            'document_link' => $request->document_link,
+
+            'type' => $request->type,
+
+        ]);
+
+        return redirect()
+            ->route('dashboard', ['view'=>$task->type])
+            ->with('success','Tâche modifiée avec succès !');
     }
 
 }

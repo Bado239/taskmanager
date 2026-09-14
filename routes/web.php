@@ -272,3 +272,9 @@ Route::get(
     '/learning-document/{document}/view',
     [LearningDocumentController::class,'view']
 )->name('learning-documents.view');
+
+Route::get('/tasks/{id}/edit', [TaskController::class, 'edit'])
+    ->name('tasks.edit');
+
+Route::put('/tasks/{id}', [TaskController::class, 'update'])
+    ->name('tasks.update');
