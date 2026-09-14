@@ -52,7 +52,11 @@
 
     <div class="mb-4 pb-2 border-b border-gray-100 flex items-center justify-between">
         <h2 class="font-bold text-gray-900 text-base flex items-center gap-2">
-            ➕ Enregistrer une tâche
+            @if(isset($editTask))
+                ✏️ Modifier la tâche
+            @else
+                ➕ Enregistrer une tâche
+            @endif
             <span class="text-[#0052cc]">
                 @if($view === 'dashboard')
                     en Mode Global
@@ -68,9 +72,17 @@
         </button>
     </div>
 
-    <form action="{{ route('tasks.store') }}"
+    <form action="{{ isset($editTask) 
+            ? route('tasks.update',$editTask->id) 
+            : route('tasks.store') }}"
         method="POST"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        @csrf
+
+        @if(isset($editTask))
+            @method('PUT')
+        @endif       
         x-data="{
             currentMode: '{{ $currentType }}',
             selectedProject: '',
@@ -261,12 +273,20 @@
             </div>
         </div>
                     {{-- 3. LIBELLÉ DE LA TÂCHE --}}
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">3. Libellé de la Tâche *</label>
-                    <input type="text" name="title" required placeholder="Ex: Résolution de l'exercice d'économétrie"
-                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
-                </div>
+            <div class="md:col-span-2">
 
+                <label class="block text-xs font-semibold text-gray-700 mb-1">
+                    3. Libellé de la Tâche *
+                </label>
+
+                <input type="text"
+                    name="title"
+                    required
+                    value="{{ isset($editTask) ? $editTask->title : '' }}"
+                    placeholder="Ex: Résolution de l'exercice d'économétrie"
+                    class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+
+            </div>
             {{-- LIEN DE TRAVAIL --}}
             <div class="md:col-span-2">
                 <label class="block text-xs font-semibold text-gray-700 mb-1">Lien de Travail</label>
