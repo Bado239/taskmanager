@@ -269,7 +269,7 @@
                     </div>
 
                     <!-- En-tête du tableau -->
-                    <div class="grid grid-cols-12 px-6 py-2.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
+                    <div class="grid grid-cols-12 px-6 py-3 text-[10px] font-bold text-blue-800 uppercase tracking-wider bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
                         <div class="col-span-1">Rang</div>
                         <div class="col-span-6 md:col-span-7">Détails de l'activité</div>
                         <div class="col-span-3 md:col-span-2">Statut / Canal</div>
