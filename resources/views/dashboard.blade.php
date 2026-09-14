@@ -72,7 +72,7 @@
         </button>
     </div>
 
-        <form id="taskForm"
+    <form id="taskForm"
         action="{{ route('tasks.store') }}"
         method="POST"
         class="grid grid-cols-1 md:grid-cols-2 gap-4">            
@@ -83,9 +83,6 @@
 
         @csrf
 
-        @if(isset($editTask))
-            @method('PUT')
-        @endif       
         x-data="{
             currentMode: '{{ $currentType }}',
             selectedProject: '',
@@ -345,7 +342,7 @@
                     💾 Valider et Enregistrer la tâche
                 </button>
             </div>
-        </form>
+    </form>
     </div>
 
     <script>
