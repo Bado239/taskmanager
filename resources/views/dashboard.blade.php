@@ -1487,10 +1487,11 @@ async function editTask(id) {
             throw new Error("Erreur chargement tâche");
         }
 
+
         const task = await response.json();
 
 
-        // ouvrir le formulaire
+        // Ouvrir le formulaire
         const formContainer = document.getElementById('taskFormContainer');
 
         formContainer.style.display = 'block';
@@ -1499,60 +1500,96 @@ async function editTask(id) {
             behavior: 'smooth'
         });
 
-        document.getElementById('taskForm').action =
-        "/tasks/"+id;
-
-        document.getElementById('methodField').value="PUT";
 
 
-        // titre
-        document.querySelector('input[name="title"]').value = task.title;
+        // Passage en mode modification
+        document.getElementById('taskForm').action = "/tasks/" + id;
+
+        document.getElementById('methodField').value = "PUT";
 
 
-        document.querySelector('select[name="project_id"]').value = task.project_id ?? '';
 
-        document.querySelector('select[name="project_id"]').dispatchEvent(new Event('change'));
-
-        document.querySelector('select[name="category_id"]').value = task.category_id ?? '';
-
-        document.querySelector('select[name="category_id"]').dispatchEvent(new Event('change'));
-
-        // document
-        document.querySelector('input[name="document_link"]').value = task.document_link ?? '';
+        // Récupérer Alpine
+        const alpineData = document.querySelector('#taskForm')._x_dataStack[0];
 
 
-        // date échéance
-        document.querySelector('input[name="date_prevue"]').value = task.date_prevue ?? '';
+
+        // TITRE
+        document.querySelector('input[name="title"]').value = task.title ?? '';
 
 
-        // date exécution
-        document.querySelector('input[name="execution_date"]').value = task.execution_date ?? '';
+
+        // PROJET
+        alpineData.selectedProject = task.project_id ?? '';
 
 
-        // heures
-        document.querySelector('input[name="start_time"]').value =
-            task.heure_debut ? task.heure_debut.substring(0,5) : '';
+
+        // CATEGORIE
+        alpineData.selectedCategory = task.category_id ?? '';
 
 
-        document.querySelector('input[name="end_time"]').value =
-            task.heure_fin ? task.heure_fin.substring(0,5) : '';
+
+        // DOCUMENT
+        document.querySelector('input[name="document_link"]').value =
+            task.document_link ?? '';
 
 
-        // statut
+
+        // DATE ECHEANCE
+        alpineData.dueDate = task.date_prevue ?? '';
+
+
+
+        // DATE EXECUTION
+        alpineData.executionDate = task.execution_date ?? '';
+
+
+
+        // HEURE DEBUT
+        alpineData.startTime = task.heure_debut
+            ? task.heure_debut.substring(0,5)
+            : '';
+
+
+
+        // HEURE FIN
+        alpineData.endTime = task.heure_fin
+            ? task.heure_fin.substring(0,5)
+            : '';
+
+
+
+        // STATUT
         document.querySelector('select[name="document_status"]').value =
             task.document_status ?? 'in_progress';
 
 
-        // priorité
+
+        // PRIORITE
         document.querySelector('select[name="priority"]').value =
             task.priority ?? 'medium';
 
-        document.querySelector('#taskFormContainer h2').innerHTML =
-        "✏️ Modifier la tâche";
+
+
+        // Rafraîchir les select Alpine
+        document.querySelector('select[name="project_id"]')
+            ?.dispatchEvent(new Event('change'));
+
+        document.querySelector('select[name="category_id"]')
+            ?.dispatchEvent(new Event('change'));
 
 
 
-    } catch(error){
+        // Changer le titre du formulaire
+        const titre = document.querySelector('#taskFormContainer h2');
+
+        if(titre){
+            titre.innerHTML = "✏️ Modifier la tâche";
+        }
+
+
+
+    } catch(error) {
 
         console.error(error);
 
@@ -1561,7 +1598,6 @@ async function editTask(id) {
     }
 
 }
-
 </script>
 
 @endsection
