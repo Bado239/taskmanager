@@ -72,11 +72,14 @@
         </button>
     </div>
 
-    <form action="{{ isset($editTask) 
-            ? route('tasks.update',$editTask->id) 
-            : route('tasks.store') }}"
+        <form id="taskForm"
+        action="{{ route('tasks.store') }}"
+        method="POST"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4">            
         method="POST"
         class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" name="_method" id="methodField">
+        <input type="hidden" name="edit_id" id="editTaskId">
 
         @csrf
 
@@ -1308,6 +1311,88 @@ function toggleGlobalLibrary(){
 
         btn.innerHTML="📚 Afficher la bibliothèque globale";
 
+
+    }
+
+}
+
+async function editTask(id) {
+
+    try {
+
+        const response = await fetch(`/tasks/${id}/edit-data`);
+
+        if (!response.ok) {
+            throw new Error("Erreur chargement tâche");
+        }
+
+        const task = await response.json();
+
+
+        // ouvrir le formulaire
+        const formContainer = document.getElementById('taskFormContainer');
+
+        formContainer.style.display = 'block';
+
+        formContainer.scrollIntoView({
+            behavior: 'smooth'
+        });
+
+        document.getElementById('taskForm').action =
+        "/tasks/"+id;
+
+        document.getElementById('methodField').value="PUT";
+
+
+        // titre
+        document.querySelector('input[name="title"]').value = task.title;
+
+
+        // projet
+        document.querySelector('select[name="project_id"]').value = task.project_id ?? '';
+
+
+        // catégorie
+        document.querySelector('select[name="category_id"]').value = task.category_id ?? '';
+
+
+        // document
+        document.querySelector('input[name="document_link"]').value = task.document_link ?? '';
+
+
+        // date échéance
+        document.querySelector('input[name="date_prevue"]').value = task.date_prevue ?? '';
+
+
+        // date exécution
+        document.querySelector('input[name="execution_date"]').value = task.execution_date ?? '';
+
+
+        // heures
+        document.querySelector('input[name="start_time"]').value =
+            task.heure_debut ? task.heure_debut.substring(0,5) : '';
+
+
+        document.querySelector('input[name="end_time"]').value =
+            task.heure_fin ? task.heure_fin.substring(0,5) : '';
+
+
+        // statut
+        document.querySelector('select[name="document_status"]').value =
+            task.document_status ?? 'in_progress';
+
+
+        // priorité
+        document.querySelector('select[name="priority"]').value =
+            task.priority ?? 'medium';
+
+
+
+    } catch(error){
+
+        console.error(error);
+
+        alert("Impossible de charger la tâche");
 
     }
 

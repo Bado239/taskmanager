@@ -509,4 +509,23 @@ class TaskController extends Controller
             ->with('success','Tâche modifiée avec succès !');
     }
 
+    public function editData($id)
+    {
+        $task = Task::findOrFail($id);
+
+        return response()->json([
+            'id'=>$task->id,
+            'title'=>$task->title,
+            'project_id'=>$task->project_id,
+            'category_id'=>$task->category_id,
+            'document_link'=>$task->document_link,
+            'date_prevue'=>$task->date_prevue,
+            'execution_date'=>$task->execution_date,
+            'heure_debut'=>$task->heure_debut,
+            'heure_fin'=>$task->heure_fin,
+            'document_status'=>$task->document_status,
+            'priority'=>$task->priority,
+        ]);
+    }
+
 }

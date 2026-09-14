@@ -278,3 +278,7 @@ Route::get('/tasks/{id}/edit', [TaskController::class, 'edit'])
 
 Route::put('/tasks/{id}', [TaskController::class, 'update'])
     ->name('tasks.update');
+
+Route::get('/tasks/{id}/edit-data',
+    [TaskController::class,'editData']
+)->name('tasks.editData');
