@@ -225,6 +225,7 @@ class TaskController extends Controller
             'type'  => 'required|string|in:office,master',
             'new_project_name' => 'nullable|string|max:255',
             'new_category_name' => 'nullable|string|max:255',
+            'document_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png',            
         ]);
 
         if ($validator->fails()) {
@@ -266,10 +267,21 @@ class TaskController extends Controller
             $categoryId = null;
         }
 
+        // Gestion du fichier joint
+        $documentLink = $request->document_link ?? null;
+
+        if ($request->hasFile('document_file')) {
+
+            $path = $request->file('document_file')
+                            ->store('documents', 'public');
+
+            $documentLink = '/storage/' . $path;
+        }
+
         // Enregistrement de la tâche
         Task::create([
             'title'           => $request->title,
-            'document_link'   => $request->document_link,
+            'document_link'   => $documentLink,
             'category_id'     => $categoryId,
             'project_id'      => $projectId,
             'project_name'    => $projectName,
