@@ -272,10 +272,11 @@ class TaskController extends Controller
 
         if ($request->hasFile('document_file')) {
 
-            $path = $request->file('document_file')
-                            ->store('documents', 'public');
+            $storage = new SupabaseStorageService();
 
-            $documentLink = $path;
+            $documentLink = $storage->upload(
+                $request->file('document_file')
+            );
         }
 
         // Enregistrement de la tâche
