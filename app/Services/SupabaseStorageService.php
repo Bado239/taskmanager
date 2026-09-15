@@ -11,20 +11,17 @@ class SupabaseStorageService
         $filename = 'documents/' . uniqid() . '.' . $file->getClientOriginalExtension();
 
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.env('SUPABASE_KEY'),
-            'apikey' => env('SUPABASE_KEY'),
+            'Authorization' => 'Bearer ' . env('SUPABASE_SERVICE_KEY'),
             'Content-Type' => $file->getMimeType(),
-        ])
-        ->withBody(
+        ])->withBody(
             file_get_contents($file->getRealPath()),
             $file->getMimeType()
-        )
-        ->post(
-            env('SUPABASE_URL')
-            . '/storage/v1/object/'
-            . 'task-documents/'
-            . $filename
+        )->post(
+            env('SUPABASE_URL') .
+            '/storage/v1/object/task-documents/' .
+            $filename
         );
+
 
         if ($response->failed()) {
             throw new \Exception(
