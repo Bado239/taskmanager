@@ -1580,6 +1580,29 @@ async function editTask(id) {
 
         const task = await response.json();
 
+        // Synchroniser Alpine
+        const form = document.querySelector('#taskForm');
+
+        if(form && form._x_dataStack){
+
+            let alpineData = form._x_dataStack[0];
+
+            alpineData.selectedProject = task.project_id ?? '';
+            alpineData.selectedCategory = task.category_id ?? '';
+
+            alpineData.dueDate = task.date_prevue ?? '';
+            alpineData.executionDate = task.execution_date ?? '';
+
+            alpineData.startTime = task.heure_debut 
+                ? task.heure_debut.substring(0,5)
+                : '';
+
+            alpineData.endTime = task.heure_fin 
+                ? task.heure_fin.substring(0,5)
+                : '';
+
+        }
+
 
         // Ouvrir le formulaire
         const formContainer = document.getElementById('taskFormContainer');
