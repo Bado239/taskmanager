@@ -3,15 +3,17 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\UploadedFile;
 
 class SupabaseStorageService
 {
-    public function upload($file)
+    public function upload(UploadedFile $file)
     {
         $filename = 'documents/' . uniqid() . '.' . $file->getClientOriginalExtension();
 
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . env('SUPABASE_SERVICE_KEY'),
+            'apikey' => env('SUPABASE_SERVICE_KEY'),
             'Content-Type' => $file->getMimeType(),
         ])->withBody(
             file_get_contents($file->getRealPath()),
