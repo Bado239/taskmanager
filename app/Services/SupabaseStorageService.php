@@ -21,10 +21,10 @@ class SupabaseStorageService
         )
         ->post(
             env('SUPABASE_URL')
-            . '/storage/v1/object/task-documents/'
+            . '/storage/v1/object/'
+            . 'task-documents/'
             . $filename
         );
-
 
         if ($response->failed()) {
             throw new \Exception(
