@@ -275,7 +275,7 @@ class TaskController extends Controller
             $path = $request->file('document_file')
                             ->store('documents', 'public');
 
-            $documentLink = '/storage/' . $path;
+            $documentLink = $path;
         }
 
         // Enregistrement de la tâche
@@ -490,12 +490,13 @@ class TaskController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
-            'document_link' => 'nullable|string|max:1000',
+            'document_file' => 'nullable|file|max:10240',
             'date_prevue' => 'nullable|date',
             'execution_date' => 'nullable|date',
         ]);
 
-        $task->update([
+
+        $data = [
 
             'title' => $request->title,
 
@@ -517,11 +518,33 @@ class TaskController extends Controller
 
             'heure_fin' => $request->end_time,
 
-            'document_link' => $request->document_link,
-
             'type' => $request->type,
 
-        ]);
+        ];
+
+
+        // ==========================
+        // GESTION DU FICHIER
+        // ==========================
+
+        if($request->hasFile('document_file')){
+
+
+            $file = $request->file('document_file');
+
+
+            $path = $file->store('documents','public');
+
+
+            $data['document_link'] = $path;
+
+
+        }
+
+
+        $task->update($data);
+
+
 
         return redirect()
             ->route('dashboard', ['view' => $task->type])

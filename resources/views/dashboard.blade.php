@@ -1641,8 +1641,18 @@ async function editTask(id) {
 
 
         // DOCUMENT
-        document.querySelector('input[name="document_link"]').value =
-            task.document_link ?? '';
+        // Un input type=file ne peut pas être rempli automatiquement pour des raisons de sécurité
+        // On affiche seulement l'ancien document s'il existe
+
+        const oldDocument = document.getElementById('oldDocument');
+
+        if(oldDocument){
+
+            oldDocument.innerHTML = task.document_link
+                ? "📎 Document actuel : " + task.document_link
+                : "";
+
+        }
 
         document.querySelector('input[name="date_prevue"]').value =
             task.date_prevue ?? '';
