@@ -11,29 +11,42 @@ class SupabaseStorageService
     {
         $filename = 'documents/' . uniqid() . '.' . $file->getClientOriginalExtension();
 
+        $url = config('services.supabase.url');
+        $key = config('services.supabase.key');
+
+
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('SUPABASE_SERVICE_KEY'),
-            'apikey' => env('SUPABASE_SERVICE_KEY'),
+
+            'Authorization' => 'Bearer '.$key,
+
+            'apikey' => $key,
+
             'Content-Type' => $file->getMimeType(),
+
         ])->withBody(
+
             file_get_contents($file->getRealPath()),
+
             $file->getMimeType()
+
         )->post(
-            env('SUPABASE_URL') .
-            '/storage/v1/object/task-documents/' .
-            $filename
+
+            $url . '/storage/v1/object/task-documents/' . $filename
+
         );
 
 
         if ($response->failed()) {
+
             throw new \Exception(
                 'Erreur Supabase : '.$response->body()
             );
+
         }
 
 
-        return env('SUPABASE_URL')
-            . '/storage/v1/object/public/task-documents/'
-            . $filename;
+        return $url .
+            '/storage/v1/object/public/task-documents/' .
+            $filename;
     }
 }

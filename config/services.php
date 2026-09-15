@@ -36,4 +36,14 @@ return [
 
     ],
 
+
+    // SUPABASE STORAGE
+    'supabase' => [
+
+        'url' => env('SUPABASE_URL'),
+
+        'key' => env('SUPABASE_SERVICE_KEY'),
+
+    ],
+
 ];
