@@ -791,7 +791,24 @@
                                             </div>
                                             <div class="font-bold text-gray-900 hover:text-blue-700">{{ $task->title }}</div>
                                             @if($task->document_link)
-                                                <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document / Support</a>
+
+                                                @php
+                                                    $link = $task->document_link;
+
+                                                    // Correction automatique du chemin de stockage
+                                                    if(!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
+                                                        $link = '/storage/' . $link;
+                                                    }
+                                                @endphp
+
+                                                <a href="{{ $link }}"
+                                                target="_blank"
+                                                class="text-xs text-[#0052cc] underline block mt-0.5">
+
+                                                    🔗 Document / Support
+
+                                                </a>
+
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 space-y-1">
@@ -935,7 +952,14 @@
 
                                                 @php
                                                     $link = $task->document_link;
+
+                                                    // Ajouter automatiquement storage
+                                                    if(!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
+                                                        $link = '/storage/'.$link;
+                                                    }
+
                                                     $extension = strtolower(pathinfo($link, PATHINFO_EXTENSION));
+
                                                 @endphp
 
                                                 @if(in_array($extension, ['pdf']))
