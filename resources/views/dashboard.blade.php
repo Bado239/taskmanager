@@ -614,7 +614,57 @@
                                     <td class="px-4 py-4 font-bold text-gray-900">
                                         {{ $task->title }}
                                         @if($task->document_link)
-                                            <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document</a>
+
+                                            @php
+                                                $link = $task->document_link;
+
+                                                // Transformation chemin Windows en lien local
+                                                if(str_starts_with($link, 'C:\\')) {
+                                                    $openLink = 'file:///' . str_replace('\\', '/', $link);
+                                                } else {
+                                                    $openLink = $link;
+                                                }
+
+                                                $extension = strtolower(pathinfo($link, PATHINFO_EXTENSION));
+                                            @endphp
+
+
+                                            @if(in_array($extension, ['pdf']))
+                                                <a href="{{ $openLink }}"
+                                                target="_blank"
+                                                class="text-xs text-red-600 underline block mt-0.5">
+                                                    📄 Ouvrir PDF
+                                                </a>
+
+                                            @elseif(in_array($extension, ['doc','docx']))
+                                                <a href="{{ $openLink }}"
+                                                target="_blank"
+                                                class="text-xs text-blue-700 underline block mt-0.5">
+                                                    📝 Ouvrir Word
+                                                </a>
+
+                                            @elseif(in_array($extension, ['xls','xlsx']))
+                                                <a href="{{ $openLink }}"
+                                                target="_blank"
+                                                class="text-xs text-green-700 underline block mt-0.5">
+                                                    📊 Ouvrir Excel
+                                                </a>
+
+                                            @elseif(in_array($extension, ['ppt','pptx']))
+                                                <a href="{{ $openLink }}"
+                                                target="_blank"
+                                                class="text-xs text-orange-600 underline block mt-0.5">
+                                                    📽️ Ouvrir PowerPoint
+                                                </a>
+
+                                            @else
+                                                <a href="{{ $openLink }}"
+                                                target="_blank"
+                                                class="text-xs text-[#0052cc] underline block mt-0.5">
+                                                    🔗 Document / Support
+                                                </a>
+                                            @endif
+
                                         @endif
                                     </td>
                                     <td class="px-4 py-4">
