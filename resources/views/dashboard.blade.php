@@ -76,7 +76,7 @@
         action="{{ route('tasks.store') }}"
         method="POST"
         enctype="multipart/form-data"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        class="grid grid-cols-1 md:grid-cols-2 gap-4"
 
         x-data="{
 
@@ -91,11 +91,9 @@
             startTime: '{{ $defaultStartTime }}',
             endTime: '{{ $defaultEndTime }}',
 
-
             projects: @js($allProjects->where('is_active', true)->values()),
 
             categories: @js($allCategories->values()),
-
 
 
             get filteredProjects() {
