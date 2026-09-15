@@ -14,6 +14,7 @@ use App\Models\CourseResource;
 use App\Services\DocumentReaderService;
 use App\Services\AICourseGeneratorService;
 use App\Models\GeneratedCourse;
+use App\Services\SupabaseStorageService;
 
 class TaskController extends Controller
 {
