@@ -476,6 +476,13 @@ class TaskController extends Controller
     {
         $task = Task::findOrFail($id);
 
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'document_link' => 'nullable|string|max:1000',
+            'date_prevue' => 'nullable|date',
+            'execution_date' => 'nullable|date',
+        ]);
+
         $task->update([
 
             'title' => $request->title,
@@ -505,8 +512,8 @@ class TaskController extends Controller
         ]);
 
         return redirect()
-            ->route('dashboard', ['view'=>$task->type])
-            ->with('success','Tâche modifiée avec succès !');
+            ->route('dashboard', ['view' => $task->type])
+            ->with('success', 'Tâche modifiée avec succès !');
     }
 
     public function editData($id)
