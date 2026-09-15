@@ -260,7 +260,7 @@
                 </div>
 
                 <!-- Section de Droite : Leaderboard d'activités -->
-                <div class="lg:col-span-2 bg-white rounded-2xl border border-blue-100 shadow-lg overflow-hidden">
+                <div class="lg:col-span-2 bg-blue-50/30 rounded-2xl border border-blue-200 shadow-lg overflow-hidden">
                     <div class="px-6 py-4 border-b border-blue-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
                         <h2 class="text-xs font-black uppercase tracking-wider text-gray-400">📊 Top Activités du jour</h2>
                         <span class="text-xs font-bold text-[#1862ff] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">
@@ -269,7 +269,7 @@
                     </div>
 
                     <!-- En-tête du tableau -->
-                    <div class="grid grid-cols-12 px-6 py-3 text-[10px] font-bold text-blue-800 uppercase tracking-wider bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
+                    <div class="grid grid-cols-12 px-6 py-3 text-[10px] font-bold text-blue-900 uppercase tracking-wider bg-blue-100 border-b border-blue-200">
                         <div class="col-span-1">Rang</div>
                         <div class="col-span-6 md:col-span-7">Détails de l'activité</div>
                         <div class="col-span-3 md:col-span-2">Statut / Canal</div>
@@ -279,7 +279,7 @@
                     <div class="divide-y divide-gray-100">
                         @php $index = 1; @endphp
                         @forelse($todayTasks as $task)
-                            <div class="grid grid-cols-12 px-6 py-4 items-center hover:bg-blue-50/60 transition-all border-l-4 border-transparent hover:border-blue-500">
+                            <div class="grid grid-cols-12 px-6 py-4 items-center bg-white hover:bg-blue-50 transition-all border-b border-blue-100">
                                 
                                 <!-- Index / Rang -->
                                 <div class="col-span-1">

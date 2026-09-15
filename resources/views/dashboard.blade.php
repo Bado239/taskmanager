@@ -57,7 +57,7 @@
             @else
                 ➕ Enregistrer une tâche
             @endif
-            <span class="text-[#0052cc]">
+            <span class="text-blue-700 font-extrabold">
                 @if($view === 'dashboard')
                     en Mode Global
                 @else
@@ -569,7 +569,7 @@
 
         @if($indicator)
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-6">
-                <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <div class="p-4 bg-blue-50 border-b border-blue-200 flex items-center justify-between">
                     <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
                         📋 Résultats pour l'indicateur : 
                         <span class="text-[#0052cc] uppercase">{{ str_replace('_', ' ', $indicator) }}</span>
@@ -581,7 +581,7 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm text-gray-600">
-                        <thead class="bg-[#f8fafc] text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
+                        <thead class="bg-blue-100 text-xs uppercase font-semibold text-blue-900 border-b border-blue-200">
                             <tr>
                                 <th class="px-4 py-3">Type</th>
                                 <th class="px-4 py-3">Projet / Matière</th>
@@ -593,7 +593,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($globalIndicatorTasks as $task)
-                                <tr class="hover:bg-gray-50 transition-colors">
+                                <tr class="hover:bg-blue-50 transition-colors border-b border-blue-100">
                                     <td class="px-4 py-4 font-bold text-xs">
                                         @if($task->type === 'office')
                                             <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-200">Office</span>
@@ -697,19 +697,19 @@
 
         <div class="space-y-6">
             @forelse($groupedOfficeTasks as $projectName => $tasksInProject)
-                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                    <div class="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
+                <div class="bg-white rounded-xl border border-blue-200 shadow-md overflow-hidden">
+                    <div class="p-4 bg-blue-50 border-b border-blue-200 flex items-center justify-between">
                         <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                            📁 Projet : <span class="text-[#0052cc]">{{ $projectName }}</span>
+                            📁 Projet : <span class="text-blue-700 font-extrabold">{{ $projectName }}</span>
                         </h3>
-                        <span class="text-xs bg-blue-100 text-[#0052cc] font-bold px-2.5 py-1 rounded-full">
+                        <span class="text-xs bg-blue-200 text-blue-800 font-bold px-2.5 py-1 rounded-full">
                             {{ $tasksInProject->count() }} tâche(s)
                         </span>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-[#f8fafc] text-xs uppercase font-semibold text-gray-500 border-b border-gray-200">
+                            <thead class="bg-blue-100 text-xs uppercase font-semibold text-blue-900 border-b border-blue-200">
                                 <tr>
                                     <th class="px-4 py-3">Rang</th>
                                     <th class="px-4 py-3">Étape & Libellé</th>
@@ -721,13 +721,13 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($tasksInProject as $index => $task)
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-4 py-4 font-bold text-gray-400">#{{ $index + 1 }}</td>
+                                    <tr class="hover:bg-blue-50 transition-colors border-b border-blue-100">
+                                        <td class="px-4 py-4 font-bold text-blue-400">#{{ $index + 1 }}</td>
                                         <td class="px-4 py-4">
-                                            <div class="text-xs font-semibold text-blue-600 mb-0.5">
+                                            <div class="text-xs font-semibold text-blue-700 mb-0.5">
                                                 📌 Étape : {{ $task->category->title ?? $task->category->name ?? 'Général' }}
                                             </div>
-                                            <div class="font-bold text-gray-900">{{ $task->title }}</div>
+                                            <div class="font-bold text-gray-900 hover:text-blue-700">{{ $task->title }}</div>
                                             @if($task->document_link)
                                                 <a href="{{ $task->document_link }}" target="_blank" class="text-xs text-[#0052cc] underline block mt-0.5">🔗 Document / Support</a>
                                             @endif
@@ -779,7 +779,7 @@
                     </div>
                 </div>
             @empty
-                <div class="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-sm text-gray-600 font-semibold">
+                <div class="bg-blue-50 p-12 text-center rounded-xl border border-blue-200 shadow-sm text-blue-700 font-semibold">
                     Aucune activité enregistrée en Mode Office
                 </div>
             @endforelse
@@ -855,7 +855,7 @@
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($tasksInMatiere as $index => $task)
                                     <tr class="hover:bg-blue-50 transition-colors">
-                                        <td class="px-4 py-4 font-bold text-gray-400">#{{ $index + 1 }}</td>
+                                        <td class="px-4 py-4 font-bold text-blue-400">#{{ $index + 1 }}</td>
                                         <td class="px-4 py-4 font-semibold text-blue-600 text-xs">
                                             📖 {{ $task->category->title ?? $task->category->name ?? 'Général' }}
                                         </td>
