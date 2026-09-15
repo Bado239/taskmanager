@@ -2,36 +2,40 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class SupabaseStorageService
 {
+
     public function upload(UploadedFile $file)
     {
-        $filename = 'documents/' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        $url = config('services.supabase.url');
-        $key = config('services.supabase.key');
+        $filename = 'documents/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
 
 
         $response = Http::withHeaders([
 
-            'Authorization' => 'Bearer '.$key,
+            'Authorization' => 'Bearer ' . config('services.supabase.key'),
 
-            'apikey' => $key,
+            'apikey' => config('services.supabase.key'),
 
             'Content-Type' => $file->getMimeType(),
 
-        ])->withBody(
+        ])
+        ->withBody(
 
             file_get_contents($file->getRealPath()),
 
             $file->getMimeType()
 
-        )->post(
+        )
+        ->post(
 
-            $url . '/storage/v1/object/task-documents/' . $filename
+            config('services.supabase.url')
+            . '/storage/v1/object/task-documents/'
+            . $filename
 
         );
 
@@ -39,14 +43,16 @@ class SupabaseStorageService
         if ($response->failed()) {
 
             throw new \Exception(
-                'Erreur Supabase : '.$response->body()
+                'Erreur Supabase : ' . $response->body()
             );
 
         }
 
 
-        return $url .
-            '/storage/v1/object/public/task-documents/' .
-            $filename;
+        return config('services.supabase.url')
+            . '/storage/v1/object/public/task-documents/'
+            . $filename;
+
     }
+
 }
