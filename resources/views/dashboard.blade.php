@@ -523,21 +523,64 @@
 
     <script>
         function toggleTaskForm() {
+
             const formContainer = document.getElementById('taskFormContainer');
             const btn = document.getElementById('btnToggleForm');
-            const currentView = "{{ $view }}";
-            let labelText = "+ Nouvelle tâche";
-            if (currentView === 'office') labelText += " (Mode Office)";
-            else if (currentView === 'master') labelText += " (Mode Master)";
 
-            if (formContainer.style.display === 'none') {
+            const form = document.getElementById('taskForm');
+
+
+            // Si on ouvre pour une nouvelle tâche
+            if(formContainer.style.display === 'none') {
+
+
+                // remettre le formulaire en mode création
+                form.action = "{{ route('tasks.store') }}";
+
+
+                document.getElementById('methodField').value = "POST";
+
+
+                document.getElementById('editTaskId').value = "";
+
+
+                // vider les champs
+                form.reset();
+
+
+                // vider Alpine
+                if(form._x_dataStack){
+
+                    let alpineData = form._x_dataStack[0];
+
+                    alpineData.selectedProject = '';
+
+                    alpineData.selectedCategory = '';
+
+                }
+
+
                 formContainer.style.display = 'block';
+
                 btn.innerHTML = '<span>✕ Fermer</span>';
-                formContainer.scrollIntoView({ behavior: 'smooth' });
+
+
+                formContainer.scrollIntoView({
+                    behavior:'smooth'
+                });
+
+
             } else {
+
+
                 formContainer.style.display = 'none';
-                btn.innerHTML = '<span>' + labelText + '</span>';
+
+
+                btn.innerHTML =
+                '<span>+ Nouvelle tâche (Mode Office)</span>';
+
             }
+
         }
     </script>
         
