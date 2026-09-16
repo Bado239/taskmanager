@@ -1640,10 +1640,12 @@ async function editTask(id) {
 
 
         // Passage en mode modification
-        document.getElementById('taskForm').action = "/tasks/" + id;
+        document.getElementById('taskForm').action =
+            "{{ url('/tasks') }}/" + id;
 
         document.getElementById('methodField').value = "PUT";
 
+        document.getElementById('editTaskId').value = id;
 
 
         // Récupérer Alpine

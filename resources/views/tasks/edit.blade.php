@@ -255,21 +255,46 @@
 
                 <div>
 
-
                     <label class="block text-sm font-medium text-gray-700">
-                        🔗 Lien document / cours
+                        🔗 Document actuel
                     </label>
 
 
-                    <input type="url"
-                           name="document_link"
-                           value="{{ old('document_link',$task->document_link) }}"
-                           class="mt-1 w-full rounded-md border-gray-300 shadow-sm"
-                           placeholder="https://...">
+                    @if($task->document_link)
+
+                        @php
+                            $documentUrl = str_starts_with($task->document_link, 'http')
+                                ? $task->document_link
+                                : config('services.supabase.url')
+                                    . '/storage/v1/object/public/task-documents/'
+                                    . $task->document_link;
+                        @endphp
+
+
+                        <a href="{{ $documentUrl }}"
+                        target="_blank"
+                        class="text-blue-600 underline block mt-2">
+
+                            📄 Ouvrir le document actuel
+
+                        </a>
+
+
+                    @else
+
+                        <p class="text-gray-500 mt-2">
+                            Aucun document associé
+                        </p>
+
+                    @endif
+
+
+                    <input type="hidden"
+                        name="document_link"
+                        value="{{ $task->document_link }}">
 
 
                 </div>
-
 
 
 
