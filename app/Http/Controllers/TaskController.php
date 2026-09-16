@@ -520,7 +520,7 @@ class TaskController extends Controller
 
             'heure_fin' => $request->end_time,
 
-            'type' => $request->type,
+            'type' => $task->type,
 
         ];
 
@@ -532,17 +532,18 @@ class TaskController extends Controller
         if($request->hasFile('document_file')){
 
 
-            $file = $request->file('document_file');
+            $storage = new SupabaseStorageService();
 
 
-            $path = $file->store('documents','public');
+            $documentLink = $storage->upload(
+                $request->file('document_file')
+            );
 
 
-            $data['document_link'] = $path;
+            $data['document_link'] = $documentLink;
 
 
         }
-
 
         $task->update($data);
 
