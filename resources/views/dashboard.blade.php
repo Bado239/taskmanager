@@ -457,12 +457,18 @@
                     📎 Document / Support de travail
                 </label>
 
-                <input 
+                <input
                     type="file"
                     name="document_file"
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
                     class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]"
                 >
+
+                <div id="oldDocument" class="mt-2 text-sm text-blue-600"></div>
+
+
+                <div id="document_actuel" class="mt-2 text-sm text-blue-600"></div>
+
 
                 <p class="text-xs text-gray-400 mt-1">
                     Formats acceptés : PDF, Word, Excel, PowerPoint, Images
@@ -1718,7 +1724,12 @@ async function editTask(id) {
         if(oldDocument){
 
             oldDocument.innerHTML = task.document_link
-                ? "📎 Document actuel : " + task.document_link
+                ? `
+                📎 Document actuel :
+                <a href="${task.document_link}" target="_blank" class="text-blue-600 underline">
+                    Ouvrir le document
+                </a>
+                `
                 : "";
 
         }
