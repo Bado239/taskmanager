@@ -56,9 +56,9 @@
 
 
             <form action="{{ route('tasks.update',$task->id) }}"
-                  method="POST"
-                  class="space-y-5">
-
+                method="POST"
+                enctype="multipart/form-data"
+                class="space-y-5">
 
                 @csrf
                 @method('PUT')
@@ -68,6 +68,14 @@
                 <input type="hidden"
                        name="type"
                        value="{{ $task->type ?? 'office' }}">
+
+                <input type="file"
+                    name="document_file"
+                    class="mt-3 w-full rounded-md border-gray-300 shadow-sm">
+
+                <p class="text-sm text-gray-500 mt-1">
+                Formats acceptés : PDF, Word, Excel, PowerPoint, Images
+                </p>
 
 
 
