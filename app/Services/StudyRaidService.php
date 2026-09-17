@@ -335,7 +335,7 @@ class StudyRaidService
 
 
 
-        // Retours propres
+        // Retours propres sans casser la structure du cours
 
         $text = preg_replace(
             "/[ \t]+/",
@@ -344,21 +344,22 @@ class StudyRaidService
         );
 
 
+        // Restaurer les paragraphes
 
         $text = preg_replace(
-            "/\n{3,}/",
+            "/\n\s*\n/",
             "\n\n",
             $text
         );
 
-        // Correction Markdown des titres
 
-        $text = str_replace(
-            '\#',
-            '',
+        // Garder les titres séparés
+
+        $text = preg_replace(
+            "/(## .+?)(?=\S)/",
+            "$1\n\n",
             $text
         );
-
 
         // Supprimer les doubles titres
         $text = str_replace(
@@ -454,7 +455,7 @@ class StudyRaidService
 
 
 
-        // Corriger les titres collés au texte
+        // Séparer les titres Markdown
 
         $text = preg_replace(
             '/(## [^\n]+)\s*/',
@@ -462,6 +463,14 @@ class StudyRaidService
             $text
         );
 
+
+        // Séparer les paragraphes après les phrases
+
+        $text = preg_replace(
+            '/([.!?])\s+(## )/',
+            "$1\n\n$2",
+            $text
+        );
 
 
         // Ajouter des sauts avant les sections
