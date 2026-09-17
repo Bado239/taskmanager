@@ -149,6 +149,31 @@ class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold">
 
 </button>
 
+@if($task->generatedCourse)
+
+<div class="bg-white rounded-2xl border shadow-sm p-6 mt-6">
+
+    <h2 class="text-2xl font-bold text-indigo-700 mb-4">
+        📖 Cours du chapitre
+    </h2>
+
+
+    <h3 class="text-xl font-semibold mb-4">
+        {{ $task->generatedCourse->title }}
+    </h3>
+
+
+    <div class="prose max-w-none text-gray-700 whitespace-pre-line">
+
+        {!! nl2br(e($task->generatedCourse->content)) !!}
+
+    </div>
+
+
+</div>
+
+@endif
+
 
 
 

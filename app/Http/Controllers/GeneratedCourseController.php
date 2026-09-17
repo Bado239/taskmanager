@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\GeneratedCourse;
-use App\Services\DocumentReaderService;
-use App\Services\AICourseGeneratorService;
+use App\Services\StudyRaidService;
 
 
 class GeneratedCourseController extends Controller
@@ -14,93 +13,54 @@ class GeneratedCourseController extends Controller
 
     public function generate(
         Task $task,
-        DocumentReaderService $reader,
-        AICourseGeneratorService $ai
+        StudyRaidService $studyRaid
     )
     {
-
-        // Charger les documents liés à la tâche
-        $task->load('learningDocuments');
-
-
-        $text = "";
-
-
-        // Lire les documents existants s'il y en a
-
-        foreach($task->learningDocuments as $document)
-        {
-
-            $content = $reader->read($document);
-
-
-            if($content)
-            {
-                $text .= "\n\n".$content;
-            }
-
-        }
-
-
-        // Si aucun document trouvé,
-        // on crée automatiquement le sujet du cours
-
-        if(strlen(trim($text)) < 100)
-        {
-
-            $text = "
-
-            Créer un cours complet de niveau Master 1 au Sénégal.
-
-            Matière :
-            ".$task->project->title."
-
-            Chapitre :
-            ".$task->title."
-
-            Le cours doit contenir :
-            - Introduction
-            - Définitions
-            - Concepts clés
-            - Développements détaillés
-            - Exemples appliqués au Sénégal
-            - Résumé
-            - Questions de révision
-
-            ";
-
-        }
-
 
 
         try {
 
 
-            $content = $ai->generate(
-
-                $text,
-
-                $task->project->title
-                .' - '
-                .$task->title
-
-            );
+            // Recherche du cours depuis StudyRaid
+            $content = $studyRaid->getCourse($task->title);
 
 
+
+            if(!$content)
+            {
+
+                return back()->with(
+
+                    'error',
+
+                    'Aucun cours trouvé pour ce chapitre.'
+
+                );
+
+            }
+
+
+
+            // Enregistrement du cours dans la base
 
             GeneratedCourse::updateOrCreate(
 
                 [
-                    'task_id'=>$task->id
+
+                    'task_id' => $task->id
+
                 ],
 
                 [
-                    'title'=>$task->title,
 
-                    'content'=>$content
+                    'title' => $task->title,
+
+                    'content' => $content
+
                 ]
 
             );
+
 
 
 
@@ -111,7 +71,7 @@ class GeneratedCourseController extends Controller
 
                 'error',
 
-                'Erreur génération IA : '.$e->getMessage()
+                'Erreur récupération cours : '.$e->getMessage()
 
             );
 
@@ -124,7 +84,7 @@ class GeneratedCourseController extends Controller
 
             'success',
 
-            'Cours généré avec succès.'
+            'Cours importé avec succès depuis StudyRaid.'
 
         );
 
