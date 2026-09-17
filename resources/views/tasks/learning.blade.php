@@ -137,7 +137,11 @@ Chapitre :
 
     <div class="text-gray-700 leading-8 whitespace-pre-line">
 
+        <div class="prose max-w-none">
+
         {!! nl2br(e($task->generatedCourse->content)) !!}
+
+</div>
 
     </div>
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use App\Models\GeneratedCourse;
 use App\Services\StudyRaidService;
+use App\Services\CourseFormatterService;
 
 
 class GeneratedCourseController extends Controller
@@ -13,7 +14,8 @@ class GeneratedCourseController extends Controller
 
     public function generate(
         Task $task,
-        StudyRaidService $studyRaid
+        StudyRaidService $studyRaid,
+        CourseFormatterService $formatter
     )
     {
 
@@ -23,6 +25,9 @@ class GeneratedCourseController extends Controller
 
             // Recherche du cours depuis StudyRaid
             $content = $studyRaid->getCourse($task->title);
+
+
+            $content = $formatter->format($content);
 
 
 
