@@ -351,14 +351,29 @@ class StudyRaidService
             $text
         );
 
-        // Correction des titres Markdown
+        // Correction Markdown des titres
 
-        $text = preg_replace(
-            '/##\s+/',
-            "\n\n## ",
+        $text = str_replace(
+            '\#',
+            '',
             $text
         );
 
+
+        // Supprimer les doubles titres
+        $text = str_replace(
+            '# ##',
+            '##',
+            $text
+        );
+
+
+        // Nettoyer les titres seuls
+        $text = preg_replace(
+            '/\s+##\s+/',
+            "\n\n## ",
+            $text
+        );
 
         // Ajouter espace après les titres
 
@@ -367,6 +382,50 @@ class StudyRaidService
             "$1\n\n$2",
             $text
         );
+
+        // Ajouter des espaces après les titres
+
+        $text = preg_replace(
+            '/(## [^\n]+)([A-ZÉÈÀÂÎÔÛ])/u',
+            "$1\n\n$2",
+            $text
+        );
+
+
+        // Corriger Note
+
+        $text = str_replace(
+            '# ## Note',
+            '> ### Note',
+            $text
+        );
+
+
+        // Supprimer les éléments restants
+
+        $remove = [
+
+            '- Définition générale',
+            '- Le périmètre concerné',
+            '- Les opérations financières',
+            '- Les fonctions financières',
+            '- Les principes fondamentaux',
+
+            '✨Create your course with AIfor free on any topic',
+
+            'on /2026',
+
+        ];
+
+
+        foreach($remove as $item)
+        {
+            $text = str_replace(
+                $item,
+                '',
+                $text
+            );
+        }
 
 
 
