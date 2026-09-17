@@ -26,6 +26,8 @@ class GeneratedCourseController extends Controller
         $text = "";
 
 
+        // Lire les documents existants s'il y en a
+
         foreach($task->learningDocuments as $document)
         {
 
@@ -40,17 +42,34 @@ class GeneratedCourseController extends Controller
         }
 
 
+        // Si aucun document trouvé,
+        // on crée automatiquement le sujet du cours
 
         if(strlen(trim($text)) < 100)
         {
 
-            return back()->with(
-                'error',
-                'Aucun contenu exploitable trouvé dans les documents.'
-            );
+            $text = "
+
+            Créer un cours complet de niveau Master 1 au Sénégal.
+
+            Matière :
+            ".$task->project->title."
+
+            Chapitre :
+            ".$task->title."
+
+            Le cours doit contenir :
+            - Introduction
+            - Définitions
+            - Concepts clés
+            - Développements détaillés
+            - Exemples appliqués au Sénégal
+            - Résumé
+            - Questions de révision
+
+            ";
 
         }
-
 
 
 
