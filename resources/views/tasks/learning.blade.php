@@ -186,9 +186,21 @@ Chapitre :
     </h3>
 
 
-    <div class="prose max-w-none text-gray-700 leading-8">
+    <div class="prose prose-blue max-w-none text-gray-700 leading-8 whitespace-normal">
 
-        {!! Str::markdown($task->generatedCourse->content) !!}
+        {!! Str::markdown(
+            preg_replace(
+                [
+                    '/(## [^\n]+)\s*/',
+                    '/(### [^\n]+)\s*/'
+                ],
+                [
+                    "$1\n\n",
+                    "$1\n\n"
+                ],
+                $task->generatedCourse->content
+            )
+        ) !!}
 
     </div>
 

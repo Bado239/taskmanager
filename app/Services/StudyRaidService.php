@@ -335,13 +335,6 @@ class StudyRaidService
 
 
 
-        // Retours propres sans casser la structure du cours
-
-        $text = preg_replace(
-            "/[ \t]+/",
-            " ",
-            $text
-        );
 
 
         // Restaurer les paragraphes
@@ -526,6 +519,70 @@ class StudyRaidService
         $text = preg_replace(
             '/(## [^\n]+)\s+/',
             "$1\n\n",
+            $text
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reconstruction du format cours
+        |--------------------------------------------------------------------------
+        */
+
+
+        // Séparer les titres
+
+        $text = preg_replace(
+            '/(##\s+[A-ZÉÈÀÂÎÔÛa-zéèàâîôû].*?)(?=##|$)/s',
+            "$1\n\n",
+            $text
+        );
+
+
+        // Ajouter retour après les titres principaux
+
+        $text = str_replace(
+            [
+                '## Définition générale',
+                '## Le périmètre concerné',
+                '## Les opérations financières',
+                '## Les fonctions financières',
+                '## Les principes fondamentaux'
+            ],
+            [
+                "\n\n## Définition générale\n\n",
+                "\n\n## Le périmètre concerné\n\n",
+                "\n\n## Les opérations financières\n\n",
+                "\n\n## Les fonctions financières\n\n",
+                "\n\n## Les principes fondamentaux\n\n"
+            ],
+            $text
+        );
+
+
+        // Corriger le bloc Note
+
+        $text = str_replace(
+            '> ### Note',
+            "\n\n> ### Note\n\n",
+            $text
+        );
+
+
+        // Mettre les listes sur plusieurs lignes
+
+        $text = str_replace(
+            ' - ',
+            "\n- ",
+            $text
+        );
+
+
+        // Nettoyage final
+
+        $text = preg_replace(
+            "/\n{3,}/",
+            "\n\n",
             $text
         );
 
