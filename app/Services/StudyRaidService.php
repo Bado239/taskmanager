@@ -45,6 +45,37 @@ class StudyRaidService
         // Conversion HTML vers texte
         $text = strip_tags($html);
 
+        
+        // Suppression des éléments inutiles StudyRaid
+
+        $remove = [
+            'open navigation menu',
+            'Créer un cours avec l\'IA',
+            'Poser une question',
+            'Créez votre premier cours',
+            'Commencer',
+            'Quiz',
+            'Résumé',
+            'Examen',
+            'Cartes mémoire',
+            'Jeu',
+            'Générer avec l\'IA',
+            'ProAudio',
+            'Vidéo',
+            'Illustration',
+            'Certification',
+        ];
+
+
+        foreach($remove as $item)
+        {
+            $text = str_replace($item, '', $text);
+        }
+
+
+        // Nettoyage espaces
+
+        $text = preg_replace('/\s+/', ' ', $text);
 
         // Décodage des caractères HTML
         $text = html_entity_decode($text);
