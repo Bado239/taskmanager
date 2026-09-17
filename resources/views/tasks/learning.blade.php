@@ -86,13 +86,20 @@ Chapitre :
     </div>
 
 
-    <button
-        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold">
+    <form method="POST"
+        action="{{ route('tasks.generate.course',$task->id) }}">
 
-        ✨ Générer le cours
+        @csrf
 
-    </button>
+        <button
+            type="submit"
+            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold">
 
+            ✨ Générer le cours
+
+        </button>
+
+    </form>
 
 </div>
 
