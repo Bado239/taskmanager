@@ -211,20 +211,143 @@ class StudyRaidService
 
 
 
-
         /*
         |--------------------------------------------------------------------------
-        | Nettoyage espaces
+        | Nettoyage intelligent du cours
         |--------------------------------------------------------------------------
         */
 
 
+        // Décodage HTML
+        $text = html_entity_decode(
+            $text,
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8'
+        );
+
+
+        // Supprimer les éléments StudyRaid
+
+        $remove = [
+
+            'Finances Publiques au Sénégal : Fondamentaux et Cadre Légal',
+            '10 sections',
+            '41 chapitres',
+            '0/4',
+
+            'open navigation menu',
+            'Créer un cours avec l\'IA',
+            'Poser une question',
+            'Créez votre premier cours',
+            'Commencer',
+
+            'Quiz',
+            'Résumé',
+            'Examen',
+            'Cartes mémoire',
+            'Jeu',
+
+            'Générer avec l\'IA',
+            'ProAudio',
+            'Vidéo',
+            'Illustration',
+
+            'Certification',
+
+            'Sur cette page',
+
+            'Dernière mise à jour',
+        ];
+
+
+        foreach($remove as $item)
+        {
+            $text = str_replace(
+                $item,
+                '',
+                $text
+            );
+        }
+
+
+
+        // Supprimer les compteurs StudyRaid
+
         $text = preg_replace(
-            '/[ \t]+/',
-            ' ',
+            '/\d+\/\d+/',
+            '',
             $text
         );
 
+
+
+        // Corriger les titres Markdown
+
+        $text = str_replace(
+            '\#',
+            '#',
+            $text
+        );
+
+
+
+        // Ajouter des retours avant les titres
+
+        $sections = [
+
+            '## Définition générale',
+
+            '## Le périmètre concerné',
+
+            '## Les opérations financières',
+
+            '## Les fonctions financières',
+
+            '## Les principes fondamentaux',
+
+        ];
+
+
+        foreach($sections as $section)
+        {
+
+            $text = str_replace(
+                $section,
+                "\n\n".$section."\n\n",
+                $text
+            );
+
+        }
+
+
+
+        // Ajouter retours après les titres
+
+        $text = preg_replace(
+            '/(## [^\n]+)\s+/',
+            "$1\n\n",
+            $text
+        );
+
+
+
+        // Nettoyage espaces
+
+        $text = preg_replace(
+            "/[ \t]+/",
+            " ",
+            $text
+        );
+
+
+        $text = preg_replace(
+            "/\n\s*\n\s*\n+/",
+            "\n\n",
+            $text
+        );
+
+
+        return trim($text);
 
         $text = preg_replace(
             '/\n\s*\n\s*\n+/',
