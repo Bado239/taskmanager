@@ -376,22 +376,13 @@ class StudyRaidService
             $text
         );
 
-        // Ajouter espace après les titres
+        // Correction des titres avec espaces artificiels
 
         $text = preg_replace(
-            '/(## [^\n]+)([A-ZÉÈÀÂÎÔÛ])/u',
-            "$1\n\n$2",
+            '/##\s+([A-ZÉÈÀÂÎÔÛ])\s+/u',
+            '## $1',
             $text
         );
-
-        // Ajouter des espaces après les titres
-
-        $text = preg_replace(
-            '/(## [^\n]+)([A-ZÉÈÀÂÎÔÛ])/u',
-            "$1\n\n$2",
-            $text
-        );
-
 
         // Corriger Note
 
@@ -518,6 +509,23 @@ class StudyRaidService
         $text = preg_replace(
             "/\n{3,}/",
             "\n\n",
+            $text
+        );
+
+        // Nettoyage des espaces dans les titres Markdown
+
+        $text = preg_replace(
+            '/##\s+([A-Za-zÀ-ÿ])\s+/u',
+            '## $1',
+            $text
+        );
+
+
+        // Forcer les retours après titres
+
+        $text = preg_replace(
+            '/(## [^\n]+)\s+/',
+            "$1\n\n",
             $text
         );
 
