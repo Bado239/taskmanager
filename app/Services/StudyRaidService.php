@@ -224,6 +224,14 @@ class StudyRaidService
 
         $remove = [
 
+            "Finances Publiques au Sénégal : Fondamentaux et Cadre Légal",
+
+            "10 sections",
+
+            "41 chapitres",
+
+            "0/4",
+
             "open navigation menu",
 
             "Créer un cours avec l'IA",
@@ -260,14 +268,31 @@ class StudyRaidService
 
             "Dernière mise à jour",
 
-            "Finances Publiques au Sénégal : Fondamentaux et Cadre Légal",
+            "Qu'est-ce que les finances publiques ?",
 
-            "10 sections",
+            "\# Définition et Périmètre des Finances Publiques",
 
-            "41 chapitres",
+            "Summary",
+
+            "Exam",
+
+            "Flashcards",
+
+            "Game",
+
+            "Generate with AI",
+
+            "Video",
+
+            "On this page",
+
+            "Next Chapter",
+
+            "Distinction finances publiques et finances privées",
+
+            "Last Updated",
 
         ];
-
 
 
 
@@ -323,6 +348,23 @@ class StudyRaidService
         $text = preg_replace(
             "/\n{3,}/",
             "\n\n",
+            $text
+        );
+
+        // Correction des titres Markdown
+
+        $text = preg_replace(
+            '/##\s+/',
+            "\n\n## ",
+            $text
+        );
+
+
+        // Ajouter espace après les titres
+
+        $text = preg_replace(
+            '/(## [^\n]+)([A-ZÉÈÀÂÎÔÛ])/u',
+            "$1\n\n$2",
             $text
         );
 
