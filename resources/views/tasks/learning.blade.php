@@ -69,6 +69,58 @@ Chapitre :
 
 </div>
 
+<!-- GENERATION COURS IA -->
+
+<div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 shadow-sm p-6">
+
+    <h2 class="text-xl font-bold mb-3 text-purple-800">
+        🤖 Générer mon cours avec l'IA
+    </h2>
+
+
+    <p class="text-gray-700 mb-4">
+        L'IA va préparer un cours adapté à votre chapitre.
+    </p>
+
+
+    <div class="bg-white rounded-xl p-4 mb-4">
+
+        <p>
+            📚 Sujet :
+            <strong>
+                {{ $task->title }}
+            </strong>
+        </p>
+
+
+        <p>
+            🎓 Niveau :
+            <strong>
+                Master 1 - Sénégal
+            </strong>
+        </p>
+
+    </div>
+
+
+    <form method="POST"
+        action="{{ route('tasks.generate.course',$task->id) }}">
+
+        @csrf
+
+        <button
+            type="submit"
+            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-bold">
+
+            ✨ Générer le cours
+
+        </button>
+
+    </form>
+
+</div>
+
+
 @if($task->generatedCourse)
 
 <div class="bg-white rounded-2xl border shadow-sm p-6 mt-6">
@@ -93,6 +145,33 @@ Chapitre :
 </div>
 
 @endif
+
+@if($task->generatedCourse)
+
+<div class="bg-white rounded-2xl border shadow-sm p-6 mt-6">
+
+    <h2 class="text-2xl font-bold text-indigo-700 mb-5">
+        📖 Cours du chapitre
+    </h2>
+
+
+    <h3 class="text-xl font-semibold mb-4">
+        {{ $task->generatedCourse->title }}
+    </h3>
+
+
+    <div class="text-gray-700 leading-8 whitespace-pre-line">
+
+        {!! nl2br(e($task->generatedCourse->content)) !!}
+
+    </div>
+
+
+</div>
+
+@endif
+
+
 
 <!-- DOCUMENTS PERSONNELS -->
 
