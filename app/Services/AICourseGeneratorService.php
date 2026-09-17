@@ -65,9 +65,8 @@ $text
 
         ->post(
 
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key='
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='
         .config('services.gemini.key'),
-
 
         [
 
@@ -106,11 +105,10 @@ $text
         {
 
             throw new \Exception(
-                $response->body()
+                "Service IA indisponible. Veuillez réessayer dans quelques instants."
             );
 
         }
-
 
 
         return $response
