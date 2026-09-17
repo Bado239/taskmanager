@@ -124,6 +124,57 @@ Chapitre :
 @if($task->generatedCourse)
 
 <div class="bg-white rounded-2xl border shadow-sm p-6 mt-6">
+    <style>
+
+        .prose h2 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #1e40af;
+            margin-top: 35px;
+            margin-bottom: 15px;
+        }
+
+
+        .prose h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #374151;
+            margin-top: 25px;
+            margin-bottom: 10px;
+        }
+
+
+        .prose p {
+            margin-bottom: 18px;
+            line-height: 1.9;
+        }
+
+
+        .prose ul {
+            list-style-type: disc;
+            margin-left: 30px;
+            margin-bottom:20px;
+        }
+
+
+        .prose ol {
+            list-style-type: decimal;
+            margin-left:30px;
+        }
+
+
+        .prose blockquote {
+
+            border-left:5px solid #2563eb;
+            background:#eff6ff;
+            padding:15px;
+            border-radius:10px;
+            margin:20px 0;
+
+        }
+
+
+    </style>
 
     <h2 class="text-2xl font-bold text-indigo-700 mb-5">
         📖 Cours du chapitre
@@ -135,16 +186,11 @@ Chapitre :
     </h3>
 
 
-    <div class="text-gray-700 leading-8 whitespace-pre-line">
+    <div class="prose max-w-none text-gray-700 leading-8">
 
-        <div class="prose max-w-none">
-
-        {!! nl2br(e($task->generatedCourse->content)) !!}
-
-</div>
+        {!! Str::markdown($task->generatedCourse->content) !!}
 
     </div>
-
 
 </div>
 
