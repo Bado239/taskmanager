@@ -427,6 +427,91 @@ class StudyRaidService
             );
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Mise en forme finale du cours
+        |--------------------------------------------------------------------------
+        */
+
+
+        // Supprimer les antislash devant Markdown
+
+        $text = str_replace(
+            ['\#','\\'],
+            '',
+            $text
+        );
+
+
+
+        // Supprimer le grand titre StudyRaid
+
+        $text = str_replace(
+            'Définition et Périmètre des Finances Publiques',
+            '',
+            $text
+        );
+
+
+
+        // Corriger les titres collés au texte
+
+        $text = preg_replace(
+            '/(## [^\n]+)\s*/',
+            "$1\n\n",
+            $text
+        );
+
+
+
+        // Ajouter des sauts avant les sections
+
+        $sections = [
+
+            '## Définition générale',
+
+            '## Le périmètre concerné',
+
+            '## Les opérations financières',
+
+            '## Les fonctions financières',
+
+            '## Les principes fondamentaux',
+
+        ];
+
+
+        foreach($sections as $section)
+        {
+
+            $text = str_replace(
+                $section,
+                "\n\n".$section."\n\n",
+                $text
+            );
+
+        }
+
+
+
+        // Corriger le bloc Note
+
+        $text = str_replace(
+            '### Note',
+            "\n\n> ### Note\n\n",
+            $text
+        );
+
+
+
+        // Nettoyage final
+
+        $text = preg_replace(
+            "/\n{3,}/",
+            "\n\n",
+            $text
+        );
+
 
 
         return trim($text);
