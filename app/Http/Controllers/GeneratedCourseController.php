@@ -24,7 +24,7 @@ class GeneratedCourseController extends Controller
 
 
             // Recherche du cours depuis StudyRaid
-            $content = $studyRaid->getCourse($task->title);
+            $content = $studyRaid->getCourse($task);
 
 
             $content = $formatter->format($content);

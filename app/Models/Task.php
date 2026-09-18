@@ -87,5 +87,12 @@ class Task extends Model
 
     }
 
+    public function studyRaidSource()
+    {
+        return $this->hasOne(
+            StudyRaidSource::class
+        );
+    }
+
 
 }

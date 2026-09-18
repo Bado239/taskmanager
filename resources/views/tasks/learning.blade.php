@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@php
+use League\CommonMark\CommonMarkConverter;
+@endphp
+
 @section('content')
 
 @if(session('success'))
@@ -186,24 +190,71 @@ Chapitre :
     </h3>
 
 
-    <div class="prose prose-blue max-w-none text-gray-700 leading-8 whitespace-normal">
+@php
 
-        {!! Str::markdown(
-            preg_replace(
-                [
-                    '/(## [^\n]+)\s*/',
-                    '/(### [^\n]+)\s*/'
-                ],
-                [
-                    "$1\n\n",
-                    "$1\n\n"
-                ],
-                $task->generatedCourse->content
-            )
-        ) !!}
+$content = $task->generatedCourse->content;
 
-    </div>
 
+/*
+Correction automatique Markdown
+*/
+
+$content = preg_replace(
+    '/(## .*?)(?=[A-ZÉÈÀÂÎÔÛ])/u',
+    "$1\n\n",
+    $content
+);
+
+
+$content = preg_replace(
+    '/(### .*?)(?=[A-ZÉÈÀÂÎÔÛ])/u',
+    "$1\n\n",
+    $content
+);
+
+
+$converter = new CommonMarkConverter();
+
+
+$htmlCourse = $converter->convert($content);
+
+
+@endphp
+
+
+
+<!-- SOMMAIRE -->
+
+<div class="bg-indigo-50 rounded-xl p-5 mb-8">
+
+
+<h3 class="text-lg font-bold text-indigo-700 mb-3">
+📚 Sommaire du chapitre
+</h3>
+
+
+<ul id="courseMenu"
+class="space-y-2 text-blue-700">
+
+</ul>
+
+
+</div>
+
+
+
+
+
+<!-- COURS -->
+
+<div id="courseContent"
+class="prose prose-lg max-w-none text-gray-700 leading-8">
+
+
+{!! $htmlCourse !!}
+
+
+</div>
 </div>
 
 @endif
@@ -516,6 +567,57 @@ class="text-red-600 font-bold ml-3">
 
 
 </div>
+
+<script>
+
+document.addEventListener(
+"DOMContentLoaded",
+function(){
+
+
+let menu=document.getElementById(
+"courseMenu"
+);
+
+
+let titles=document.querySelectorAll(
+"#courseContent h2"
+);
+
+
+
+titles.forEach(function(title,index){
+
+
+let id="chapitre-"+index;
+
+
+title.id=id;
+
+
+let li=document.createElement("li");
+
+
+li.innerHTML=
+`
+<a href="#${id}"
+class="hover:underline">
+
+📖 ${title.innerText}
+
+</a>
+`;
+
+
+menu.appendChild(li);
+
+
+});
+
+
+});
+
+</script>
 
 
 @endsection

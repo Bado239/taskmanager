@@ -3,39 +3,51 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use DOMDocument;
-use DOMXPath;
+use App\Models\Task;
 
 
 class StudyRaidService
 {
 
-
-    public function getCourse($title)
+    public function getCourse(Task $task)
     {
 
 
-        $courses = [
-
-            "Généralités sur les finances publiques" =>
-            "https://app.studyraid.com/fr/read/122635/5696968/quest-que-les-finances-publiques",
-
-        ];
-
+        /*
+        |--------------------------------------------------------------------------
+        | Récupération automatique de la source StudyRaid
+        |--------------------------------------------------------------------------
+        */
 
 
-        if (!isset($courses[$title])) {
+        $source = $task->studyRaidSource;
+
+
+        if(!$source)
+        {
             return null;
         }
 
 
 
+        $url = $source->url;
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Chargement de la page StudyRaid
+        |--------------------------------------------------------------------------
+        */
+
+
         $response = Http::timeout(30)
-            ->get($courses[$title]);
+            ->get($url);
 
 
 
-        if (!$response->successful()) {
+        if(!$response->successful())
+        {
             return null;
         }
 
@@ -45,11 +57,13 @@ class StudyRaidService
 
 
 
+
         /*
         |--------------------------------------------------------------------------
         | Nettoyage HTML
         |--------------------------------------------------------------------------
         */
+
 
         $html = preg_replace(
             '/<script\b[^>]*>(.*?)<\/script>/is',
@@ -69,73 +83,25 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Extraction DOM
+        | Extraction du contenu principal
         |--------------------------------------------------------------------------
         */
 
 
-        libxml_use_internal_errors(true);
-
-
-        $dom = new DOMDocument();
-
-        $dom->loadHTML(
-            '<?xml encoding="UTF-8">'.$html
+        preg_match(
+            '/<article.*?>(.*?)<\/article>/is',
+            $html,
+            $match
         );
 
 
-        $xpath = new DOMXPath($dom);
-
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Chercher le vrai contenu article
-        |--------------------------------------------------------------------------
-        */
-
-
-        $content = '';
-
-
-
-        $articles = $xpath->query(
-            "//article"
-        );
-
-
-
-        if($articles->length > 0)
+        if(isset($match[1]))
         {
-
-            foreach($articles as $article)
-            {
-                $content .= $dom->saveHTML($article);
-            }
-
+            $content = $match[1];
         }
         else
         {
-
-            $main = $xpath->query("//main");
-
-
-            if($main->length > 0)
-            {
-                foreach($main as $node)
-                {
-                    $content .= $dom->saveHTML($node);
-                }
-            }
-
-        }
-
-
-
-
-        if(empty($content))
-        {
-            return null;
+            $content = $html;
         }
 
 
@@ -143,20 +109,12 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Garder les balises utiles
+        | Conversion HTML vers Markdown
         |--------------------------------------------------------------------------
         */
 
 
-        $content = preg_replace(
-            '/<(script|style).*?<\/\1>/is',
-            '',
-            $content
-        );
-
-
-
-        // titres
+        // titres niveau 2
 
         $content = preg_replace(
             '/<h2[^>]*>(.*?)<\/h2>/is',
@@ -164,6 +122,9 @@ class StudyRaidService
             $content
         );
 
+
+
+        // titres niveau 3
 
         $content = preg_replace(
             '/<h3[^>]*>(.*?)<\/h3>/is',
@@ -217,12 +178,13 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Nettoyage StudyRaid
+        | Suppression éléments StudyRaid
         |--------------------------------------------------------------------------
         */
 
 
         $remove = [
+
 
             "Finances Publiques au Sénégal : Fondamentaux et Cadre Légal",
 
@@ -230,47 +192,6 @@ class StudyRaidService
 
             "41 chapitres",
 
-            "0/4",
-
-            "open navigation menu",
-
-            "Créer un cours avec l'IA",
-
-            "Poser une question",
-
-            "Créez votre premier cours",
-
-            "Commencer",
-
-            "Quiz",
-
-            "Résumé",
-
-            "Examen",
-
-            "Cartes mémoire",
-
-            "Jeu",
-
-            "Générer avec l'IA",
-
-            "ProAudio",
-
-            "Vidéo",
-
-            "Illustration",
-
-            "Certification",
-
-            "Sur cette page",
-
-            "Chapitre Suivant",
-
-            "Dernière mise à jour",
-
-            "Qu'est-ce que les finances publiques ?",
-
-            "\# Définition et Périmètre des Finances Publiques",
 
             "Summary",
 
@@ -288,19 +209,27 @@ class StudyRaidService
 
             "Next Chapter",
 
-            "Distinction finances publiques et finances privées",
-
             "Last Updated",
+
+
+            "Créer un cours avec l'IA",
+
+            "Poser une question",
+
+            "Générer avec l'IA",
+
+
+            "Certification",
 
         ];
 
 
 
-        foreach($remove as $word)
+        foreach($remove as $item)
         {
 
             $text = str_replace(
-                $word,
+                $item,
                 '',
                 $text
             );
@@ -310,9 +239,10 @@ class StudyRaidService
 
 
 
+
         /*
         |--------------------------------------------------------------------------
-        | Correction Markdown
+        | Nettoyage Markdown final
         |--------------------------------------------------------------------------
         */
 
@@ -325,260 +255,17 @@ class StudyRaidService
 
 
 
-        // supprimer compteurs 0/4
+        // supprimer espaces inutiles
 
         $text = preg_replace(
-            '/\d+\/\d+/',
-            '',
+            "/[ \t]+/",
+            " ",
             $text
         );
 
 
 
-
-
-        // Restaurer les paragraphes
-
-        $text = preg_replace(
-            "/\n\s*\n/",
-            "\n\n",
-            $text
-        );
-
-
-        // Garder les titres séparés
-
-        $text = preg_replace(
-            "/(## .+?)(?=\S)/",
-            "$1\n\n",
-            $text
-        );
-
-        // Supprimer les doubles titres
-        $text = str_replace(
-            '# ##',
-            '##',
-            $text
-        );
-
-
-        // Nettoyer les titres seuls
-        $text = preg_replace(
-            '/\s+##\s+/',
-            "\n\n## ",
-            $text
-        );
-
-        // Correction des titres avec espaces artificiels
-
-        $text = preg_replace(
-            '/##\s+([A-ZÉÈÀÂÎÔÛ])\s+/u',
-            '## $1',
-            $text
-        );
-
-        // Corriger Note
-
-        $text = str_replace(
-            '# ## Note',
-            '> ### Note',
-            $text
-        );
-
-
-        // Supprimer les éléments restants
-
-        $remove = [
-
-            '- Définition générale',
-            '- Le périmètre concerné',
-            '- Les opérations financières',
-            '- Les fonctions financières',
-            '- Les principes fondamentaux',
-
-            '✨Create your course with AIfor free on any topic',
-
-            'on /2026',
-
-        ];
-
-
-        foreach($remove as $item)
-        {
-            $text = str_replace(
-                $item,
-                '',
-                $text
-            );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Mise en forme finale du cours
-        |--------------------------------------------------------------------------
-        */
-
-
-        // Supprimer les antislash devant Markdown
-
-        $text = str_replace(
-            ['\#','\\'],
-            '',
-            $text
-        );
-
-
-
-        // Supprimer le grand titre StudyRaid
-
-        $text = str_replace(
-            'Définition et Périmètre des Finances Publiques',
-            '',
-            $text
-        );
-
-
-
-        // Séparer les titres Markdown
-
-        $text = preg_replace(
-            '/(## [^\n]+)\s*/',
-            "$1\n\n",
-            $text
-        );
-
-
-        // Séparer les paragraphes après les phrases
-
-        $text = preg_replace(
-            '/([.!?])\s+(## )/',
-            "$1\n\n$2",
-            $text
-        );
-
-
-        // Ajouter des sauts avant les sections
-
-        $sections = [
-
-            '## Définition générale',
-
-            '## Le périmètre concerné',
-
-            '## Les opérations financières',
-
-            '## Les fonctions financières',
-
-            '## Les principes fondamentaux',
-
-        ];
-
-
-        foreach($sections as $section)
-        {
-
-            $text = str_replace(
-                $section,
-                "\n\n".$section."\n\n",
-                $text
-            );
-
-        }
-
-
-
-        // Corriger le bloc Note
-
-        $text = str_replace(
-            '### Note',
-            "\n\n> ### Note\n\n",
-            $text
-        );
-
-
-
-        // Nettoyage final
-
-        $text = preg_replace(
-            "/\n{3,}/",
-            "\n\n",
-            $text
-        );
-
-        // Nettoyage des espaces dans les titres Markdown
-
-        $text = preg_replace(
-            '/##\s+([A-Za-zÀ-ÿ])\s+/u',
-            '## $1',
-            $text
-        );
-
-
-        // Forcer les retours après titres
-
-        $text = preg_replace(
-            '/(## [^\n]+)\s+/',
-            "$1\n\n",
-            $text
-        );
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Reconstruction du format cours
-        |--------------------------------------------------------------------------
-        */
-
-
-        // Séparer les titres
-
-        $text = preg_replace(
-            '/(##\s+[A-ZÉÈÀÂÎÔÛa-zéèàâîôû].*?)(?=##|$)/s',
-            "$1\n\n",
-            $text
-        );
-
-
-        // Ajouter retour après les titres principaux
-
-        $text = str_replace(
-            [
-                '## Définition générale',
-                '## Le périmètre concerné',
-                '## Les opérations financières',
-                '## Les fonctions financières',
-                '## Les principes fondamentaux'
-            ],
-            [
-                "\n\n## Définition générale\n\n",
-                "\n\n## Le périmètre concerné\n\n",
-                "\n\n## Les opérations financières\n\n",
-                "\n\n## Les fonctions financières\n\n",
-                "\n\n## Les principes fondamentaux\n\n"
-            ],
-            $text
-        );
-
-
-        // Corriger le bloc Note
-
-        $text = str_replace(
-            '> ### Note',
-            "\n\n> ### Note\n\n",
-            $text
-        );
-
-
-        // Mettre les listes sur plusieurs lignes
-
-        $text = str_replace(
-            ' - ',
-            "\n- ",
-            $text
-        );
-
-
-        // Nettoyage final
+        // conserver les paragraphes
 
         $text = preg_replace(
             "/\n{3,}/",
@@ -590,8 +277,6 @@ class StudyRaidService
 
         return trim($text);
 
-
     }
-
 
 }
