@@ -32,6 +32,12 @@ COPY . .
 
 # 5. Installation de Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+RUN mkdir -p bootstrap/cache \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    && chmod -R 775 storage bootstrap/cache
+
 RUN composer install --no-dev --optimize-autoloader
 
 # 6. COMPILATION DE TAILWIND CSS (Crucial pour ton design !)
