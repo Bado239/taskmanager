@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-
 use App\Models\Task;
 use App\Models\StudyRaidSource;
-
 
 
 class StudyRaidAutoAssignService
@@ -18,15 +16,60 @@ class StudyRaidAutoAssignService
 
         /*
         |--------------------------------------------------------------------------
-        | Vérifier que c'est une tâche Master
+        | Vérifier si déjà associé
         |--------------------------------------------------------------------------
         */
 
 
-        if($task->type !== 'master')
+        if($task->studyRaidSource)
         {
-            return false;
+            return true;
         }
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Matière
+        |--------------------------------------------------------------------------
+        */
+
+
+        $subject = trim($task->project_name);
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Niveau par défaut
+        |--------------------------------------------------------------------------
+        */
+
+
+        $level = "Master 1";
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Normalisation du titre
+        |--------------------------------------------------------------------------
+        */
+
+
+        $title = trim(
+            preg_replace(
+                '/\s+/',
+                ' ',
+                $task->title
+            )
+        );
+
+
 
 
 
@@ -38,17 +81,36 @@ class StudyRaidAutoAssignService
         */
 
 
-        $source = StudyRaidSource::findByTitle(
-            $task->title
-        );
+        $source = StudyRaidSource::where(
+                'active',
+                true
+            )
 
+            ->whereRaw(
+                'LOWER(title) LIKE ?',
+                [
+                    '%'.mb_strtolower($title).'%'
+                ]
+            )
 
+            ->where(function($query) use ($subject){
 
+                $query
+                    ->where('subject',$subject)
+                    ->orWhereNull('subject');
 
-        if(!$source)
-        {
-            return false;
-        }
+            })
+
+            ->where(function($query) use ($level){
+
+                $query
+                    ->where('level',$level)
+                    ->orWhereNull('level');
+
+            })
+
+            ->first();
+
 
 
 
@@ -56,7 +118,26 @@ class StudyRaidAutoAssignService
 
         /*
         |--------------------------------------------------------------------------
-        | Association source <-> tâche
+        | Aucune source trouvée
+        |--------------------------------------------------------------------------
+        */
+
+
+        if(!$source)
+        {
+
+            return false;
+
+        }
+
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Association source → tâche
         |--------------------------------------------------------------------------
         */
 
@@ -70,6 +151,15 @@ class StudyRaidAutoAssignService
 
 
 
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Association tâche → source
+        |--------------------------------------------------------------------------
+        */
+
+
         $task->update([
 
             'study_raid_source_id'=>$source->id
@@ -80,10 +170,12 @@ class StudyRaidAutoAssignService
 
 
 
+
         return true;
 
 
     }
+
 
 
 }
