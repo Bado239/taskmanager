@@ -19,12 +19,41 @@ class GeneratedCourseController extends Controller
     )
     {
 
-
         try {
 
 
-            // Recherche du cours depuis StudyRaid
+            /*
+            |--------------------------------------------------------------------------
+            | Récupération du cours depuis StudyRaid
+            |--------------------------------------------------------------------------
+            */
+
+
             $content = $studyRaid->getCourse($task);
+
+
+
+            if(!$content)
+            {
+
+                return back()->with(
+
+                    'error',
+
+                    'Aucun cours StudyRaid trouvé pour ce chapitre.'
+
+                );
+
+            }
+
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Transformation en vrai cours Markdown
+            |--------------------------------------------------------------------------
+            */
 
 
             $content = $formatter->format($content);
@@ -38,7 +67,7 @@ class GeneratedCourseController extends Controller
 
                     'error',
 
-                    'Aucun cours trouvé pour ce chapitre.'
+                    'Le formatage du cours a échoué.'
 
                 );
 
@@ -46,19 +75,25 @@ class GeneratedCourseController extends Controller
 
 
 
-            // Enregistrement du cours dans la base
+
+            /*
+            |--------------------------------------------------------------------------
+            | Enregistrement du cours
+            |--------------------------------------------------------------------------
+            */
+
 
             GeneratedCourse::updateOrCreate(
 
                 [
 
-                    'task_id' => $task->id
+                    'task_id' => $task->getKey()
 
                 ],
 
                 [
 
-                    'title' => $task->title,
+                    'title' => $task->getAttribute('title'),
 
                     'content' => $content
 
@@ -68,8 +103,9 @@ class GeneratedCourseController extends Controller
 
 
 
-
-        } catch(\Exception $e) {
+        }
+        catch(\Exception $e)
+        {
 
 
             return back()->with(
@@ -82,6 +118,7 @@ class GeneratedCourseController extends Controller
 
 
         }
+
 
 
 

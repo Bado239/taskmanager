@@ -15,7 +15,7 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Récupération automatique de la source StudyRaid
+        | Récupération automatique source StudyRaid
         |--------------------------------------------------------------------------
         */
 
@@ -23,7 +23,7 @@ class StudyRaidService
         $source = $task->studyRaidSource;
 
 
-        if(!$source)
+        if(!$source || !$source->active)
         {
             return null;
         }
@@ -36,7 +36,7 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Chargement de la page StudyRaid
+        | Chargement StudyRaid
         |--------------------------------------------------------------------------
         */
 
@@ -54,7 +54,6 @@ class StudyRaidService
 
 
         $html = $response->body();
-
 
 
 
@@ -83,7 +82,7 @@ class StudyRaidService
 
         /*
         |--------------------------------------------------------------------------
-        | Extraction du contenu principal
+        | Extraction contenu principal
         |--------------------------------------------------------------------------
         */
 
@@ -114,7 +113,7 @@ class StudyRaidService
         */
 
 
-        // titres niveau 2
+        // Titres H2
 
         $content = preg_replace(
             '/<h2[^>]*>(.*?)<\/h2>/is',
@@ -124,7 +123,7 @@ class StudyRaidService
 
 
 
-        // titres niveau 3
+        // Titres H3
 
         $content = preg_replace(
             '/<h3[^>]*>(.*?)<\/h3>/is',
@@ -134,7 +133,7 @@ class StudyRaidService
 
 
 
-        // paragraphes
+        // Paragraphes
 
         $content = preg_replace(
             '/<p[^>]*>(.*?)<\/p>/is',
@@ -144,7 +143,7 @@ class StudyRaidService
 
 
 
-        // listes
+        // Listes
 
         $content = preg_replace(
             '/<li[^>]*>(.*?)<\/li>/is',
@@ -175,7 +174,6 @@ class StudyRaidService
 
 
 
-
         /*
         |--------------------------------------------------------------------------
         | Suppression éléments StudyRaid
@@ -186,12 +184,17 @@ class StudyRaidService
         $remove = [
 
 
+            // Titres StudyRaid
+
             "Finances Publiques au Sénégal : Fondamentaux et Cadre Légal",
 
-            "10 sections",
+            "Définition et Périmètre des Finances Publiques",
 
-            "41 chapitres",
+            "Qu'est-ce que les finances publiques ?",
 
+
+
+            // Menus
 
             "Summary",
 
@@ -205,12 +208,22 @@ class StudyRaidService
 
             "Video",
 
-            "On this page",
+            "ProAudio",
 
-            "Next Chapter",
+            "Illustration",
 
-            "Last Updated",
+            "Quiz",
 
+            "Résumé",
+
+            "Examen",
+
+            "Cartes mémoire",
+
+            "Jeu",
+
+
+            // IA StudyRaid
 
             "Créer un cours avec l'IA",
 
@@ -218,10 +231,37 @@ class StudyRaidService
 
             "Générer avec l'IA",
 
+            "Create your course with AI for free on any topic",
+
+
+
+            // Navigation
+
+            "On this page",
+
+            "Sur cette page",
+
+            "Next Chapter",
+
+            "Chapitre Suivant",
+
+            "Last Updated",
+
+            "Dernière mise à jour",
+
+
+            // Certification
 
             "Certification",
 
+
+            // Autres
+
+            "Distinction finances publiques et finances privées",
+
         ];
+
+
 
 
 
@@ -240,12 +280,54 @@ class StudyRaidService
 
 
 
+
         /*
         |--------------------------------------------------------------------------
-        | Nettoyage Markdown final
+        | Suppression automatique des parasites
         |--------------------------------------------------------------------------
         */
 
+
+        // Supprime les compteurs 0/4, 1/10...
+
+        $text = preg_replace(
+            '/\d+\/\d+/',
+            '',
+            $text
+        );
+
+
+
+        // Supprime les dates StudyRaid
+
+        $text = preg_replace(
+            '/on\s+\d{1,2}\/\d{1,2}\/\d{4}/',
+            '',
+            $text
+        );
+
+
+
+        // Supprime lignes de sommaire
+
+        $text = preg_replace(
+            '/-\s*(Définition générale|Le périmètre concerné|Les opérations financières|Les fonctions financières|Les principes fondamentaux)/',
+            '',
+            $text
+        );
+
+
+
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Nettoyage Markdown
+        |--------------------------------------------------------------------------
+        */
+
+
+        // Corrige les #
 
         $text = str_replace(
             '\#',
@@ -255,7 +337,7 @@ class StudyRaidService
 
 
 
-        // supprimer espaces inutiles
+        // Supprime espaces multiples
 
         $text = preg_replace(
             "/[ \t]+/",
@@ -265,7 +347,47 @@ class StudyRaidService
 
 
 
-        // conserver les paragraphes
+        // Sépare correctement les titres
+
+        $text = preg_replace(
+            '/(## [^\n]+)\s*/',
+            "$1\n\n",
+            $text
+        );
+
+
+
+        // Sépare les paragraphes
+
+        $text = preg_replace(
+            '/([.!?])\s+(## )/',
+            "$1\n\n$2",
+            $text
+        );
+
+
+
+        // Listes propres
+
+        $text = str_replace(
+            " - ",
+            "\n- ",
+            $text
+        );
+
+
+
+        // Note Markdown
+
+        $text = str_replace(
+            "### Note",
+            "\n\n> ### Note\n\n",
+            $text
+        );
+
+
+
+        // Nettoyage lignes vides
 
         $text = preg_replace(
             "/\n{3,}/",
@@ -276,6 +398,7 @@ class StudyRaidService
 
 
         return trim($text);
+
 
     }
 
