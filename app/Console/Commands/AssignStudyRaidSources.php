@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Task;
 use App\Models\StudyRaidSource;
 
+
 class AssignStudyRaidSources extends Command
 {
 
@@ -17,44 +18,97 @@ class AssignStudyRaidSources extends Command
     public function handle()
     {
 
+        $this->info("Début de l'association StudyRaid...");
+
+
         $tasks = Task::where('type','master')->get();
+
+
+        $count = 0;
 
 
         foreach($tasks as $task)
         {
 
 
-            $source = StudyRaidSource::where(
-                'title',
-                $task->title
-            )->first();
-
-
-
-            if($source)
+            if($task->study_raid_source_id)
             {
 
-                $task->update([
-
-                    'study_raid_source_id'=>$source->id
-
-                ]);
-
-
-                $this->info(
-                    "Associé : ".$task->title
+                $this->line(
+                    "Déjà associé : ".$task->title
                 );
+
+                continue;
 
             }
 
 
+
+            $source = StudyRaidSource::whereRaw(
+                    'LOWER(title) LIKE ?',
+                    [
+                        '%'.mb_strtolower($task->title).'%'
+                    ]
+                )
+
+                ->where(function($query) use ($task){
+
+                    $query
+                        ->where('subject',$task->project_name)
+                        ->orWhereNull('subject');
+
+                })
+
+                ->first();
+
+
+
+            if(!$source)
+            {
+
+                $this->warn(
+                    "Aucune source trouvée : ".$task->title
+                );
+
+                continue;
+
+            }
+
+
+
+            $task->update([
+
+                'study_raid_source_id'=>$source->id
+
+            ]);
+
+
+
+            $source->update([
+
+                'task_id'=>$task->id
+
+            ]);
+
+
+
+            $count++;
+
+
+            $this->info(
+                "Associé : ".$task->title
+            );
+
         }
 
 
+
         $this->info(
-            "Association terminée."
+            "Association terminée. Total : ".$count
         );
 
+
+        return Command::SUCCESS;
 
     }
 
