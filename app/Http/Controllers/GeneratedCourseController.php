@@ -6,6 +6,7 @@ use App\Models\Task;
 use App\Models\GeneratedCourse;
 use App\Services\StudyRaidService;
 use App\Services\CourseFormatterService;
+use App\Services\StudyRaidAutoAssignService;
 
 
 class GeneratedCourseController extends Controller
@@ -15,7 +16,8 @@ class GeneratedCourseController extends Controller
     public function generate(
         Task $task,
         StudyRaidService $studyRaid,
-        CourseFormatterService $formatter
+        CourseFormatterService $formatter,
+        StudyRaidAutoAssignService $autoAssign
     )
     {
 
@@ -24,7 +26,41 @@ class GeneratedCourseController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Récupération du cours depuis StudyRaid
+            | Vérifier et créer automatiquement la liaison StudyRaid
+            |--------------------------------------------------------------------------
+            */
+
+
+            if(!$task->studyRaidSource)
+            {
+
+                $autoAssign->assign($task);
+
+                $task->refresh();
+
+            }
+
+
+
+            if(!$task->studyRaidSource)
+            {
+
+                return back()->with(
+
+                    'error',
+
+                    'Aucune source StudyRaid trouvée pour ce chapitre.'
+
+                );
+
+            }
+
+
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Récupération du cours StudyRaid
             |--------------------------------------------------------------------------
             */
 
@@ -40,7 +76,7 @@ class GeneratedCourseController extends Controller
 
                     'error',
 
-                    'Aucun cours StudyRaid trouvé pour ce chapitre.'
+                    'Impossible de récupérer le cours StudyRaid.'
 
                 );
 
@@ -51,7 +87,7 @@ class GeneratedCourseController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Transformation en vrai cours Markdown
+            | Transformation Markdown professionnelle
             |--------------------------------------------------------------------------
             */
 
@@ -78,7 +114,7 @@ class GeneratedCourseController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Enregistrement du cours
+            | Sauvegarde dans generated_courses
             |--------------------------------------------------------------------------
             */
 
@@ -87,19 +123,20 @@ class GeneratedCourseController extends Controller
 
                 [
 
-                    'task_id' => $task->getKey()
+                    'task_id'=>$task->id
 
                 ],
 
                 [
 
-                    'title' => $task->getAttribute('title'),
+                    'title'=>$task->title,
 
-                    'content' => $content
+                    'content'=>$content
 
                 ]
 
             );
+
 
 
 
@@ -112,7 +149,7 @@ class GeneratedCourseController extends Controller
 
                 'error',
 
-                'Erreur récupération cours : '.$e->getMessage()
+                'Erreur génération cours : '.$e->getMessage()
 
             );
 
@@ -121,12 +158,11 @@ class GeneratedCourseController extends Controller
 
 
 
-
         return back()->with(
 
             'success',
 
-            'Cours importé avec succès depuis StudyRaid.'
+            'Cours généré automatiquement avec succès depuis StudyRaid.'
 
         );
 
