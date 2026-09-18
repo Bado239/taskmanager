@@ -3,18 +3,15 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\StudyRaidSource;
 
 class StudyRaidSeeder extends Seeder
 {
 
-    public function run(): void
+    public function run()
     {
 
-
         $courses = [
-
 
             [
                 'title' => 'Généralités sur les finances publiques',
@@ -26,11 +23,10 @@ class StudyRaidSeeder extends Seeder
             ],
 
 
-
             [
                 'title' => 'Distinction finances publiques et finances privées',
 
-                'url' => 'URL_STUDYRAID_A_COMPLETER',
+                'url' => 'URL_REELLE_A_METTRE',
 
                 'subject' => 'Finances',
 
@@ -41,7 +37,7 @@ class StudyRaidSeeder extends Seeder
             [
                 'title' => 'Les principes des lois de finances',
 
-                'url' => 'URL_STUDYRAID_A_COMPLETER',
+                'url' => 'URL_REELLE_A_METTRE',
 
                 'subject' => 'Finances',
 
@@ -52,7 +48,7 @@ class StudyRaidSeeder extends Seeder
             [
                 'title' => 'La loi de finances de l’année (LFI)',
 
-                'url' => 'URL_STUDYRAID_A_COMPLETER',
+                'url' => 'URL_REELLE_A_METTRE',
 
                 'subject' => 'Finances',
 
@@ -63,7 +59,7 @@ class StudyRaidSeeder extends Seeder
             [
                 'title' => 'Les lois de finances rectificatives',
 
-                'url' => 'URL_STUDYRAID_A_COMPLETER',
+                'url' => 'URL_REELLE_A_METTRE',
 
                 'subject' => 'Finances',
 
@@ -74,22 +70,18 @@ class StudyRaidSeeder extends Seeder
             [
                 'title' => 'La loi de règlement',
 
-                'url' => 'URL_STUDYRAID_A_COMPLETER',
+                'url' => 'URL_REELLE_A_METTRE',
 
                 'subject' => 'Finances',
 
             ],
 
-
         ];
-
-
 
 
 
         foreach($courses as $course)
         {
-
 
             StudyRaidSource::updateOrCreate(
 
@@ -103,17 +95,14 @@ class StudyRaidSeeder extends Seeder
 
                     'subject'=>$course['subject'],
 
-                    'active'=>DB::raw('true')
+                    'active'=>true,
 
                 ]
 
             );
 
-
         }
 
-
     }
-
 
 }
