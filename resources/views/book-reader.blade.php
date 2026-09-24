@@ -282,41 +282,6 @@ Page :
 
 </div>
 
-@if(isset($readingGoal))
-
-<div class="mt-3 bg-blue-50 border-l-4 border-blue-500 p-3 rounded-lg">
-
-
-<div class="flex justify-between items-center">
-
-<span class="font-bold text-blue-700 text-sm">
-🎯 Objectif du jour
-</span>
-
-
-<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded">
-⏳ En cours
-</span>
-
-
-</div>
-
-
-<div class="text-sm mt-2">
-
-📖 Lire jusqu'à la page
-
-<strong>
-{{ $readingGoal->target_page }}
-</strong>
-
-
-</div>
-
-
-</div>
-
-@endif
 
 
 </div>

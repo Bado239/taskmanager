@@ -647,7 +647,17 @@
                                 <th class="px-4 py-3">Type</th>
                                 <th class="px-4 py-3">Projet / Matière</th>
                                 <th class="px-4 py-3">Libellé de la Tâche</th>
-                                <th class="px-4 py-3">Statut</th>
+                                <th class="px-4 py-3">
+                                    Statut
+                                </th>
+
+                                <th class="px-4 py-3">
+                                    Progression
+                                </th>
+
+                                <th class="px-4 py-3">
+                                    Objectif du jour
+                                </th>
                                 <th class="px-4 py-3">Date d'exécution</th>
                                 <th class="px-4 py-3 text-right">Actions</th>
                             </tr>
@@ -1317,6 +1327,71 @@
                             </span>
 
                             @endif
+
+                            </td>
+
+                            <td class="px-4 py-3">
+
+                                <div class="text-xs font-semibold">
+                                    📖 {{ $book->progress ?? 0 }} %
+                                </div>
+
+                                <div class="bg-gray-200 h-2 rounded mt-1">
+
+                                    <div 
+                                    class="bg-blue-600 h-2 rounded"
+                                    style="width: {{ $book->progress ?? 0 }}%">
+                                    </div>
+
+                                </div>
+
+                                <div class="text-xs text-gray-500 mt-1">
+
+                                    Page :
+                                    {{ $book->current_page ?? 1 }}
+
+                                </div>
+
+                            </td>
+
+
+                            <td class="px-4 py-3">
+
+                                @php
+                                    $goal = \App\Models\ReadingGoal::where('personal_resource_id',$book->id)
+                                            ->where('date',date('Y-m-d'))
+                                            ->first();
+                                @endphp
+
+
+                                @if($goal)
+
+                                    🎯 Lire jusqu'à la page 
+                                    <b>{{ $goal->target_page }}</b>
+
+                                    <br>
+
+                                    @if(($book->current_page ?? 1) >= $goal->target_page)
+
+                                        <span class="text-green-600">
+                                            ✅ Objectif atteint
+                                        </span>
+
+                                    @else
+
+                                        <span class="text-orange-600">
+                                            ⏳ En cours
+                                        </span>
+
+                                    @endif
+
+                                @else
+
+                                    <span class="text-gray-400">
+                                        Aucun objectif
+                                    </span>
+
+                                @endif
 
                             </td>
                         </tr>
