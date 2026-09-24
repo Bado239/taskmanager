@@ -149,6 +149,8 @@ class TaskController extends Controller
 
         $globalLibraryBooks = collect();
 
+        $readingProgress = [];
+
 
         if ($view === 'personal') {
 
@@ -168,7 +170,6 @@ class TaskController extends Controller
                 ->latest()
                 ->get();
 
-            $readingProgress = [];
 
             $service = new ReadingProgressService();
 
