@@ -6,6 +6,7 @@ use App\Models\PersonalResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
+use App\Models\ReadingGoal;
 
 
 class PersonalResourceController extends Controller
@@ -217,13 +218,23 @@ class PersonalResourceController extends Controller
         $book = PersonalResource::findOrFail($id);
 
 
+        $readingGoal = ReadingGoal::where(
+            'personal_resource_id',
+            $book->id
+        )
+        ->whereDate('date', today())
+        ->first();
+
+
         return view(
             'book-reader',
-            compact('book')
+            compact(
+                'book',
+                'readingGoal'
+            )
         );
 
     }
-
 
 
 
