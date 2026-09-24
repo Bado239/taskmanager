@@ -1371,17 +1371,44 @@
 
                                     <br>
 
-                                    @if(($book->current_page ?? 1) >= $goal->target_page)
+                                    @php
 
-                                        <span class="text-green-600">
-                                            ✅ Objectif atteint
+                                    $currentPage = $book->current_page ?? 1;
+
+                                    $targetPage = $goal->target_page;
+
+                                    $difference = $currentPage - $targetPage;
+
+                                    @endphp
+
+
+
+                                    @if($difference > 0)
+
+                                        <span class="text-green-600 font-bold">
+
+                                            🚀 En avance de {{ $difference }} pages
+
                                         </span>
+
+
+                                    @elseif($difference == 0)
+
+                                        <span class="text-blue-600 font-bold">
+
+                                            🟢 Objectif atteint exactement
+
+                                        </span>
+
 
                                     @else
 
-                                        <span class="text-orange-600">
-                                            ⏳ En cours
+                                        <span class="text-red-600 font-bold">
+
+                                            🔴 Retard de {{ abs($difference) }} pages
+
                                         </span>
+
 
                                     @endif
 
