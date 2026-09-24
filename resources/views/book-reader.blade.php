@@ -282,6 +282,57 @@ Page :
 
 </div>
 
+@if(isset($readingGoal))
+
+<div class="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+
+
+    <h3 class="font-bold text-blue-700">
+        🎯 Objectif du jour
+    </h3>
+
+
+    <p class="text-sm mt-2">
+
+        Lire jusqu'à la page :
+
+        <strong>
+            {{ $readingGoal->target_page }}
+        </strong>
+
+    </p>
+
+
+    <p class="text-sm">
+
+        Page actuelle :
+
+        <strong id="goalCurrentPage">
+            {{ $book->current_page ?? 1 }}
+        </strong>
+
+        /
+
+        {{ $readingGoal->target_page }}
+
+    </p>
+
+
+    <div class="mt-2">
+
+        <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-bold">
+
+            ⏳ Objectif en cours
+
+        </span>
+
+    </div>
+
+
+</div>
+
+@endif
+
 
 
 </div>
