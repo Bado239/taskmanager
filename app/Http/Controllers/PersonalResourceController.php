@@ -446,4 +446,45 @@ public function update(Request $request, $id)
     }
 
 
+    public function updateReadingStart(Request $request, $id)
+    {
+
+        $request->validate([
+            'start_page'=>'required|integer|min:1'
+        ]);
+
+
+        $book = PersonalResource::findOrFail($id);
+
+
+        $goal = ReadingGoal::where(
+            'personal_resource_id',
+            $book->id
+        )
+        ->first();
+
+
+
+        if($goal)
+        {
+
+            $goal->update([
+
+                'calculation_start_page' =>
+                $request->start_page,
+
+                'delay_pages'=>0,
+
+                'date'=>today()
+
+            ]);
+
+        }
+
+
+        return back();
+
+    }
+
+
 }

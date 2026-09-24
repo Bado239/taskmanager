@@ -15,6 +15,7 @@ use App\Services\DocumentReaderService;
 use App\Services\AICourseGeneratorService;
 use App\Models\GeneratedCourse;
 use App\Services\SupabaseStorageService;
+use App\Services\ReadingProgressService;
 
 class TaskController extends Controller
 {
@@ -167,6 +168,34 @@ class TaskController extends Controller
                 ->latest()
                 ->get();
 
+            $readingProgress = [];
+
+            $service = new ReadingProgressService();
+
+
+            foreach($readingBooks as $book)
+            {
+
+                $goal = \App\Models\ReadingGoal::where(
+                    'personal_resource_id',
+                    $book->id
+                )
+                ->first();
+
+
+                if($goal)
+                {
+
+                    $readingProgress[$book->id] =
+                        $service->calculate(
+                            $book,
+                            $goal
+                        );
+
+                }
+
+            }
+
 
 
             // Bibliothèque globale : tous les livres
@@ -184,6 +213,7 @@ class TaskController extends Controller
             'totalTasks',
             'todoTasks',
             'doingTasks',
+            'readingProgress',
             'doneTasks',
             'officeTodayCount',
             'masterTodayCount',

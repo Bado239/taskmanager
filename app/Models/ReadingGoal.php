@@ -10,10 +10,19 @@ class ReadingGoal extends Model
     protected $fillable = [
 
         'personal_resource_id',
+
         'date',
+
         'start_page',
+
         'target_page',
-        'pages_per_day',
+
+        'daily_pages',
+
+        'delay_pages',
+
+        'calculation_start_page',
+
         'status'
 
     ];

@@ -1351,6 +1351,54 @@
                                     {{ $book->current_page ?? 1 }}
 
                                 </div>
+                                <form method="POST"
+                                action="{{ route('personal-resources.update-reading-start',$book->id) }}"
+                                class="mt-2">
+
+                                @csrf
+
+
+                                <div class="flex items-center gap-2">
+
+
+                                <input
+                                type="number"
+                                name="start_page"
+                                value="{{ $book->current_page ?? 1 }}"
+                                class="border rounded px-2 py-1 w-20 text-xs"
+                                >
+
+
+                                <button
+                                class="bg-gray-800 text-white px-3 py-1 rounded text-xs">
+
+                                ⚙️ Modifier départ
+
+                                </button>
+
+
+                                </div>
+
+                                </form>
+
+                                @if(isset($readingProgress[$book->id]))
+
+                                    <div class="mt-2 text-sm">
+
+                                        🎯 Objectif :
+                                        {{ $book->readingGoal->daily_pages ?? 10 }}
+                                        pages/jour
+
+                                    </div>
+
+
+                                    <div class="mt-1 font-bold text-sm">
+
+                                        {{ $readingProgress[$book->id]['message'] }}
+
+                                    </div>
+
+                                @endif
 
                             </td>
 

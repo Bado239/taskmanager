@@ -282,3 +282,9 @@ Route::put('/tasks/{id}', [TaskController::class, 'update'])
 Route::get('/tasks/{id}/edit-data',
     [TaskController::class,'editData']
 )->name('tasks.editData');
+
+Route::post(
+    '/personal-resources/{id}/update-reading-start',
+    [PersonalResourceController::class,'updateReadingStart']
+)
+->name('personal-resources.update-reading-start');
