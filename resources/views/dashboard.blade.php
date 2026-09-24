@@ -1410,7 +1410,6 @@
                                             ->where('date',date('Y-m-d'))
                                             ->first();
                                 @endphp
-                                $goal->target_page
                             </td>
                         </tr>
 
