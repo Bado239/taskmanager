@@ -129,11 +129,10 @@ class="w-[70%] flex flex-col bg-gray-700">
 
 
     <button
-    onclick="zoomOut()"
+    onclick="changerZoom(-0.1)"
     class="bg-gray-700 px-3 py-2 rounded">
-        −
+    −
     </button>
-
 
     <span id="zoomText">
         100%
@@ -141,11 +140,10 @@ class="w-[70%] flex flex-col bg-gray-700">
 
 
     <button
-    onclick="zoomIn()"
+    onclick="changerZoom(0.1)"
     class="bg-gray-700 px-3 py-2 rounded">
-        +
+    +
     </button>
-
 
 </div>
 
@@ -859,38 +857,6 @@ function previousPage(){
         }
 
     }
-
-}
-
-
-
-function zoomIn(){
-
-    zoom += 0.2;
-
-    document.getElementById('zoomText').innerHTML =
-    Math.round((zoom/1.4)*100)+"%";
-
-    reloadPages();
-
-}
-
-
-
-function zoomOut(){
-
-    if(zoom > 0.8){
-
-        zoom -= 0.2;
-
-    }
-
-
-    document.getElementById('zoomText').innerHTML =
-    Math.round((zoom/1.4)*100)+"%";
-
-
-    reloadPages();
 
 }
 
