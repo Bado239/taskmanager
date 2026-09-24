@@ -13,10 +13,10 @@ class ReadingGoal extends Model
         'date',
         'start_page',
         'target_page',
+        'pages_per_day',
         'status'
 
     ];
-
 
 
     public function book()
