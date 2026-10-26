@@ -988,9 +988,12 @@
                         </span>
                     </div>
 
-                    <!-- Tableau responsive -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full min-w-[1000px] border-collapse text-left text-sm">
+                    <!-- Tableau responsive : défilement horizontal sur petit écran -->
+                    <p class="px-4 pt-3 text-xs text-slate-500 sm:hidden">
+                        Faites glisser le tableau horizontalement pour voir toutes les colonnes.
+                    </p>
+                    <div class="overflow-x-auto overscroll-x-contain">
+                        <table class="w-full min-w-[980px] border-collapse text-left text-sm">
                             <thead>
                                 <tr class="border-b border-blue-200 bg-blue-100/80 text-[11px] font-extrabold uppercase tracking-wide text-blue-900">
                                     <th class="px-5 py-4">Rang</th>
@@ -1071,7 +1074,7 @@
                                         </td>
 
                                         <td class="px-5 py-5">
-                                            <div class="flex items-center justify-end gap-2">
+                                            <div class="flex min-w-[132px] items-center justify-end gap-2">
                                                 <button type="button"
                                                         onclick="editTask({{ $task->id }})"
                                                         title="Modifier la tâche"
@@ -1083,7 +1086,7 @@
                                                 </button>
 
                                                 @if(!$task->is_archived)
-                                                    <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                    <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline" onsubmit="return confirm('Archiver cette tâche ? Vous pourrez la retrouver dans les archives.');">
                                                         @csrf
                                                         <button type="submit" title="Archiver la tâche" aria-label="Archiver la tâche" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 shadow-sm transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200">
                                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
