@@ -46,6 +46,19 @@
         [x-cloak] {
             display: none !important;
         }
+
+        
+        /* Masquer visuellement la barre de défilement du menu */
+        .tm-sidebar nav {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tm-sidebar nav::-webkit-scrollbar {
+            display: none;
+            width: 0;
+        }
+
     </style>
 
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
