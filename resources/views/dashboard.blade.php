@@ -926,175 +926,195 @@
 
     <!-- ================= VUE : MODE MASTER ================= -->
     @if($view === 'master')
-        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-2xl border border-yellow-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center gap-4">
-
-                <div class="w-14 h-14 rounded-full bg-white border border-yellow-200 flex items-center justify-center text-3xl shadow-sm">
-                    🎓
+        <!-- En-tête du cockpit -->
+        <section class="mb-6 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-yellow-50 to-white shadow-sm">
+            <div class="flex flex-col gap-5 p-5 sm:p-6 xl:flex-row xl:items-center xl:justify-between">
+                <div class="flex min-w-0 items-center gap-4">
+                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-white text-3xl shadow-sm">
+                        🎓
+                    </div>
+                    <div class="min-w-0">
+                        <p class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-700">Espace académique</p>
+                        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+                            MASTER Cockpit
+                        </h1>
+                        <p class="mt-1 text-sm text-slate-600">Suivi académique · Organisez vos matières et vos leçons</p>
+                    </div>
                 </div>
 
-                <h1 class="text-xl font-bold text-gray-900">
-                    MASTER Cockpit - Suivi Académique
-                </h1>
-
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}"
+                       class="inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50' }}">
+                        Toutes actives
+                    </a>
+                    <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'today', 'status' => 'active']) }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50' }}">
+                        <span>📅</span> Aujourd'hui
+                    </a>
+                    <a href="{{ route('schedule.index') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
+                        <span>🗓️</span> Emploi du temps
+                    </a>
+                    <a href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}">
+                        <span>📁</span> Archives
+                    </a>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-white text-gray-700 border-gray-200 hover:bg-yellow-50' }}">
-                   Toutes Actives
-                </a>
-                <a href="{{ route('dashboard', ['view' => 'master', 'filter' => 'today', 'status' => 'active']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
-                   📅 Aujourd'hui
-                </a>
-                <a href="{{ route('schedule.index') }}"
-                    class="px-3 py-1.5 text-xs font-bold rounded-xl border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
-
-                    📅 Emploi du temps
-
-                </a>
-                <a href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-xl border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
-                   📁 Archives
-                </a>
-            </div>
-        </div>
+        </section>
 
         @php
-           $groupedMasterTasks = $masterTasks->groupBy(function($task) {
-                return $task->project->title ?? $task->project_name ?? 'Matière Non Spécifiée';
+            $groupedMasterTasks = $masterTasks->groupBy(function ($task) {
+                return $task->project->title ?? $task->project_name ?? 'Matière non spécifiée';
             });
         @endphp
 
         <div class="space-y-6">
             @forelse($groupedMasterTasks as $matiereName => $tasksInMatiere)
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 shadow-md overflow-hidden">
-                    <div class="p-4 bg-blue-100 border-b border-blue-200 flex items-center justify-between">
-                        <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                            📚 Matière : <span class="text-blue-700">{{ $matiereName }}</span>
-                        </h3>
-                        <span class="text-xs bg-blue-200 text-blue-700 font-bold px-2.5 py-1 rounded-full">
-                            {{ $tasksInMatiere->count() }} tâche(s)
+                <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:shadow-md">
+                    <!-- En-tête matière -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white px-5 py-4 sm:px-6">
+                        <div class="flex min-w-0 items-center gap-3">
+                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-xl">📚</span>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Matière</p>
+                                <h2 class="truncate text-lg font-extrabold text-slate-900">
+                                    {{ $matiereName }}
+                                </h2>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center rounded-full border border-blue-100 bg-blue-100/70 px-3 py-1.5 text-xs font-bold text-blue-800">
+                            {{ $tasksInMatiere->count() }} {{ $tasksInMatiere->count() > 1 ? 'tâches' : 'tâche' }}
                         </span>
                     </div>
 
+                    <!-- Tableau responsive -->
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-blue-200 text-xs uppercase font-semibold text-blue-800 border-b border-blue-300">
-                                <tr>
-                                    <th class="px-4 py-3">Rang</th>
-                                    <th class="px-4 py-3">Leçon / Étape</th>
-                                    <th class="px-4 py-3">Libellé de la Tâche</th>
-                                    <th class="px-4 py-3">Date d'exécution & Heures</th>
-                                    <th class="px-4 py-3">Échéance</th>
-                                    <th class="px-4 py-3 text-right">Actions</th>
+                        <table class="w-full min-w-[1000px] border-collapse text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-blue-200 bg-blue-100/80 text-[11px] font-extrabold uppercase tracking-wide text-blue-900">
+                                    <th class="px-5 py-4">Rang</th>
+                                    <th class="px-5 py-4">Leçon / étape</th>
+                                    <th class="px-5 py-4">Libellé de la tâche</th>
+                                    <th class="px-5 py-4">Date d'exécution & heures</th>
+                                    <th class="px-5 py-4">Échéance</th>
+                                    <th class="px-5 py-4">Statut</th>
+                                    <th class="px-5 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100">
+                            <tbody class="divide-y divide-slate-100">
                                 @foreach($tasksInMatiere as $index => $task)
-                                    <tr class="hover:bg-blue-50 transition-colors">
-                                        <td class="px-4 py-4 font-bold text-blue-400">#{{ $index + 1 }}</td>
-                                        <td class="px-4 py-4 font-semibold text-blue-600 text-xs">
-                                            📖 {{ $task->category->title ?? $task->category->name ?? 'Général' }}
+                                    <tr class="group transition-colors hover:bg-blue-50/60">
+                                        <td class="whitespace-nowrap px-5 py-5 font-extrabold text-blue-600">#{{ $index + 1 }}</td>
+
+                                        <td class="px-5 py-5">
+                                            <span class="inline-flex items-center gap-2 font-semibold text-blue-700">
+                                                <span class="text-base">📖</span>
+                                                {{ $task->category->title ?? $task->category->name ?? 'Général' }}
+                                            </span>
                                         </td>
-                                        <td class="px-4 py-4 font-bold text-gray-900">
 
+                                        <td class="max-w-sm px-5 py-5">
                                             <a href="{{ route('tasks.learning', $task->id) }}"
-                                            class="hover:text-blue-600 transition-colors">
-
+                                               class="font-bold leading-5 text-slate-900 transition hover:text-blue-700">
                                                 {{ $task->title }}
-
                                             </a>
 
-
                                             @if($task->document_link)
-
                                                 @php
                                                     $link = $task->document_link;
-
-                                                    // Ajouter automatiquement storage
-                                                    if(!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
-                                                        $link = '/storage/'.$link;
+                                                    if (!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
+                                                        $link = '/storage/' . $link;
                                                     }
-
                                                     $extension = strtolower(pathinfo($link, PATHINFO_EXTENSION));
-
                                                 @endphp
 
                                                 @if(in_array($extension, ['pdf']))
-                                                    <a href="{{ $link }}" target="_blank"
-                                                    class="text-xs text-red-600 underline block mt-0.5">
-                                                        📄 Ouvrir PDF
-                                                    </a>
-
-                                                @elseif(in_array($extension, ['doc','docx']))
-                                                    <a href="{{ $link }}" target="_blank"
-                                                    class="text-xs text-blue-700 underline block mt-0.5">
-                                                        📝 Ouvrir Word
-                                                    </a>
-
-                                                @elseif(in_array($extension, ['xls','xlsx']))
-                                                    <a href="{{ $link }}" target="_blank"
-                                                    class="text-xs text-green-700 underline block mt-0.5">
-                                                        📊 Ouvrir Excel
-                                                    </a>
-
-                                                @elseif(in_array($extension, ['ppt','pptx']))
-                                                    <a href="{{ $link }}" target="_blank"
-                                                    class="text-xs text-orange-600 underline block mt-0.5">
-                                                        📽️ Ouvrir PowerPoint
-                                                    </a>
-
+                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-red-600 underline underline-offset-2 hover:text-red-800">📄 Ouvrir PDF</a>
+                                                @elseif(in_array($extension, ['doc', 'docx']))
+                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-blue-700 underline underline-offset-2">📝 Ouvrir Word</a>
+                                                @elseif(in_array($extension, ['xls', 'xlsx']))
+                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-emerald-700 underline underline-offset-2">📊 Ouvrir Excel</a>
+                                                @elseif(in_array($extension, ['ppt', 'pptx']))
+                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-orange-700 underline underline-offset-2">📽️ Ouvrir PowerPoint</a>
                                                 @else
-                                                    <a href="{{ $link }}" target="_blank"
-                                                    class="text-xs text-[#0052cc] underline block mt-0.5">
-                                                        🔗 Document / Support
-                                                    </a>
+                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-blue-700 underline underline-offset-2">🔗 Ouvrir le document</a>
+                                                @endif
+                                            @endif
+                                        </td>
+
+                                        <td class="whitespace-nowrap px-5 py-5 text-slate-600">
+                                            <div class="flex items-center gap-2">
+                                                <span>📅</span>
+                                                <span>{{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</span>
+                                            </div>
+                                            <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                                                <span>⏱️</span>
+                                                <span>{{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}</span>
+                                            </div>
+                                        </td>
+
+                                        <td class="whitespace-nowrap px-5 py-5 text-slate-600">
+                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '—' }}
+                                        </td>
+
+                                        <td class="whitespace-nowrap px-5 py-5">
+                                            @if($task->is_archived)
+                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">📁 Archivée</span>
+                                            @elseif($task->document_status === 'done')
+                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800">✓ Terminée</span>
+                                            @elseif($task->document_status === 'in_progress')
+                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-800">◷ En cours</span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800">○ À faire</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="px-5 py-5">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <button type="button"
+                                                        onclick="editTask({{ $task->id }})"
+                                                        title="Modifier la tâche"
+                                                        aria-label="Modifier la tâche"
+                                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/>
+                                                    </svg>
+                                                </button>
+
+                                                @if(!$task->is_archived)
+                                                    <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" title="Archiver la tâche" aria-label="Archiver la tâche" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 shadow-sm transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7h18M5 7l1 13h12l1-13M9 7V4h6v3M10 11v5m4-5v5"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
                                                 @endif
 
-                                            @endif
-
-                                        </td>
-                                        <td class="px-4 py-4 text-xs text-gray-600">
-                                            <div>📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</div>
-                                            @if($task->heure_debut || $task->heure_fin)
-                                                <div class="text-gray-500 font-semibold mt-0.5">⏰ {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}</div>
-                                            @else
-                                                <div class="text-gray-400 mt-0.5">⏰ --:--</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-xs text-gray-500">
-                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
-                                        </td>
-                                        <td class="px-4 py-4 text-right space-x-2">
-                                            <button type="button"
-                                            onclick="editTask({{ $task->id }})"
-                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
-
-                                                Modifier
-
-                                            </button>
-                                            @if(!$task->is_archived)
-                                                <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
+                                                <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
                                                     @csrf
-                                                    <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
+                                                    @method('DELETE')
+                                                    <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" title="Supprimer la tâche" aria-label="Supprimer la tâche" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/>
+                                                        </svg>
+                                                    </button>
                                                 </form>
-                                            @endif
-                                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">Supprimer</button>
-                                            </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </section>
             @empty
-                <div class="bg-white p-12 text-center rounded-xl border border-gray-200 shadow-sm font-semibold text-gray-600">
-                    Aucune activité enregistrée en Mode Master
+                <div class="rounded-2xl border border-dashed border-blue-200 bg-white px-6 py-14 text-center shadow-sm">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl">📚</div>
+                    <h3 class="mt-4 text-base font-bold text-slate-800">Aucune tâche à afficher</h3>
+                    <p class="mt-1 text-sm text-slate-500">Les tâches du Mode Master apparaîtront ici une fois ajoutées.</p>
                 </div>
             @endforelse
         </div>
