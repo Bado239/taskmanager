@@ -1324,16 +1324,6 @@
                                             ✎
                                         </button>
 
-                                        {{-- CONSULTER --}}
-                                        <a
-                                            href="{{ route('tasks.learning', $task->id) }}"
-                                            title="Consulter"
-                                            aria-label="Consulter la tâche"
-                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition hover:bg-slate-200"
-                                        >
-                                            ◉
-                                        </a>
-
                                         {{-- ARCHIVER --}}
                                         @if(!$task->is_archived)
 
