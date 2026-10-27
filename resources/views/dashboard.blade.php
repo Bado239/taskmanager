@@ -975,14 +975,14 @@
     @if($view === 'master')
         <!-- En-tête du cockpit -->
         <section class="mb-6 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-yellow-50 to-white shadow-sm">
-            <div class="flex flex-col gap-5 p-5 sm:p-6 xl:flex-row xl:items-center xl:justify-between">
+            <div class="flex flex-col gap-3 px-5 py-3 sm:px-6 sm:py-4 xl:flex-row xl:items-center xl:justify-between">
                 <div class="flex min-w-0 items-center gap-4">
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-amber-200 bg-white text-3xl shadow-sm">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-white text-2xl shadow-sm">
                         🎓
                     </div>
                     <div class="min-w-0">
                         <p class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-700">Espace académique</p>
-                        <h1 class="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
+                        <h1 class="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
                             MASTER Cockpit
                         </h1>
                         <p class="mt-1 text-sm text-slate-600">Suivi académique · Organisez vos matières et vos leçons</p>
@@ -1017,7 +1017,7 @@
         <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
 
             {{-- EN-TÊTE DU TABLEAU --}}
-            <div class="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
 
                 <div class="flex items-center gap-3">
 
@@ -1037,56 +1037,70 @@
 
                 </div>
 
-                {{-- RECHERCHE DANS LE TABLEAU --}}
-                <form
-                    action="{{ route('dashboard') }}"
-                    method="GET"
-                    class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 sm:w-72"
-                >
-                    <input type="hidden" name="view" value="master">
-
-                    @if(request()->filled('filter'))
-                        <input type="hidden" name="filter" value="{{ request('filter') }}">
-                    @endif
-
-                    @if(request()->filled('status'))
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                    @endif
-
-                    <svg
-                        class="h-4 w-4 shrink-0 text-slate-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
-                        <path d="m16 16 4 4" stroke-linecap="round" stroke-width="1.8"/>
-                    </svg>
-
-                    <input
-                        type="search"
-                        name="search"
-                        value="{{ request('search') }}"
-                        placeholder="Rechercher une tâche..."
-                        class="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                    >
-
-                    <button
-                        type="submit"
-                        title="Rechercher"
-                        class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700"
-                    >
-                        OK
-                    </button>
-
-                </form>
-
             </div>
 
             {{-- TABLEAU UNIQUE --}}
+
+            
+            <style>
+                /* Tableau Master : affichage compact et lisible */
+
+                .master-table {
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
+
+                .master-table th {
+                    padding: 12px 10px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    white-space: nowrap;
+                    letter-spacing: 0.025em;
+                }
+
+                .master-table td {
+                    padding: 11px 10px;
+                    font-size: 12px;
+                    vertical-align: middle;
+                    white-space: nowrap;
+                }
+
+                .master-table td a,
+                .master-table td span {
+                    font-size: inherit;
+                }
+
+                .master-table td .text-xs {
+                    font-size: 11px;
+                }
+
+                .master-table td .text-lg {
+                    font-size: 15px;
+                }
+
+                .master-table tbody tr {
+                    height: 58px;
+                }
+
+                .master-table tbody tr:hover {
+                    background-color: #f8fbff;
+                }
+
+                .master-table td .flex {
+                    gap: 6px;
+                }
+
+                /* Conservation du défilement sur les petits écrans */
+                @media (max-width: 1200px) {
+                    .master-table {
+                        min-width: 1100px;
+                    }
+                }
+            </style>
+
             <div class="overflow-x-auto">
 
-                <table class="w-full min-w-[1150px] border-collapse text-left text-sm">
+                <table class="master-table w-full min-w-[1100px] border-collapse text-left text-xs">
 
                     <thead class="border-b border-blue-100 bg-blue-50/80">
 
