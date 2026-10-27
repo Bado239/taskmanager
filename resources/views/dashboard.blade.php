@@ -950,7 +950,23 @@
 
                     <tbody class="divide-y divide-slate-100">
 
-                        @forelse($officeTasks as $task)
+
+                        @forelse($officeTasks->sortBy(function ($task) {
+
+                            if (empty($task->execution_date)) {
+                                return '9999-12-31 23:59:59';
+                            }
+
+                            $date = \Carbon\Carbon::parse($task->execution_date)
+                                ->format('Y-m-d');
+
+                            $heure = !empty($task->heure_debut)
+                                ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i:s')
+                                : '23:59:59';
+
+                            return $date . ' ' . $heure;
+
+                        }) as $task)
 
                             <tr class="transition-colors hover:bg-blue-50/50">
 
@@ -1443,7 +1459,23 @@
 
                     <tbody class="divide-y divide-slate-100">
 
-                        @forelse($masterTasks as $task)
+
+                        @forelse($masterTasks->sortBy(function ($task) {
+
+                            if (empty($task->execution_date)) {
+                                return '9999-12-31 23:59:59';
+                            }
+
+                            $date = \Carbon\Carbon::parse($task->execution_date)
+                                ->format('Y-m-d');
+
+                            $heure = !empty($task->heure_debut)
+                                ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i:s')
+                                : '23:59:59';
+
+                            return $date . ' ' . $heure;
+
+                        }) as $task)
 
                             <tr class="transition-colors hover:bg-blue-50/50">
 
