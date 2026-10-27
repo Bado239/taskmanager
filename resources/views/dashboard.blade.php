@@ -1691,11 +1691,25 @@
 
                                             <button
                                                 type="submit"
-                                                title="Supprimer"
+                                                title="Supprimer la tâche"
                                                 aria-label="Supprimer la tâche"
-                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white transition hover:bg-red-600"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white shadow-sm transition hover:bg-red-600"
                                             >
-                                                🗑
+                                                <svg
+                                                    class="h-4 w-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.8"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path d="M4 7h16"/>
+                                                    <path d="M10 11v6"/>
+                                                    <path d="M14 11v6"/>
+                                                    <path d="M6 7l1 14h10l1-14"/>
+                                                    <path d="M9 7V4h6v3"/>
+                                                </svg>
                                             </button>
 
                                         </form>
