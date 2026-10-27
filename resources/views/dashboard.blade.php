@@ -2597,13 +2597,12 @@ async function editTask(id) {
 
 
 
-        // DATE ECHEANCE
-        alpineData.dueDate = task.date_prevue ?? '';
 
+        // DATE ÉCHÉANCE
+        alpineData.dueDate = formatDateForInput(task.date_prevue);
 
-
-        // DATE EXECUTION
-        alpineData.executionDate = task.execution_date ?? '';
+        // DATE D'EXÉCUTION
+        alpineData.executionDate = formatDateForInput(task.execution_date);
 
 
 
