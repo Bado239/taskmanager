@@ -2456,7 +2456,28 @@ async function editTask(id) {
         }
 
 
+
         const task = await response.json();
+
+        // Convertir les dates Laravel pour les champs HTML type="date"
+        function formatDateForInput(value) {
+            if (!value) return '';
+
+            const date = String(value);
+
+            // Accepte YYYY-MM-DD et les dates ISO Laravel
+            if (/^\d{4}-\d{2}-\d{2}/.test(date)) {
+                return date.substring(0, 10);
+            }
+
+            // Accepte DD/MM/YYYY
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+                const [day, month, year] = date.split('/');
+                return `${year}-${month}-${day}`;
+            }
+
+            return '';
+        }
 
         // Synchroniser Alpine
         const form = document.querySelector('#taskForm');
@@ -2468,8 +2489,9 @@ async function editTask(id) {
             alpineData.selectedProject = task.project_id ?? '';
             alpineData.selectedCategory = task.category_id ?? '';
 
-            alpineData.dueDate = task.date_prevue ?? '';
-            alpineData.executionDate = task.execution_date ?? '';
+
+            alpineData.dueDate = formatDateForInput(task.date_prevue);
+            alpineData.executionDate = formatDateForInput(task.execution_date);
 
             alpineData.startTime = task.heure_debut 
                 ? task.heure_debut.substring(0,5)
@@ -2539,11 +2561,12 @@ async function editTask(id) {
 
         }
 
+
         document.querySelector('input[name="date_prevue"]').value =
-            task.date_prevue ?? '';
+            formatDateForInput(task.date_prevue);
 
         document.querySelector('input[name="execution_date"]').value =
-            task.execution_date ?? '';
+            formatDateForInput(task.execution_date);
 
 
 
