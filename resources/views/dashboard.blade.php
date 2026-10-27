@@ -974,40 +974,46 @@
     <!-- ================= VUE : MODE MASTER ================= -->
     @if($view === 'master')
         <!-- En-tête du cockpit -->
-        <section class="mb-6 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 via-yellow-50 to-white shadow-sm">
-            <div class="flex flex-col gap-3 px-5 py-3 sm:px-6 sm:py-4 xl:flex-row xl:items-center xl:justify-between">
-                <div class="flex min-w-0 items-center gap-4">
-                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-white text-2xl shadow-sm">
-                        🎓
-                    </div>
-                    <div class="min-w-0">
-                        <p class="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-amber-700">Espace académique</p>
-                        <h1 class="text-lg font-extrabold tracking-tight text-slate-900 sm:text-xl">
-                            MASTER Cockpit
-                        </h1>
-                        <p class="mt-1 text-sm text-slate-600">Suivi académique · Organisez vos matières et vos leçons</p>
-                    </div>
-                </div>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'all', 'status' => 'active'])) }}"
-                       class="inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50' }}">
-                        Toutes actives
-                    </a>
-                    <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'today', 'status' => 'active'])) }}"
-                       class="inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white shadow-sm' : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:bg-blue-50' }}">
-                        <span>📅</span> Aujourd'hui
-                    </a>
-                    <a href="{{ route('schedule.index') }}"
-                       class="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100">
-                        <span>🗓️</span> Emploi du temps
-                    </a>
-                    <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'status' => 'archived'])) }}"
-                       class="inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}">
-                        <span>📁</span> Archives
-                    </a>
-                </div>
+        {{-- BARRE COMPACTE DES FILTRES MASTER --}}
+        <section class="mb-4 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
+
+            <div class="flex flex-wrap items-center gap-2">
+
+                {{-- TOUTES ACTIVES --}}
+                <a
+                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'all', 'status' => 'active'])) }}"
+                    class="inline-flex items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                >
+                    Toutes actives
+                </a>
+
+                {{-- AUJOURD'HUI --}}
+                <a
+                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'today', 'status' => 'active'])) }}"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                >
+                    📅 Aujourd'hui
+                </a>
+
+                {{-- EMPLOI DU TEMPS --}}
+                <a
+                    href="{{ route('schedule.index') }}"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+                >
+                    🗓️ Emploi du temps
+                </a>
+
+                {{-- ARCHIVES --}}
+                <a
+                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'status' => 'archived'])) }}"
+                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}"
+                >
+                    📁 Archives
+                </a>
+
             </div>
+
         </section>
         
         {{-- ============================================== --}}
