@@ -53,36 +53,6 @@
 @endphp
 
 <div class="space-y-6 pb-12">
-    <!-- BARRE DE NAVIGATION / BOUTON NOUVELLE TÂCHE EN HAUT -->
-    <div class="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-100 shadow-md">
-        <div class="flex items-center gap-2">
-            <a href="{{ route('dashboard', ['view' => 'dashboard']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'dashboard' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
-                📊 Dashboard
-            </a>
-            <a href="{{ route('dashboard', ['view' => 'office']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'office' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
-                💼 Mode Office
-            </a>
-            <a href="{{ route('dashboard', ['view' => 'master']) }}" 
-               class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'master' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
-                🎓 Mode Master
-            </a>
-            <a href="{{ route('dashboard', ['view' => 'personal']) }}" 
-            class="px-4 py-2 font-bold text-xs rounded-xl transition-all {{ $view === 'personal' ? 'bg-[#0052cc] text-white shadow-sm' : 'bg-white text-gray-700 border border-gray-200 hover:bg-blue-50 hover:border-blue-200' }}">
-                🌱 Perso
-            </a>
-        </div>
-
-        <button onclick="toggleTaskForm()" id="btnToggleForm" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2">
-            <span>+ Nouvelle tâche 
-                @if($view === 'office') (Mode Office)
-                @elseif($view === 'master') (Mode Master)
-                @else (Global)
-                @endif
-            </span>
-        </button>
-    </div>
 
     <!-- FORMULAIRE DE CRÉATION DE TÂCHE (CACHÉ PAR DÉFAUT) -->
 <div id="taskFormContainer"
@@ -607,7 +577,9 @@
 
                 formContainer.style.display = 'block';
 
-                btn.innerHTML = '<span>✕ Fermer</span>';
+                if (btn) {
+                    btn.innerHTML = '<span>✕ Fermer</span>';
+                }
 
 
                 formContainer.scrollIntoView({
@@ -975,42 +947,68 @@
     @if($view === 'master')
         <!-- En-tête du cockpit -->
 
-        {{-- BARRE COMPACTE DES FILTRES MASTER --}}
+        {{-- BARRE MASTER : FILTRES + NOUVELLE TÂCHE --}}
         <section class="mb-4 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
 
-            <div class="flex flex-wrap items-center gap-2">
+            <div class="flex flex-wrap items-center justify-between gap-3">
 
-                {{-- TOUTES ACTIVES --}}
-                <a
-                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'all', 'status' => 'active'])) }}"
-                    class="inline-flex items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
-                >
-                    Toutes actives
-                </a>
+                {{-- FILTRES À GAUCHE --}}
+                <div class="flex flex-wrap items-center gap-2">
 
-                {{-- AUJOURD'HUI --}}
-                <a
-                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'filter' => 'today', 'status' => 'active'])) }}"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
-                >
-                    📅 Aujourd'hui
-                </a>
+                    {{-- TOUTES ACTIVES --}}
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'master',
+                            'filter' => 'all',
+                            'status' => 'active'
+                        ])) }}"
+                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                    >
+                        Toutes actives
+                    </a>
 
-                {{-- EMPLOI DU TEMPS --}}
-                <a
-                    href="{{ route('schedule.index') }}"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
-                >
-                    🗓️ Emploi du temps
-                </a>
+                    {{-- AUJOURD'HUI --}}
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'master',
+                            'filter' => 'today',
+                            'status' => 'active'
+                        ])) }}"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                    >
+                        📅 Aujourd'hui
+                    </a>
 
-                {{-- ARCHIVES --}}
-                <a
-                    href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'master', 'status' => 'archived'])) }}"
-                    class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}"
+                    {{-- EMPLOI DU TEMPS --}}
+                    <a
+                        href="{{ route('schedule.index') }}"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+                    >
+                        🗓️ Emploi du temps
+                    </a>
+
+                    {{-- ARCHIVES --}}
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'master',
+                            'status' => 'archived'
+                        ])) }}"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}"
+                    >
+                        📁 Archives
+                    </a>
+
+                </div>
+
+                {{-- NOUVELLE TÂCHE À DROITE --}}
+                <button
+                    type="button"
+                    onclick="toggleTaskForm()"
+                    id="btnToggleForm"
+                    class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
                 >
-                    📁 Archives
-                </a>
+                    + Nouvelle tâche (Mode Master)
+                </button>
 
             </div>
 
