@@ -2479,9 +2479,10 @@ async function editTask(id) {
 
 
 
+
         const task = await response.json();
 
-        console.log('TÂCHE REÇUE :', task);
+        console.log('DONNÉES DE LA TÂCHE :', task);
         console.log('ÉCHÉANCE :', task.date_prevue);
         console.log('DATE EXÉCUTION :', task.execution_date);
 
