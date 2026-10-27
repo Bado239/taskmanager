@@ -1009,180 +1009,423 @@
                 </div>
             </div>
         </section>
+        
+        {{-- ============================================== --}}
+        {{-- TABLEAU UNIQUE DES TÂCHES MASTER               --}}
+        {{-- ============================================== --}}
 
-        @php
-            $groupedMasterTasks = $masterTasks->groupBy(function ($task) {
-                return $task->project->title ?? $task->project_name ?? 'Matière non spécifiée';
-            });
-        @endphp
+        <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
 
-        <div class="space-y-6">
-            @forelse($groupedMasterTasks as $matiereName => $tasksInMatiere)
-                <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:shadow-md">
-                    <!-- En-tête matière -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-white px-5 py-4 sm:px-6">
-                        <div class="flex min-w-0 items-center gap-3">
-                            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-xl">📚</span>
-                            <div class="min-w-0">
-                                <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Matière</p>
-                                <h2 class="truncate text-lg font-extrabold text-slate-900">
-                                    {{ $matiereName }}
-                                </h2>
-                            </div>
-                        </div>
-                        <span class="inline-flex items-center rounded-full border border-blue-100 bg-blue-100/70 px-3 py-1.5 text-xs font-bold text-blue-800">
-                            {{ $tasksInMatiere->count() }} {{ $tasksInMatiere->count() > 1 ? 'tâches' : 'tâche' }}
-                        </span>
+            {{-- EN-TÊTE DU TABLEAU --}}
+            <div class="flex flex-col gap-4 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+
+                <div class="flex items-center gap-3">
+
+                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-xl">
+                        📋
+                    </span>
+
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-900">
+                            Toutes les tâches (Mode Master)
+                        </h2>
+
+                        <p class="text-xs text-slate-500">
+                            {{ $masterTasks->count() }} tâche(s) affichée(s)
+                        </p>
                     </div>
 
-                    <!-- Tableau responsive : défilement horizontal sur petit écran -->
-                    <p class="px-4 pt-3 text-xs text-slate-500 sm:hidden">
-                        Faites glisser le tableau horizontalement pour voir toutes les colonnes.
-                    </p>
-                    <div class="overflow-x-auto overscroll-x-contain">
-                        <table class="w-full min-w-[980px] border-collapse text-left text-sm">
-                            <thead>
-                                <tr class="border-b border-blue-200 bg-blue-100/80 text-[11px] font-extrabold uppercase tracking-wide text-blue-900">
-                                    <th class="px-5 py-4">Rang</th>
-                                    <th class="px-5 py-4">Leçon / étape</th>
-                                    <th class="px-5 py-4">Libellé de la tâche</th>
-                                    <th class="px-5 py-4">Date d'exécution & heures</th>
-                                    <th class="px-5 py-4">Échéance</th>
-                                    <th class="px-5 py-4">Statut</th>
-                                    <th class="px-5 py-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100">
-                                @foreach($tasksInMatiere as $index => $task)
-                                    <tr class="group transition-colors hover:bg-blue-50/60">
-                                        <td class="whitespace-nowrap px-5 py-5 font-extrabold text-blue-600">#{{ $index + 1 }}</td>
+                </div>
 
-                                        <td class="px-5 py-5">
-                                            <span class="inline-flex items-center gap-2 font-semibold text-blue-700">
-                                                <span class="text-base">📖</span>
-                                                {{ $task->category->title ?? $task->category->name ?? 'Général' }}
-                                            </span>
-                                        </td>
+                {{-- RECHERCHE DANS LE TABLEAU --}}
+                <form
+                    action="{{ route('dashboard') }}"
+                    method="GET"
+                    class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 sm:w-72"
+                >
+                    <input type="hidden" name="view" value="master">
 
-                                        <td class="max-w-sm px-5 py-5">
-                                            <a href="{{ route('tasks.learning', $task->id) }}"
-                                               class="font-bold leading-5 text-slate-900 transition hover:text-blue-700">
-                                                {{ $task->title }}
-                                            </a>
+                    @if(request()->filled('filter'))
+                        <input type="hidden" name="filter" value="{{ request('filter') }}">
+                    @endif
 
-                                            @if($task->document_link)
-                                                @php
-                                                    $link = $task->document_link;
-                                                    if (!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
-                                                        $link = '/storage/' . $link;
-                                                    }
-                                                    $extension = strtolower(pathinfo($link, PATHINFO_EXTENSION));
-                                                @endphp
+                    @if(request()->filled('status'))
+                        <input type="hidden" name="status" value="{{ request('status') }}">
+                    @endif
 
-                                                @if(in_array($extension, ['pdf']))
-                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-red-600 underline underline-offset-2 hover:text-red-800">📄 Ouvrir PDF</a>
-                                                @elseif(in_array($extension, ['doc', 'docx']))
-                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-blue-700 underline underline-offset-2">📝 Ouvrir Word</a>
-                                                @elseif(in_array($extension, ['xls', 'xlsx']))
-                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-emerald-700 underline underline-offset-2">📊 Ouvrir Excel</a>
-                                                @elseif(in_array($extension, ['ppt', 'pptx']))
-                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-orange-700 underline underline-offset-2">📽️ Ouvrir PowerPoint</a>
-                                                @else
-                                                    <a href="{{ $link }}" target="_blank" rel="noopener noreferrer" class="mt-1 block text-xs font-semibold text-blue-700 underline underline-offset-2">🔗 Ouvrir le document</a>
-                                                @endif
-                                            @endif
-                                        </td>
+                    <svg
+                        class="h-4 w-4 shrink-0 text-slate-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
+                        <path d="m16 16 4 4" stroke-linecap="round" stroke-width="1.8"/>
+                    </svg>
 
-                                        <td class="whitespace-nowrap px-5 py-5 text-slate-600">
-                                            <div class="flex items-center gap-2">
-                                                <span>📅</span>
-                                                <span>{{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</span>
-                                            </div>
-                                            <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                                                <span>⏱️</span>
-                                                <span>{{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i') : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}</span>
-                                            </div>
-                                        </td>
+                    <input
+                        type="search"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Rechercher une tâche..."
+                        class="min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                    >
 
-                                        <td class="whitespace-nowrap px-5 py-5 text-slate-600">
-                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '—' }}
-                                        </td>
+                    <button
+                        type="submit"
+                        title="Rechercher"
+                        class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700"
+                    >
+                        OK
+                    </button>
 
-                                        <td class="whitespace-nowrap px-5 py-5">
-                                            @if($task->is_archived)
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">📁 Archivée</span>
-                                            @elseif($task->document_status === 'done')
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800">✓ Terminée</span>
-                                            @elseif($task->document_status === 'in_progress')
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-bold text-blue-800">◷ En cours</span>
+                </form>
+
+            </div>
+
+            {{-- TABLEAU UNIQUE --}}
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[1150px] border-collapse text-left text-sm">
+
+                    <thead class="border-b border-blue-100 bg-blue-50/80">
+
+                        <tr class="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+
+                            <th class="px-5 py-4">Matière</th>
+                            <th class="px-4 py-4">Leçon / Étape</th>
+                            <th class="px-4 py-4">Tâche</th>
+                            <th class="px-4 py-4">Exécution</th>
+                            <th class="px-4 py-4">Échéance</th>
+                            <th class="px-4 py-4">Statut</th>
+                            <th class="px-4 py-4">Priorité</th>
+                            <th class="px-5 py-4 text-right">Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100">
+
+                        @forelse($masterTasks as $task)
+
+                            <tr class="transition-colors hover:bg-blue-50/50">
+
+                                {{-- MATIÈRE --}}
+                                <td class="px-5 py-4">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span class="text-lg">📚</span>
+
+                                        <span class="font-bold text-slate-800">
+                                            {{ $task->project->title ?? $task->project_name ?? 'Général' }}
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                {{-- LEÇON / ÉTAPE --}}
+                                <td class="px-4 py-4">
+
+                                    <span class="inline-flex items-center gap-2 font-semibold text-blue-600">
+
+                                        <span>📖</span>
+
+                                        {{ $task->category->title ?? $task->category->name ?? 'Général' }}
+
+                                    </span>
+
+                                </td>
+
+                                {{-- LIBELLÉ ET DOCUMENT --}}
+                                <td class="max-w-sm px-4 py-4">
+
+                                    <a
+                                        href="{{ route('tasks.learning', $task->id) }}"
+                                        class="font-bold leading-5 text-slate-900 hover:text-blue-700"
+                                    >
+                                        {{ $task->title }}
+                                    </a>
+
+                                    @if($task->document_link)
+
+                                        @php
+                                            $link = $task->document_link;
+
+                                            if (
+                                                !str_starts_with($link, 'http://') &&
+                                                !str_starts_with($link, 'https://') &&
+                                                !str_starts_with($link, '/') &&
+                                                !str_starts_with($link, 'file://')
+                                            ) {
+                                                $link = asset('storage/' . $link);
+                                            }
+
+                                            $extension = strtolower(
+                                                pathinfo($task->document_link, PATHINFO_EXTENSION)
+                                            );
+                                        @endphp
+
+                                        <a
+                                            href="{{ $link }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-1 flex items-center gap-1 text-xs font-semibold underline underline-offset-2 {{ $extension === 'pdf' ? 'text-red-600' : 'text-blue-600' }}"
+                                        >
+                                            @if($extension === 'pdf')
+                                                📄 Ouvrir PDF
+                                            @elseif(in_array($extension, ['doc', 'docx']))
+                                                📝 Ouvrir Word
+                                            @elseif(in_array($extension, ['xls', 'xlsx']))
+                                                📊 Ouvrir Excel
+                                            @elseif(in_array($extension, ['ppt', 'pptx']))
+                                                📽️ Ouvrir PowerPoint
                                             @else
-                                                <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-bold text-amber-800">○ À faire</span>
+                                                🔗 Ouvrir le document
                                             @endif
-                                        </td>
+                                        </a>
 
-                                        <td class="px-5 py-5">
-                                            <div class="flex min-w-[132px] items-center justify-end gap-2">
-                                                <button type="button"
-                                                        onclick="editTask({{ $task->id }})"
-                                                        title="Modifier la tâche"
-                                                        aria-label="Modifier la tâche"
-                                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/>
-                                                    </svg>
+                                    @endif
+
+                                </td>
+
+                                {{-- EXÉCUTION --}}
+                                <td class="whitespace-nowrap px-4 py-4 text-slate-600">
+
+                                    <div class="flex items-center gap-2">
+
+                                        <span>🗓️</span>
+
+                                        {{ $task->execution_date
+                                            ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y')
+                                            : 'Non planifié' }}
+
+                                    </div>
+
+                                    @if($task->heure_debut || $task->heure_fin)
+
+                                        <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
+
+                                            <span>⏱️</span>
+
+                                            {{ $task->heure_debut
+                                                ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i')
+                                                : '--:--' }}
+
+                                            à
+
+                                            {{ $task->heure_fin
+                                                ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i')
+                                                : '--:--' }}
+
+                                        </div>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- ÉCHÉANCE --}}
+                                <td class="whitespace-nowrap px-4 py-4 text-slate-600">
+
+                                    {{ $task->date_prevue
+                                        ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y')
+                                        : '—' }}
+
+                                </td>
+
+                                {{-- STATUT --}}
+                                <td class="whitespace-nowrap px-4 py-4">
+
+                                    @if($task->is_archived)
+
+                                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
+                                            📁 Archivée
+                                        </span>
+
+                                    @elseif($task->document_status === 'done')
+
+                                        <span class="inline-flex rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700">
+                                            ✓ Terminée
+                                        </span>
+
+                                    @elseif($task->document_status === 'in_progress')
+
+                                        <span class="inline-flex rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+                                            ◷ En cours
+                                        </span>
+
+                                    @else
+
+                                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
+                                            ◷ À faire
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- PRIORITÉ --}}
+                                <td class="whitespace-nowrap px-4 py-4">
+
+                                    @if($task->priority === 'high')
+
+                                        <span class="inline-flex rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600">
+                                            ↑ Haute
+                                        </span>
+
+                                    @elseif($task->priority === 'low')
+
+                                        <span class="inline-flex rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold text-green-700">
+                                            ↓ Basse
+                                        </span>
+
+                                    @else
+
+                                        <span class="inline-flex rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700">
+                                            = Moyenne
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- ACTIONS --}}
+                                <td class="px-5 py-4">
+
+                                    <div class="flex items-center justify-end gap-2">
+
+                                        {{-- MODIFIER --}}
+                                        <button
+                                            type="button"
+                                            onclick="editTask({{ $task->id }})"
+                                            title="Modifier"
+                                            aria-label="Modifier la tâche"
+                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
+                                        >
+                                            ✎
+                                        </button>
+
+                                        {{-- CONSULTER --}}
+                                        <a
+                                            href="{{ route('tasks.learning', $task->id) }}"
+                                            title="Consulter"
+                                            aria-label="Consulter la tâche"
+                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition hover:bg-slate-200"
+                                        >
+                                            ◉
+                                        </a>
+
+                                        {{-- ARCHIVER --}}
+                                        @if(!$task->is_archived)
+
+                                            <form
+                                                action="{{ route('tasks.archive', $task->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Archiver cette tâche ?');"
+                                            >
+                                                @csrf
+
+                                                <button
+                                                    type="submit"
+                                                    title="Archiver"
+                                                    aria-label="Archiver la tâche"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 transition hover:bg-amber-500"
+                                                >
+                                                    ▣
                                                 </button>
 
-                                                @if(!$task->is_archived)
-                                                    <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline" onsubmit="return confirm('Archiver cette tâche ? Vous pourrez la retrouver dans les archives.');">
-                                                        @csrf
-                                                        <button type="submit" title="Archiver la tâche" aria-label="Archiver la tâche" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 shadow-sm transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200">
-                                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7h18M5 7l1 13h12l1-13M9 7V4h6v3M10 11v5m4-5v5"/>
-                                                            </svg>
-                                                        </button>
-                                                    </form>
-                                                @endif
+                                            </form>
 
-                                                <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" onclick="return confirm('Supprimer cette tâche ?')" title="Supprimer la tâche" aria-label="Supprimer la tâche" class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-200">
-                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            @empty
-                <div class="rounded-2xl border border-dashed border-blue-200 bg-white px-6 py-14 text-center shadow-sm">
-                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-2xl">🔍</div>
-                    <h3 class="mt-4 text-base font-bold text-slate-800">
-                        {{ request()->filled('search') ? 'Aucune tâche trouvée' : 'Aucune tâche à afficher' }}
-                    </h3>
-                    <p class="mt-2 text-sm text-slate-500">
-                        @if(request()->filled('search'))
-                            Aucune tâche ne correspond à « {{ request('search') }} » pour les filtres actuels.
-                        @else
-                            Les tâches du Mode Master apparaîtront ici une fois ajoutées.
-                        @endif
-                    </p>
-                    @if(request()->filled('search'))
-                        <a href="{{ route('dashboard', request()->except(['search', 'page'])) }}"
-                           class="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                            Effacer la recherche
-                        </a>
-                    @endif
-                </div>
-            @endforelse
-        </div>
-    @endif
+                                        @endif
+
+                                        {{-- SUPPRIMER --}}
+                                        <form
+                                            action="{{ route('tasks.destroy', $task->id) }}"
+                                            method="POST"
+                                            onsubmit="return confirm('Supprimer définitivement cette tâche ?');"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                title="Supprimer"
+                                                aria-label="Supprimer la tâche"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white transition hover:bg-red-600"
+                                            >
+                                                🗑
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+
+                                <td colspan="8" class="px-6 py-14 text-center">
+
+                                    <div class="mb-3 text-3xl">
+                                        🔍
+                                    </div>
+
+                                    <h3 class="font-bold text-slate-800">
+
+                                        {{ request()->filled('search')
+                                            ? 'Aucune tâche trouvée'
+                                            : 'Aucune tâche à afficher' }}
+
+                                    </h3>
+
+                                    <p class="mt-2 text-sm text-slate-500">
+
+                                        @if(request()->filled('search'))
+
+                                            Aucune tâche ne correspond à
+                                            « {{ request('search') }} ».
+
+                                        @else
+
+                                            Les tâches du Mode Master apparaîtront ici.
+
+                                        @endif
+
+                                    </p>
+
+                                    @if(request()->filled('search'))
+
+                                        <a
+                                            href="{{ route('dashboard', request()->except(['search', 'page'])) }}"
+                                            class="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                                        >
+                                            Effacer la recherche
+                                        </a>
+
+                                    @endif
+
+                                </td>
+
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        @endif
 
 <!-- ================= VUE : DÉVELOPPEMENT PERSONNEL ================= -->
     @if($view === 'personal')
