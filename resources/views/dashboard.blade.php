@@ -1653,13 +1653,27 @@
                                             >
                                                 @csrf
 
+
                                                 <button
                                                     type="submit"
-                                                    title="Archiver"
+                                                    title="Archiver la tâche"
                                                     aria-label="Archiver la tâche"
-                                                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 transition hover:bg-amber-500"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 shadow-sm transition hover:bg-amber-500"
                                                 >
-                                                    ▣
+                                                    <svg
+                                                        class="h-4 w-4"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.8"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <rect x="3" y="4" width="18" height="4" rx="1"/>
+                                                        <path d="M5 8v12h14V8"/>
+                                                        <path d="M9 13l3 3 3-3"/>
+                                                        <path d="M12 11v5"/>
+                                                    </svg>
                                                 </button>
 
                                             </form>
