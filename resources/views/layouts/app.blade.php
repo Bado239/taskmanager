@@ -148,20 +148,8 @@
                 >
                     Rechercher
                 </button>
+
             </form>
-            <svg class="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
-                <path d="m16 16 4 4" stroke-linecap="round" stroke-width="1.8"/>
-            </svg>
-            <input
-                type="search"
-                aria-label="Recherche bientôt disponible"
-                placeholder="Rechercher une tâche, une matière, un chapitre..."
-                title="Recherche bientôt disponible"
-                readonly
-                class="w-full cursor-default border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-            >
-        </div>
 
         <!-- PROFIL -->
         <div class="ml-auto flex shrink-0 items-center gap-3 sm:gap-5">
