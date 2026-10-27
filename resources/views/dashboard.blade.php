@@ -800,147 +800,458 @@
     @endif
 
     <!-- ================= VUE : MODE OFFICE ================= -->
+
+    {{-- ============================================= --}}
+    {{-- VUE : MODE OFFICE — DESIGN TABLEAU UNIQUE     --}}
+    {{-- ============================================= --}}
+
     @if($view === 'office')
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
-            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                💼 OFFICE Cockpit Livrables 
-                <span class="text-xs bg-blue-50 text-[#0052cc] px-2.5 py-0.5 rounded-full font-semibold border border-blue-100">
-                    🇸🇳 Dakar, Sénégal
-                </span>
-            </h1>
 
-            <div class="flex items-center gap-2">
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'office', 'filter' => 'all', 'status' => 'active'])) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'all' ? 'bg-[#0052cc] text-white border-[#0052cc] shadow-md' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
-                   Toutes Actives
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'office', 'filter' => 'today', 'status' => 'active'])) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'active' && $filter === 'today' ? 'bg-[#0052cc] text-white border-[#0052cc]' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
-                   📅 Aujourd'hui
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'office', 'status' => 'archived'])) }}" 
-                   class="px-3 py-1.5 text-xs font-bold rounded-lg border {{ $statusFilter === 'archived' ? 'bg-gray-700 text-white border-gray-700' : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100' }}">
-                   📁 Archives
-                </a>
+        {{-- BARRE COMPACTE : FILTRES + NOUVELLE TÂCHE --}}
+        <section class="mb-3 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+
+                {{-- FILTRES --}}
+                <div class="flex flex-wrap items-center gap-2">
+
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'office',
+                            'filter' => 'all',
+                            'status' => 'active'
+                        ])) }}"
+                        class="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-bold transition {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                    >
+                        Toutes actives
+                    </a>
+
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'office',
+                            'filter' => 'today',
+                            'status' => 'active'
+                        ])) }}"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition {{ $statusFilter === 'active' && $filter === 'today' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                    >
+                        📅 Aujourd'hui
+                    </a>
+
+                    <a
+                        href="{{ route('dashboard', array_merge(request()->only('search'), [
+                            'view' => 'office',
+                            'status' => 'archived'
+                        ])) }}"
+                        class="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}"
+                    >
+                        📁 Archives
+                    </a>
+
+                </div>
+
+                {{-- NOUVELLE TÂCHE À DROITE --}}
+                <button
+                    type="button"
+                    onclick="toggleTaskForm()"
+                    id="btnToggleForm"
+                    class="inline-flex shrink-0 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                >
+                    + Nouvelle tâche (Mode Office)
+                </button>
+
             </div>
-        </div>
+        </section>
 
-        @php
-            $groupedOfficeTasks = $officeTasks->groupBy(function($task) {
-                return $task->project->title ?? $task->project_name ?? 'Sans Projet';
-            });
-        @endphp
 
-        <div class="space-y-6">
-            @forelse($groupedOfficeTasks as $projectName => $tasksInProject)
-                <div class="bg-white rounded-xl border border-blue-200 shadow-md overflow-hidden">
-                    <div class="p-4 bg-blue-50 border-b border-blue-200 flex items-center justify-between">
-                        <h3 class="font-bold text-gray-900 text-base flex items-center gap-2">
-                            📁 Projet : <span class="text-blue-700 font-extrabold">{{ $projectName }}</span>
-                        </h3>
-                        <span class="text-xs bg-blue-200 text-blue-800 font-bold px-2.5 py-1 rounded-full">
-                            {{ $tasksInProject->count() }} tâche(s)
-                        </span>
+        {{-- TABLEAU UNIQUE --}}
+        <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+
+            {{-- TITRE COMPACT --}}
+            <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+
+                <div class="flex items-center gap-3">
+
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-lg">
+                        📋
+                    </span>
+
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900">
+                            Toutes les tâches (Mode Office)
+                        </h2>
+
+                        <p class="text-xs text-slate-500">
+                            {{ $officeTasks->count() }} tâche(s) affichée(s)
+                        </p>
                     </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm text-gray-600">
-                            <thead class="bg-blue-100 text-xs uppercase font-semibold text-blue-900 border-b border-blue-200">
-                                <tr>
-                                    <th class="px-4 py-3">Rang</th>
-                                    <th class="px-4 py-3">Étape & Libellé</th>
-                                    <th class="px-4 py-3">Statut / Priorité</th>
-                                    <th class="px-4 py-3">Planification</th>
-                                    <th class="px-4 py-3">Échéance</th>
-                                    <th class="px-4 py-3 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                @foreach($tasksInProject as $index => $task)
-                                    <tr class="hover:bg-blue-50 transition-colors border-b border-blue-100">
-                                        <td class="px-4 py-4 font-bold text-blue-400">#{{ $index + 1 }}</td>
-                                        <td class="px-4 py-4">
-                                            <div class="text-xs font-semibold text-blue-700 mb-0.5">
-                                                📌 Étape : {{ $task->category->title ?? $task->category->name ?? 'Général' }}
-                                            </div>
-                                            <div class="font-bold text-gray-900 hover:text-blue-700">{{ $task->title }}</div>
-                                            @if($task->document_link)
+                </div>
 
-                                                @php
-                                                    $link = $task->document_link;
+            </div>
 
-                                                    // Correction automatique du chemin de stockage
-                                                    if(!str_starts_with($link, 'http') && !str_starts_with($link, '/storage')) {
-                                                        $link = '/storage/' . $link;
-                                                    }
-                                                @endphp
+            {{-- STYLE COMPACT, IDENTIQUE AU MODE MASTER --}}
+            <style>
+                .office-table {
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
 
-                                                <a href="{{ $link }}"
-                                                target="_blank"
-                                                class="text-xs text-[#0052cc] underline block mt-0.5">
+                .office-table th {
+                    padding: 12px 10px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    white-space: nowrap;
+                    letter-spacing: 0.025em;
+                }
 
-                                                    🔗 Document / Support
+                .office-table td {
+                    padding: 11px 10px;
+                    font-size: 12px;
+                    vertical-align: middle;
+                    white-space: nowrap;
+                }
 
-                                                </a>
+                .office-table td a,
+                .office-table td span {
+                    font-size: inherit;
+                }
 
+                .office-table td .text-xs {
+                    font-size: 11px;
+                }
+
+                .office-table tbody tr {
+                    min-height: 58px;
+                }
+
+                .office-table tbody tr:hover {
+                    background-color: #f8fbff;
+                }
+            </style>
+
+            <div class="overflow-x-auto">
+
+                <table class="office-table w-full min-w-[1100px] border-collapse text-left text-xs">
+
+                    <thead class="border-b border-blue-100 bg-blue-50/80">
+
+                        <tr class="font-extrabold uppercase text-slate-600">
+                            <th>Projet</th>
+                            <th>Étape</th>
+                            <th>Tâche</th>
+                            <th>Exécution</th>
+                            <th>Échéance</th>
+                            <th>Statut</th>
+                            <th>Priorité</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-100">
+
+                        @forelse($officeTasks as $task)
+
+                            <tr class="transition-colors hover:bg-blue-50/50">
+
+                                {{-- PROJET --}}
+                                <td>
+                                    <div class="flex items-center gap-2">
+
+                                        <span class="text-base">📁</span>
+
+                                        <span class="font-bold text-slate-800">
+                                            {{ $task->project->title ?? $task->project_name ?? 'Général' }}
+                                        </span>
+
+                                    </div>
+                                </td>
+
+                                {{-- ÉTAPE --}}
+                                <td>
+                                    <span class="inline-flex items-center gap-1.5 font-semibold text-blue-600">
+                                        📌
+                                        {{ $task->category->title ?? $task->category->name ?? 'Général' }}
+                                    </span>
+                                </td>
+
+                                {{-- TÂCHE ET DOCUMENT --}}
+                                <td>
+                                    <div class="font-bold text-slate-900">
+                                        {{ $task->title }}
+                                    </div>
+
+                                    @if($task->document_link)
+
+                                        @php
+                                            $documentPath = $task->document_link;
+
+                                            if (
+                                                !str_starts_with($documentPath, 'http://') &&
+                                                !str_starts_with($documentPath, 'https://') &&
+                                                !str_starts_with($documentPath, '/') &&
+                                                !str_starts_with($documentPath, 'file://')
+                                            ) {
+                                                $documentPath = asset('storage/' . $documentPath);
+                                            }
+
+                                            $extension = strtolower(
+                                                pathinfo($task->document_link, PATHINFO_EXTENSION)
+                                            );
+                                        @endphp
+
+                                        <a
+                                            href="{{ $documentPath }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="mt-1 inline-flex items-center gap-1 font-semibold underline underline-offset-2 {{ $extension === 'pdf' ? 'text-red-600' : 'text-blue-600' }}"
+                                        >
+                                            @if($extension === 'pdf')
+                                                📄 Ouvrir PDF
+                                            @elseif(in_array($extension, ['doc', 'docx']))
+                                                📝 Ouvrir Word
+                                            @elseif(in_array($extension, ['xls', 'xlsx']))
+                                                📊 Ouvrir Excel
+                                            @elseif(in_array($extension, ['ppt', 'pptx']))
+                                                📽️ Ouvrir PowerPoint
+                                            @else
+                                                🔗 Document / Support
                                             @endif
-                                        </td>
-                                        <td class="px-4 py-4 space-y-1">
-                                            <div>
-                                                @if($task->document_status === 'done')
-                                                    <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded border border-emerald-200">🟢 Validé</span>
-                                                @elseif($task->document_status === 'in_progress')
-                                                    <span class="bg-amber-50 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded border border-amber-200">🟡 En cours</span>
-                                                @else
-                                                    <span class="bg-gray-100 text-gray-700 text-xs font-semibold px-2 py-0.5 rounded border border-gray-200">🔴 Cadrage</span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-4 text-xs text-gray-600">
-                                            <div>📅 {{ $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y') : 'Non planifié' }}</div>
-                                            @if($task->heure_debut || $task->heure_fin)
-                                                <div class="text-gray-500 font-semibold">⏰ {{ $task->heure_debut ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i' ) : '--:--' }} à {{ $task->heure_fin ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i') : '--:--' }}</div>
-                                            @endif
-                                        </td>
-                                        <td class="px-4 py-4 text-xs text-gray-500">
-                                            {{ $task->date_prevue ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y') : '-' }}
-                                        </td>
-                                        <td class="px-4 py-4 text-right space-x-2">
-                                            <button type="button"
+                                        </a>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- DATE D'EXÉCUTION ET HEURES --}}
+                                <td class="text-slate-600">
+
+                                    <div class="flex items-center gap-2">
+                                        <span>🗓️</span>
+
+                                        <span>
+                                            {{ $task->execution_date
+                                                ? \Carbon\Carbon::parse($task->execution_date)->format('d/m/Y')
+                                                : 'Non planifié' }}
+                                        </span>
+                                    </div>
+
+                                    @if($task->heure_debut || $task->heure_fin)
+
+                                        <div class="mt-1 flex items-center gap-2 text-slate-500">
+
+                                            <span>⏱️</span>
+
+                                            <span>
+                                                {{ $task->heure_debut
+                                                    ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i')
+                                                    : '--:--' }}
+
+                                                à
+
+                                                {{ $task->heure_fin
+                                                    ? \Carbon\Carbon::parse($task->heure_fin)->format('H:i')
+                                                    : '--:--' }}
+                                            </span>
+
+                                        </div>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- ÉCHÉANCE --}}
+                                <td class="text-slate-600">
+                                    {{ $task->date_prevue
+                                        ? \Carbon\Carbon::parse($task->date_prevue)->format('d/m/Y')
+                                        : '—' }}
+                                </td>
+
+                                {{-- STATUT --}}
+                                <td>
+
+                                    @if($task->is_archived)
+
+                                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 font-bold text-slate-600">
+                                            📁 Archivée
+                                        </span>
+
+                                    @elseif($task->document_status === 'done')
+
+                                        <span class="inline-flex rounded-full bg-green-50 px-3 py-1.5 font-bold text-green-700">
+                                            ✓ Terminée
+                                        </span>
+
+                                    @elseif($task->document_status === 'in_progress')
+
+                                        <span class="inline-flex rounded-full bg-blue-50 px-3 py-1.5 font-bold text-blue-700">
+                                            ◷ En cours
+                                        </span>
+
+                                    @else
+
+                                        <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 font-bold text-slate-600">
+                                            ◷ À faire
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- PRIORITÉ --}}
+                                <td>
+
+                                    @if($task->priority === 'high')
+
+                                        <span class="inline-flex rounded-full bg-red-50 px-3 py-1.5 font-bold text-red-600">
+                                            ↑ Haute
+                                        </span>
+
+                                    @elseif($task->priority === 'low')
+
+                                        <span class="inline-flex rounded-full bg-green-50 px-3 py-1.5 font-bold text-green-700">
+                                            ↓ Basse
+                                        </span>
+
+                                    @else
+
+                                        <span class="inline-flex rounded-full bg-amber-50 px-3 py-1.5 font-bold text-amber-700">
+                                            = Moyenne
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                {{-- ACTIONS --}}
+                                <td>
+                                    <div class="flex items-center justify-end gap-2">
+
+                                        {{-- MODIFIER --}}
+                                        <button
+                                            type="button"
                                             onclick="editTask({{ $task->id }})"
-                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                                            title="Modifier"
+                                            aria-label="Modifier la tâche"
+                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="1.8"
+                                                    d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/>
+                                            </svg>
+                                        </button>
 
-                                                Modifier
+                                        {{-- ARCHIVER --}}
+                                        @if(!$task->is_archived)
 
-                                            </button>
-                                            @if(!$task->is_archived)
-                                                <form action="{{ route('tasks.archive', $task->id) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="text-xs text-amber-600 hover:text-amber-800 font-semibold">Archiver</button>
-                                                </form>
-                                            @endif
-                                            <form action="{{ route('tasks.destroy', $task->id) }}" method="POST" class="inline">
+                                            <form
+                                                action="{{ route('tasks.archive', $task->id) }}"
+                                                method="POST"
+                                                class="inline"
+                                                onsubmit="return confirm('Archiver cette tâche ?');"
+                                            >
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" onclick="return confirm('Supprimer ce livrable ?')" class="text-xs text-red-500 hover:text-red-700 font-semibold">Supprimer</button>
+
+                                                <button
+                                                    type="submit"
+                                                    title="Archiver"
+                                                    aria-label="Archiver la tâche"
+                                                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 transition hover:bg-amber-500"
+                                                >
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="1.8"
+                                                            d="M3 7h18M5 7l1 13h12l1-13M9 7V4h6v3M10 11v5m4-5v5"/>
+                                                    </svg>
+                                                </button>
                                             </form>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            @empty
-                <div class="bg-blue-50 p-12 text-center rounded-xl border border-blue-200 shadow-sm text-blue-700 font-semibold">
-                    @if(request()->filled('search'))
-                        Aucune tâche trouvée pour « {{ request('search') }} » avec les filtres actuels.
-                    @else
-                        Aucune activité enregistrée en Mode Office
-                    @endif
-                </div>
-            @endforelse
-        </div>
+
+                                        @endif
+
+                                        {{-- SUPPRIMER --}}
+                                        <form
+                                            action="{{ route('tasks.destroy', $task->id) }}"
+                                            method="POST"
+                                            class="inline"
+                                            onsubmit="return confirm('Supprimer définitivement cette tâche ?');"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                title="Supprimer"
+                                                aria-label="Supprimer la tâche"
+                                                class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white transition hover:bg-red-600"
+                                            >
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="1.8"
+                                                        d="M4 7h16M10 11v6m4-6v6M6 7l1 14h10l1-14M9 7V4h6v3"/>
+                                                </svg>
+                                            </button>
+                                        </form>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        @empty
+
+                            <tr>
+                                <td colspan="8" class="px-6 py-14 text-center">
+
+                                    <div class="mb-3 text-3xl">
+                                        🔍
+                                    </div>
+
+                                    <h3 class="font-bold text-slate-800">
+                                        {{ request()->filled('search')
+                                            ? 'Aucune tâche trouvée'
+                                            : 'Aucune tâche à afficher' }}
+                                    </h3>
+
+                                    <p class="mt-2 text-sm text-slate-500">
+
+                                        @if(request()->filled('search'))
+                                            Aucune tâche ne correspond à
+                                            « {{ request('search') }} »
+                                            avec les filtres actuels.
+                                        @else
+                                            Les tâches du Mode Office apparaîtront ici.
+                                        @endif
+
+                                    </p>
+
+                                    @if(request()->filled('search'))
+
+                                        <a
+                                            href="{{ route('dashboard', request()->except(['search', 'page'])) }}"
+                                            class="mt-4 inline-flex rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                                        >
+                                            Effacer la recherche
+                                        </a>
+
+                                    @endif
+
+                                </td>
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
     @endif
 
     <!-- ================= VUE : MODE MASTER ================= -->
