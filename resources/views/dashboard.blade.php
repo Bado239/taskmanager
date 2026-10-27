@@ -52,7 +52,7 @@
     $defaultStartTime = '09:00';$defaultEndTime = '11:00';
 @endphp
 
-<div class="space-y-6 pb-12">
+<div class="space-y-3 pb-12">
 
     <!-- FORMULAIRE DE CRÉATION DE TÂCHE (CACHÉ PAR DÉFAUT) -->
 <div id="taskFormContainer"
@@ -948,8 +948,7 @@
         <!-- En-tête du cockpit -->
 
         {{-- BARRE MASTER : FILTRES + NOUVELLE TÂCHE --}}
-        <section class="mb-4 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
-
+        <section class="mt-0 mb-3 rounded-xl border border-blue-100 bg-white px-4 py-1.5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
 
                 {{-- FILTRES À GAUCHE --}}
