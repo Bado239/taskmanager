@@ -972,20 +972,24 @@
                     <tbody class="divide-y divide-slate-100">
 
 
+
                         @forelse($officeTasks->sortBy(function ($task) {
 
-                            if (empty($task->execution_date)) {
-                                return '9999-12-31 23:59:59';
-                            }
+                            // 0 = tâches non terminées, 1 = tâches terminées
+                            $groupe = $task->document_status === 'done' ? '1' : '0';
 
-                            $date = \Carbon\Carbon::parse($task->execution_date)
-                                ->format('Y-m-d');
+                            // Date d'exécution : les dates absentes sont placées en dernier
+                            $date = !empty($task->execution_date)
+                                ? \Carbon\Carbon::parse($task->execution_date)->format('Y-m-d')
+                                : '9999-12-31';
 
+                            // Heure de début : les heures absentes sont placées en dernier
                             $heure = !empty($task->heure_debut)
                                 ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i:s')
                                 : '23:59:59';
 
-                            return $date . ' ' . $heure;
+                            // Classement : groupe → date → heure → ID
+                            return $groupe . '|' . $date . '|' . $heure . '|' . str_pad((string) $task->id, 12, '0', STR_PAD_LEFT);
 
                         }) as $task)
 
@@ -1481,20 +1485,24 @@
                     <tbody class="divide-y divide-slate-100">
 
 
+
                         @forelse($masterTasks->sortBy(function ($task) {
 
-                            if (empty($task->execution_date)) {
-                                return '9999-12-31 23:59:59';
-                            }
+                            // 0 = tâches non terminées, 1 = tâches terminées
+                            $groupe = $task->document_status === 'done' ? '1' : '0';
 
-                            $date = \Carbon\Carbon::parse($task->execution_date)
-                                ->format('Y-m-d');
+                            // Date d'exécution : les dates absentes sont placées en dernier
+                            $date = !empty($task->execution_date)
+                                ? \Carbon\Carbon::parse($task->execution_date)->format('Y-m-d')
+                                : '9999-12-31';
 
+                            // Heure de début : les heures absentes sont placées en dernier
                             $heure = !empty($task->heure_debut)
                                 ? \Carbon\Carbon::parse($task->heure_debut)->format('H:i:s')
                                 : '23:59:59';
 
-                            return $date . ' ' . $heure;
+                            // Classement : groupe → date → heure → ID
+                            return $groupe . '|' . $date . '|' . $heure . '|' . str_pad((string) $task->id, 12, '0', STR_PAD_LEFT);
 
                         }) as $task)
 
