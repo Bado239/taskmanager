@@ -92,8 +92,63 @@
             </span>
         </a>
 
-        <!-- RECHERCHE VISUELLE -->
-        <div class="tm-search ml-2 hidden max-w-2xl flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 md:flex">
+
+            <!-- BARRE DE RECHERCHE -->
+            <form
+                action="{{ route('dashboard') }}"
+                method="GET"
+                role="search"
+                class="tm-search ml-2 hidden max-w-2xl flex-1 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 transition md:flex"
+            >
+                <!-- Conserver le mode actuel -->
+                <input
+                    type="hidden"
+                    name="view"
+                    value="{{ request('view', 'dashboard') }}"
+                >
+
+                <!-- Conserver les filtres actifs -->
+                @if(request()->filled('filter'))
+                    <input type="hidden" name="filter" value="{{ request('filter') }}">
+                @endif
+
+                @if(request()->filled('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+
+                <!-- Icône recherche -->
+                <svg
+                    class="h-5 w-5 shrink-0 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
+                    <path
+                        d="m16 16 4 4"
+                        stroke-linecap="round"
+                        stroke-width="1.8"
+                    />
+                </svg>
+
+                <!-- Champ de recherche -->
+                <input
+                    type="search"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Rechercher une tâche, une matière, un chapitre..."
+                    aria-label="Rechercher une tâche"
+                    class="w-full min-w-0 border-0 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                >
+
+                <!-- Bouton rechercher -->
+                <button
+                    type="submit"
+                    class="shrink-0 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
+                >
+                    Rechercher
+                </button>
+            </form>
             <svg class="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
                 <path d="m16 16 4 4" stroke-linecap="round" stroke-width="1.8"/>

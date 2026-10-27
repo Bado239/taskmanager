@@ -29,6 +29,51 @@ class TaskController extends Controller
         $statusFilter = $request->query('status', 'active');
         $indicator = $request->query('indicator');
 
+        
+        // RECHERCHE DES TÂCHES
+        $search = trim((string) $request->query('search', ''));
+        $search = mb_substr($search, 0, 100);
+
+        // Afficher les résultats sur le Dashboard global
+        if ($search !== '' && $view === 'dashboard' && !$indicator) {
+            $indicator = 'total';
+        }
+
+        // Filtre de recherche réutilisable
+        $applyTaskSearch = static function ($query) use ($search) {
+
+            if ($search === '') {
+                return;
+            }
+
+            $needle = '%' . mb_strtolower($search) . '%';
+
+            $query->where(function ($q) use ($needle) {
+
+                $q->whereRaw('LOWER(title) LIKE ?', [$needle])
+
+                  ->orWhereRaw(
+                      'LOWER(project_name) LIKE ?',
+                      [$needle]
+                  )
+
+                  ->orWhereHas('project', function ($p) use ($needle) {
+                      $p->whereRaw(
+                          'LOWER(title) LIKE ?',
+                          [$needle]
+                      );
+                  })
+
+                  ->orWhereHas('category', function ($c) use ($needle) {
+                      $c->whereRaw(
+                          'LOWER(name) LIKE ?',
+                          [$needle]
+                      );
+                  });
+            });
+        };
+
+
         if (in_array($view, ['office', 'master', 'personal'])) {
             session(['current_mode' => $view]);
         }
@@ -105,6 +150,8 @@ class TaskController extends Controller
                     $query->where('is_archived', 1);
                     break;
             }
+            $applyTaskSearch($query);
+
             $globalIndicatorTasks = $query->with(['category', 'project'])
                 ->orderBy('execution_date', 'asc')
                 ->orderBy('heure_debut', 'asc')
@@ -121,6 +168,8 @@ class TaskController extends Controller
                 $officeQuery->where('execution_date', $today);
             }
         }
+        $applyTaskSearch($officeQuery);
+
         $officeTasks = $officeQuery->with(['category', 'project'])
             ->orderBy('execution_date', 'asc')
             ->orderBy('heure_debut', 'asc')
@@ -136,6 +185,8 @@ class TaskController extends Controller
                 $masterQuery->where('execution_date', $today);
             }
         }
+        $applyTaskSearch($masterQuery);
+
         $masterTasks = $masterQuery->with(['category', 'project'])
             ->orderBy('execution_date', 'asc')
             ->orderBy('heure_debut', 'asc')
@@ -208,6 +259,7 @@ class TaskController extends Controller
         }
         return view('dashboard', compact(
             'view',
+            'search',
             'filter',
             'statusFilter',
             'currentMode',
