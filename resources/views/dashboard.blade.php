@@ -537,67 +537,88 @@
     </div>
 
     <script>
-        function toggleTaskForm() {
 
+        function toggleTaskForm() {
             const formContainer = document.getElementById('taskFormContainer');
             const btn = document.getElementById('btnToggleForm');
-
             const form = document.getElementById('taskForm');
 
+            if (!formContainer || !form) return;
 
-            // Si on ouvre pour une nouvelle tâche
-            if(formContainer.style.display === 'none') {
+            const isHidden = window.getComputedStyle(formContainer).display === 'none';
 
-
-                // remettre le formulaire en mode création
-                form.action = "{{ route('tasks.store') }}";
-
-
-                document.getElementById('methodField').value = "POST";
-
-
-                document.getElementById('editTaskId').value = "";
-
-
-                // vider les champs
-                form.reset();
-
-
-                // vider Alpine
-                if(form._x_dataStack){
-
-                    let alpineData = form._x_dataStack[0];
-
-                    alpineData.selectedProject = '';
-
-                    alpineData.selectedCategory = '';
-
-                }
-
-
-                formContainer.style.display = 'block';
-
-                if (btn) {
-                    btn.innerHTML = '<span>✕ Fermer</span>';
-                }
-
-
-                formContainer.scrollIntoView({
-                    behavior:'smooth'
-                });
-
-
-            } else {
-
-
+            if (!isHidden) {
                 formContainer.style.display = 'none';
 
+                if (btn) {
+                    btn.textContent = '+ Nouvelle tâche (Mode {{ ucfirst($view) }})';
+                }
 
-                btn.innerHTML =
-                '<span>+ Nouvelle tâche (Mode Office)</span>';
-
+                return;
             }
 
+            // Revenir en mode création.
+            form.action = @json(route('tasks.store'));
+
+            document.getElementById('methodField').value = 'POST';
+            document.getElementById('editTaskId').value = '';
+
+            form.reset();
+
+            // Réinitialiser les champs contrôlés par Alpine.js.
+            if (window.Alpine) {
+                const data = Alpine.$data(form);
+
+                if (data) {
+                    data.currentMode = @json($currentType);
+                    data.selectedProject = '';
+                    data.selectedCategory = '';
+
+                    data.dueDate = @json($defaultDueDate);
+                    data.executionDate = @json($defaultExecutionDate);
+                    data.startTime = @json($defaultStartTime);
+                    data.endTime = @json($defaultEndTime);
+                }
+            }
+
+            // Rétablir les valeurs dans les champs HTML.
+            const fields = {
+                date_prevue: @json($defaultDueDate),
+                execution_date: @json($defaultExecutionDate),
+                start_time: @json($defaultStartTime),
+                end_time: @json($defaultEndTime)
+            };
+
+            for (const [name, value] of Object.entries(fields)) {
+                const input = form.elements.namedItem(name);
+
+                if (input) {
+                    input.value = value;
+                }
+            }
+
+            const oldDocument = document.getElementById('oldDocument');
+
+            if (oldDocument) {
+                oldDocument.replaceChildren();
+            }
+
+            const title = formContainer.querySelector('h2');
+
+            if (title) {
+                title.textContent = '➕ Enregistrer une tâche en Mode {{ strtoupper($currentType) }}';
+            }
+
+            formContainer.style.display = 'block';
+
+            if (btn) {
+                btn.textContent = '✕ Fermer';
+            }
+
+            formContainer.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
     </script>
         
