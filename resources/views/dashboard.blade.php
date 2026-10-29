@@ -1318,12 +1318,55 @@
                 })
                 : null;
 
-            // Ne conserver que les tâches du dossier ouvert.
-            $masterFolderTasks = $selectedMasterFolder
-                ? $masterTasks->filter(function ($task) use ($selectedMasterFolder) {
-                    return (int) $task->project_id === (int) $selectedMasterFolder->id;
-                })
-                : collect();
+
+            // Déterminer si l'utilisateur demande une vue globale.
+            $masterActivityView = !$selectedMasterFolder
+                && $statusFilter !== 'archived'
+                && in_array($filter, ['all', 'today'])
+                && request()->has('filter');
+
+            // Dossiers visibles selon le filtre Archives.
+            $displayMasterFolders = $projectsMaster->filter(function ($project) use ($statusFilter) {
+                return $statusFilter === 'archived'
+                    ? !$project->is_active
+                    : (bool) $project->is_active;
+            });
+
+            // Dossiers actifs autorisés pour les vues globales.
+            $activeMasterIds = $projectsMaster
+                ->filter(fn ($project) => (bool) $project->is_active)
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            // Tâches à afficher à l'intérieur d'un dossier
+            // ou dans la vue globale des activités.
+            $masterFolderTasks = $masterTasks->filter(function ($task) use (
+                $selectedMasterFolder,
+                $masterActivityView,
+                $activeMasterIds,
+                $filter
+            ) {
+                if ($selectedMasterFolder) {
+                    return (int) $task->project_id === (int) $selectedMasterFolder->id
+                        && !$task->is_archived;
+                }
+
+                if (!$masterActivityView || $task->is_archived) {
+                    return false;
+                }
+
+                if (!in_array((int) $task->project_id, $activeMasterIds, true)) {
+                    return false;
+                }
+
+                if ($filter === 'today') {
+                    return $task->execution_date
+                        && \Carbon\Carbon::parse($task->execution_date)->isToday();
+                }
+
+                return $task->document_status !== 'done';
+            });
 
         @endphp
 
@@ -1366,6 +1409,9 @@
 
             </section>
 
+
+            @if(!$masterActivityView)
+
             {{-- LISTE PRINCIPALE DES DOSSIERS MASTER --}}
             <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
 
@@ -1377,12 +1423,15 @@
                         </span>
 
                         <div>
+
                             <h2 class="text-lg font-extrabold text-slate-900">
-                                Mes dossiers (Mode Master)
+                                {{ $statusFilter === 'archived'
+                                    ? 'Dossiers archivés (Mode Master)'
+                                    : 'Mes dossiers (Mode Master)' }}
                             </h2>
 
                             <p class="text-xs text-slate-500">
-                                {{ $projectsMaster->count() }} dossier(s)
+                                {{ $displayMasterFolders->count() }} dossier(s)
                             </p>
                         </div>
                     </div>
@@ -1404,7 +1453,7 @@
 
                         <tbody class="divide-y divide-slate-100">
 
-                            @forelse($projectsMaster as $project)
+                            @forelse($displayMasterFolders as $project)
 
                                 @php
                                     $folderTasks = $masterTasks->filter(function ($task) use ($project) {
@@ -1420,11 +1469,11 @@
                                     $isFinished = $activeFolderTasks->isNotEmpty()
                                         && $finishedCount === $activeFolderTasks->count();
 
+
                                     $folderUrl = route('dashboard', [
                                         'view' => 'master',
                                         'folder' => $project->id,
-                                        'filter' => 'all',
-                                        'status' => 'active'
+                                        'status' => $statusFilter
                                     ]);
                                 @endphp
 
@@ -1507,11 +1556,18 @@
 
                 </div>
 
+
             </section>
 
-        @else
+            @endif {{-- Fin de la liste des dossiers --}}
+            @endif {{-- Fin de la navigation extérieure --}}
 
-            {{-- CONTENU DU DOSSIER SÉLECTIONNÉ --}}
+            @if($selectedMasterFolder || $masterActivityView)
+
+
+            {{-- CONTENU DU DOSSIER OU ACTIVITÉS GLOBALES --}}
+
+            @if($selectedMasterFolder)
 
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
 
@@ -1538,10 +1594,13 @@
                     onclick="toggleTaskForm()"
                     class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
                 >
-                    + Nouvelle tâche
-                </button>
 
-            </div>
+                + Nouvelle tâche
+            </button>
+
+        </div>
+
+        @endif {{-- En-tête visible uniquement dans un dossier --}}
 
         {{-- ============================================== --}}
         {{-- TABLEAU UNIQUE DES TÂCHES MASTER               --}}
@@ -1560,8 +1619,15 @@
 
                     <div>
 
+
                         <h2 class="text-lg font-extrabold text-slate-900">
-                            Chapitres et tâches — {{ $selectedMasterFolder->title }}
+                            @if($selectedMasterFolder)
+                                Chapitres et tâches — {{ $selectedMasterFolder->title }}
+                            @elseif($filter === 'today')
+                                📅 Activités prévues aujourd'hui
+                            @else
+                                📋 Toutes les activités en cours
+                            @endif
                         </h2>
 
                         <p class="text-xs text-slate-500">
@@ -1691,8 +1757,15 @@
 
                                 </td>
 
+
                                 {{-- LIBELLÉ ET DOCUMENT --}}
                                 <td class="max-w-sm px-4 py-4">
+
+                                    @if($masterActivityView)
+                                        <div class="mb-1 text-[10px] font-bold text-amber-700">
+                                            📁 {{ $task->project->title ?? $task->project_name ?? 'Sans dossier' }}
+                                        </div>
+                                    @endif
 
                                     <a
                                         href="{{ route('tasks.learning', $task->id) }}"

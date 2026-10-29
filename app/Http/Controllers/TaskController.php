@@ -91,10 +91,10 @@ class TaskController extends Controller
               ->orWhereIn('id', Task::where('type', 'office')->where('is_archived', 0)->pluck('project_id'));
         })->get();
 
-        $projectsMaster = Project::where('type', 'master')->where(function($q) {
-            $q->whereRaw('is_active = true')
-              ->orWhereIn('id', Task::where('type', 'master')->where('is_archived', 0)->pluck('project_id'));
-        })->get();
+
+        $projectsMaster = Project::where('type', 'master')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         $categoriesOffice = Category::where('type', 'office')->get();
         $categoriesMaster = Category::where('type', 'master')->get();
@@ -175,19 +175,17 @@ class TaskController extends Controller
             ->orderBy('heure_debut', 'asc')
             ->get();
 
-        // Requête Mode Master avec filtres et tri chronologique
+
+        // Charger les tâches Master.
+        // Les filtres de la nouvelle navigation seront appliqués
+        // dans dashboard.blade.php.
+
         $masterQuery = Task::where('type', 'master');
-        if ($statusFilter === 'archived') {
-            $masterQuery->where('is_archived', 1);
-        } else {
-            $masterQuery->where('is_archived', 0);
-            if ($filter === 'today') {
-                $masterQuery->where('execution_date', $today);
-            }
-        }
+
         $applyTaskSearch($masterQuery);
 
-        $masterTasks = $masterQuery->with(['category', 'project'])
+        $masterTasks = $masterQuery
+            ->with(['category', 'project'])
             ->orderBy('execution_date', 'asc')
             ->orderBy('heure_debut', 'asc')
             ->get();

@@ -93,12 +93,6 @@ Route::delete('/tasks/{id}', [
 |--------------------------------------------------------------------------
 */
 
-Route::delete('/projects/{project}', [
-    ProjectController::class,
-    'destroy'
-])->name('projects.destroy');
-
-
 
 Route::delete('/projects/{id}', [
     TaskController::class,
