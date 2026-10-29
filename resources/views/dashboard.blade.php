@@ -1304,7 +1304,191 @@
     @endif
 
     <!-- ================= VUE : MODE MASTER ================= -->
+
     @if($view === 'master')
+
+        @php
+            // Le dossier sélectionné est transmis dans l'URL.
+            $folderId = request()->integer('folder');
+
+            // Vérifier que le dossier appartient bien au Mode Master.
+            $selectedMasterFolder = $folderId
+                ? $projectsMaster->first(function ($project) use ($folderId) {
+                    return (int) $project->id === $folderId;
+                })
+                : null;
+
+            // Ne conserver que les tâches du dossier ouvert.
+            $masterFolderTasks = $selectedMasterFolder
+                ? $masterTasks->filter(function ($task) use ($selectedMasterFolder) {
+                    return (int) $task->project_id === (int) $selectedMasterFolder->id;
+                })
+                : collect();
+        @endphp
+
+        @if(!$selectedMasterFolder)
+
+            {{-- LISTE PRINCIPALE DES DOSSIERS MASTER --}}
+            <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+
+                <div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-xl">
+                            📁
+                        </span>
+
+                        <div>
+                            <h2 class="text-lg font-extrabold text-slate-900">
+                                Mes dossiers (Mode Master)
+                            </h2>
+
+                            <p class="text-xs text-slate-500">
+                                {{ $projectsMaster->count() }} dossier(s)
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full min-w-[700px] text-left text-xs">
+
+                        <thead class="border-b border-blue-100 bg-blue-50/80">
+                            <tr class="text-[11px] font-extrabold uppercase text-slate-600">
+                                <th class="px-4 py-3">Nom du dossier</th>
+                                <th class="px-4 py-3">Date de création</th>
+                                <th class="px-4 py-3">Statut</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100">
+
+                            @forelse($projectsMaster as $project)
+
+                                @php
+                                    $folderTasks = $masterTasks->filter(function ($task) use ($project) {
+                                        return (int) $task->project_id === (int) $project->id;
+                                    });
+
+                                    $activeFolderTasks = $folderTasks->filter(function ($task) {
+                                        return !$task->is_archived;
+                                    });
+
+                                    $finishedCount = $activeFolderTasks->where('document_status', 'done')->count();
+
+                                    $isFinished = $activeFolderTasks->isNotEmpty()
+                                        && $finishedCount === $activeFolderTasks->count();
+
+                                    $folderUrl = route('dashboard', [
+                                        'view' => 'master',
+                                        'folder' => $project->id,
+                                        'filter' => 'all',
+                                        'status' => 'active'
+                                    ]);
+                                @endphp
+
+                                <tr
+                                    class="cursor-pointer transition hover:bg-blue-50/60"
+                                    onclick="window.location.href = @js($folderUrl)"
+                                >
+
+                                    {{-- DOSSIER --}}
+                                    <td class="px-4 py-4">
+                                        <a
+                                            href="{{ $folderUrl }}"
+                                            class="inline-flex items-center gap-3 font-bold text-slate-800 hover:text-blue-700"
+                                        >
+                                            <span class="text-xl">📁</span>
+
+                                            <span>{{ $project->title }}</span>
+
+                                            <span class="text-xs font-normal text-slate-400">
+                                                ({{ $activeFolderTasks->count() }} tâches)
+                                            </span>
+                                        </a>
+                                    </td>
+
+                                    {{-- DATE DE CRÉATION --}}
+                                    <td class="whitespace-nowrap px-4 py-4 text-slate-600">
+                                        {{ $project->created_at
+                                            ? \Carbon\Carbon::parse($project->created_at)->format('d/m/Y')
+                                            : '—' }}
+                                    </td>
+
+                                    {{-- STATUT --}}
+                                    <td class="px-4 py-4">
+                                        @if($activeFolderTasks->isEmpty())
+
+                                            <span class="rounded-full bg-slate-100 px-3 py-1.5 font-bold text-slate-600">
+                                                À commencer
+                                            </span>
+
+                                        @elseif($isFinished)
+
+                                            <span class="rounded-full bg-green-50 px-3 py-1.5 font-bold text-green-700">
+                                                ✓ Terminé
+                                            </span>
+
+                                        @else
+
+                                            <span class="rounded-full bg-blue-50 px-3 py-1.5 font-bold text-blue-700">
+                                                ◷ En cours
+                                            </span>
+
+                                        @endif
+                                    </td>
+
+                                    {{-- ACTIONS : CONFIGURATION À L'ÉTAPE 2 --}}
+                                    <td class="px-4 py-4 text-right">
+                                        <a
+                                            href="{{ $folderUrl }}"
+                                            class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-semibold text-blue-700 hover:bg-blue-100"
+                                        >
+                                            Ouvrir
+                                            <span class="ml-2">›</span>
+                                        </a>
+                                    </td>
+
+                                </tr>
+
+                            @empty
+
+                                <tr>
+                                    <td colspan="4" class="px-4 py-12 text-center text-slate-500">
+                                        Aucun dossier Master enregistré.
+                                    </td>
+                                </tr>
+
+                            @endforelse
+
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </section>
+
+        @else
+
+            {{-- CONTENU DU DOSSIER SÉLECTIONNÉ --}}
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+
+                <a
+                    href="{{ route('dashboard', ['view' => 'master']) }}"
+                    class="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900"
+                >
+                    ← Retour aux dossiers
+                </a>
+
+                <div class="flex items-center gap-2 font-bold text-slate-800">
+                    <span class="text-xl">📂</span>
+                    <span>{{ $selectedMasterFolder->title }}</span>
+                </div>
+
+            </div>
         <!-- En-tête du cockpit -->
 
         {{-- BARRE MASTER : FILTRES + NOUVELLE TÂCHE --}}
@@ -1389,12 +1573,13 @@
                     </span>
 
                     <div>
+
                         <h2 class="text-lg font-extrabold text-slate-900">
-                            Toutes les tâches (Mode Master)
+                            Chapitres et tâches — {{ $selectedMasterFolder->title }}
                         </h2>
 
                         <p class="text-xs text-slate-500">
-                            {{ $masterTasks->count() }} tâche(s) affichée(s)
+                            {{ $masterFolderTasks->count() }} tâche(s) affichée(s)
                         </p>
                     </div>
 
@@ -1469,7 +1654,6 @@
 
                         <tr class="text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
 
-                            <th class="px-5 py-4">Matière</th>
                             <th class="px-4 py-4">Leçon / Étape</th>
                             <th class="px-4 py-4">Tâche</th>
                             <th class="px-4 py-4">Exécution</th>
@@ -1486,7 +1670,7 @@
 
 
 
-                        @forelse($masterTasks->sortBy(function ($task) {
+                        @forelse($masterFolderTasks->sortBy(function ($task) {
 
                             // 0 = tâches non terminées, 1 = tâches terminées
                             $groupe = $task->document_status === 'done' ? '1' : '0';
@@ -1507,21 +1691,6 @@
                         }) as $task)
 
                             <tr class="transition-colors hover:bg-blue-50/50">
-
-                                {{-- MATIÈRE --}}
-                                <td class="px-5 py-4">
-
-                                    <div class="flex items-center gap-2">
-
-                                        <span class="text-lg">📚</span>
-
-                                        <span class="font-bold text-slate-800">
-                                            {{ $task->project->title ?? $task->project_name ?? 'Général' }}
-                                        </span>
-
-                                    </div>
-
-                                </td>
 
                                 {{-- LEÇON / ÉTAPE --}}
                                 <td class="px-4 py-4">
@@ -1785,7 +1954,7 @@
 
                             <tr>
 
-                                <td colspan="8" class="px-6 py-14 text-center">
+                                <td colspan="7" class="px-6 py-14 text-center">
 
                                     <div class="mb-3 text-3xl">
                                         🔍
@@ -1837,12 +2006,14 @@
 
             </div>
 
-        </section>
+    </section>
 
+    @endif {{-- Fin du contenu du dossier --}}
 
-        @endif
+@endif {{-- Fin du Mode Master --}}
 
 <!-- ================= VUE : DÉVELOPPEMENT PERSONNEL ================= -->
+
     @if($view === 'personal')
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
