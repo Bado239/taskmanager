@@ -1474,24 +1474,42 @@
         @else
 
             {{-- CONTENU DU DOSSIER SÉLECTIONNÉ --}}
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
 
-                <a
-                    href="{{ route('dashboard', ['view' => 'master']) }}"
-                    class="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900"
-                >
-                    ← Retour aux dossiers
-                </a>
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
 
-                <div class="flex items-center gap-2 font-bold text-slate-800">
-                    <span class="text-xl">📂</span>
-                    <span>{{ $selectedMasterFolder->title }}</span>
+                <div class="flex flex-wrap items-center gap-3">
+
+                    <a
+                        href="{{ route('dashboard', ['view' => 'master']) }}"
+                        class="inline-flex items-center gap-2 text-xs font-bold text-blue-700 hover:text-blue-900"
+                    >
+                        ← Retour aux dossiers
+                    </a>
+
+                    <span class="text-slate-300">|</span>
+
+                    <span class="inline-flex items-center gap-2 text-sm font-bold text-slate-800">
+                        📂 {{ $selectedMasterFolder->title }}
+                    </span>
+
                 </div>
+
+                <button
+                    type="button"
+                    id="btnToggleForm"
+                    onclick="toggleTaskForm()"
+                    class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+                >
+                    + Nouvelle tâche
+                </button>
 
             </div>
         <!-- En-tête du cockpit -->
 
-        {{-- BARRE MASTER : FILTRES + NOUVELLE TÂCHE --}}
+
+        {{-- FILTRES VISIBLES UNIQUEMENT HORS D'UN DOSSIER --}}
+        @if(!$selectedMasterFolder)
+
         <section class="mt-0 mb-3 rounded-xl border border-blue-100 bg-white px-4 py-1.5 shadow-sm">
             <div class="flex flex-wrap items-center justify-between gap-3">
 
@@ -1554,9 +1572,10 @@
                 </button>
 
             </div>
-
         </section>
-        
+
+        @endif {{-- Fin des filtres extérieurs --}}
+
         {{-- ============================================== --}}
         {{-- TABLEAU UNIQUE DES TÂCHES MASTER               --}}
         {{-- ============================================== --}}
