@@ -307,7 +307,8 @@ class TaskController extends Controller
             'type'  => 'required|string|in:office,master',
             'new_project_name' => 'nullable|string|max:255',
             'new_category_name' => 'nullable|string|max:255',
-            'document_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png',            
+            'document_link' => 'nullable|url:http,https|max:2048',
+            'document_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png',
         ]);
 
         if ($validator->fails()) {
@@ -349,9 +350,13 @@ class TaskController extends Controller
             $categoryId = null;
         }
 
-        // Gestion du fichier joint
-        $documentLink = $request->document_link ?? null;
 
+        // Gestion du lien Internet ou du fichier joint
+        $documentLink = $request->filled('document_link')
+            ? $request->input('document_link')
+            : null;
+
+        // Si un fichier est envoyé, il est prioritaire sur l'URL.
         if ($request->hasFile('document_file')) {
 
             $storage = new SupabaseStorageService();
@@ -573,6 +578,7 @@ class TaskController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'document_link' => 'nullable|url:http,https|max:2048',
             'document_file' => 'nullable|file|max:10240',
             'date_prevue' => 'nullable|date',
             'execution_date' => 'nullable|date',
@@ -606,10 +612,17 @@ class TaskController extends Controller
         ];
 
 
+
         // ==========================
-        // GESTION DU FICHIER
+        // GESTION DU LIEN OU DU FICHIER
         // ==========================
 
+        // Un lien renseigné remplace l'ancien document.
+        if ($request->filled('document_link')) {
+            $data['document_link'] = $request->input('document_link');
+        }
+
+        // Un nouveau fichier reste prioritaire.
         if($request->hasFile('document_file')){
 
 

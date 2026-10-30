@@ -473,10 +473,29 @@
                     class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]"
                 >
 
+
                 <div id="oldDocument" class="mt-2 text-sm text-blue-600"></div>
 
-
                 <div id="document_actuel" class="mt-2 text-sm text-blue-600"></div>
+
+                <div class="mt-4">
+                    <label class="mb-1 block text-xs font-semibold text-gray-700">
+                        🔗 Lien du document / Support en ligne
+                    </label>
+
+                    <input
+                        type="url"
+                        name="document_link"
+                        id="document_link"
+                        placeholder="https://exemple.com/mon-cours"
+                        class="w-full rounded-lg border border-gray-200 bg-[#f8fafc] px-3 py-2 text-sm focus:border-[#0052cc] focus:outline-none"
+                    >
+
+                    <p class="mt-1 text-xs text-gray-400">
+                        Facultatif : Google Drive, YouTube, PDF en ligne, site de cours...
+                        Vous pouvez aussi joindre un fichier ci-dessus.
+                    </p>
+                </div>
 
 
                 <p class="text-xs text-gray-400 mt-1">
@@ -2807,10 +2826,19 @@ async function editTask(id) {
         alpineData.selectedCategory = String(task.category_id ?? '');
 
 
-        // DOCUMENT
-        // Un input type=file ne peut pas être rempli automatiquement pour des raisons de sécurité
-        // On affiche seulement l'ancien document s'il existe
 
+        // DOCUMENT
+        // Afficher l'URL existante lorsque le support est un lien Internet.
+        const documentLinkInput = document.getElementById('document_link');
+
+        if (documentLinkInput) {
+            const currentLink = task.document_link || '';
+
+            documentLinkInput.value =
+                /^https?:\/\//i.test(currentLink) ? currentLink : '';
+        }
+
+        // Conserver l'affichage de l'ancien document.
         const oldDocument = document.getElementById('oldDocument');
 
         if(oldDocument){
