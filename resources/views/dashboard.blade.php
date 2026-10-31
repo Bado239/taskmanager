@@ -378,49 +378,73 @@
             <input type="hidden" name="type" value="{{ $view }}">
         @endif
 
+
         {{-- 1. PROJET / MATIÈRE --}}
         <div>
             <label class="block text-xs font-semibold text-gray-700 mb-1">
                 1. Projet / Matière *
             </label>
-            <div class="flex gap-2">
 
-                <select
-                    name="{{ $view === 'master' && request()->integer('folder') ? 'project_display' : 'project_id' }}"
-                    x-model="selectedProject"
-                    @if($view === 'master' && request()->integer('folder')) disabled @endif
-                    required
-                    class="w-full rounded-lg border border-gray-200 bg-[#f8fafc] px-3 py-2 text-sm focus:border-[#0052cc] focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100 disabled:font-bold disabled:text-slate-700"
+            @if($view === 'master' && request()->integer('folder'))
+
+                @php
+                    $fixedFolder = $projectsMaster->firstWhere(
+                        'id',
+                        request()->integer('folder')
+                    );
+                @endphp
+
+                {{-- Nom du dossier affiché et verrouillé --}}
+                <input
+                    type="text"
+                    value="{{ $fixedFolder->title ?? '' }}"
+                    readonly
+                    class="w-full rounded-lg border border-gray-200 bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700 cursor-not-allowed"
                 >
-                    <option value="">-- Sélectionner --</option>
-                    <template x-for="project in filteredProjects" :key="project.id">
-                        <option :value="project.id" x-text="project.title"></option>
-                    </template>
-                    <option value="new">➕ Créer un nouveau...</option>
-                </select>
-                
-                    @if($view === 'master' && request()->integer('folder'))
-                        <input
-                            type="hidden"
-                            name="project_id"
-                            value="{{ request()->integer('folder') }}"
-                        >
-                    @endif
-                <template x-if="selectedProject && selectedProject !== 'new'">
-                    <button type="button"
-                            @click="deleteProject(selectedProject)"
-                            class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs font-bold">
-                        🗑️
-                    </button>
-                </template>
-            </div>
 
-            <div x-show="selectedProject === 'new'" class="mt-2">
-                <input type="text"
-                    name="new_project_name"
-                    placeholder="Nom du projet ou de la matière..."
-                    class="w-full bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-sm">
-            </div>
+                {{-- Identifiant du dossier envoyé au serveur --}}
+                <input
+                    type="hidden"
+                    name="project_id"
+                    value="{{ $fixedFolder->id ?? '' }}"
+                >
+
+            @else
+
+                {{-- Sélection normale pour les autres vues --}}
+                <div class="flex gap-2">
+
+                    <select
+                        name="project_id"
+                        x-model="selectedProject"
+                        required
+                        class="w-full rounded-lg border border-gray-200 bg-[#f8fafc] px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]"
+                    >
+                        <option value="">-- Sélectionner --</option>
+
+                        <template x-for="project in filteredProjects" :key="project.id">
+                            <option
+                                :value="project.id"
+                                x-text="project.title"
+                            ></option>
+                        </template>
+
+                        <option value="new">➕ Créer un nouveau...</option>
+                    </select>
+
+                </div>
+
+                <div x-show="selectedProject === 'new'" class="mt-2">
+                    <input
+                        type="text"
+                        name="new_project_name"
+                        placeholder="Nom du projet ou de la matière..."
+                        class="w-full rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm"
+                    >
+                </div>
+
+            @endif
+
         </div>
 
         {{-- 2. CATÉGORIE (Étape / Leçon) --}}
