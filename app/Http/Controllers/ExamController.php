@@ -31,12 +31,13 @@ class ExamController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+
             'project_id' => [
                 'required',
                 'integer',
                 Rule::exists('projects', 'id')
                     ->where('type', 'master')
-                    ->whereRaw('is_active = TRUE'),
+                    ->where('is_active', true),
             ],
             'exam_date' => 'required|date',
             'start_time' => 'nullable|date_format:H:i',
