@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\PersonalResourceController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CourseResourceController;
@@ -289,3 +290,20 @@ Route::post(
     [PersonalResourceController::class,'updateReadingStart']
 )
 ->name('personal-resources.update-reading-start');
+
+
+/*
+|--------------------------------------------------------------------------
+| Préparation aux examens
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/exams', [
+    ExamController::class,
+    'index'
+])->name('exams.index');
+
+Route::post('/exams', [
+    ExamController::class,
+    'store'
+])->name('exams.store');

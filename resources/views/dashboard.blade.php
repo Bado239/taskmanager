@@ -1460,6 +1460,15 @@
                         🗓️ Emploi du temps
                     </a>
 
+                 
+                    <a
+                        href="{{ route('exams.index') }}"
+                        class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
+                    >
+                        🎓 Préparation aux examens
+                    </a>
+
+
                 </div>
 
             </section>
