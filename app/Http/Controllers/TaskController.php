@@ -96,8 +96,20 @@ class TaskController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+
         $categoriesOffice = Category::where('type', 'office')->get();
         $categoriesMaster = Category::where('type', 'master')->get();
+
+        // Date du prochain examen pour chaque dossier Master.
+        // Les examens passés ne sont pas prioritaires.
+        $upcomingExamDates = \App\Models\Exam::query()
+            ->whereDate('exam_date', '>=', Carbon::today())
+            ->whereHas('project', function ($query) {
+                $query->where('type', 'master');
+            })
+            ->selectRaw('project_id, MIN(exam_date) AS next_exam_date')
+            ->groupBy('project_id')
+            ->pluck('next_exam_date', 'project_id');
 
         if ($view === 'office') {
             $categories = $categoriesOffice;
@@ -281,7 +293,8 @@ class TaskController extends Controller
             'projectsOffice',
             'projectsMaster',
             'categoriesOffice',
-            'categoriesMaster'
+            'categoriesMaster',
+            'upcomingExamDates'
         ));
     }
 

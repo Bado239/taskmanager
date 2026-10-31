@@ -1387,12 +1387,47 @@
                 && in_array($filter, ['all', 'today'])
                 && request()->has('filter');
 
-            // Dossiers visibles selon le filtre Archives.
-            $displayMasterFolders = $projectsMaster->filter(function ($project) use ($statusFilter) {
-                return $statusFilter === 'archived'
-                    ? !$project->is_active
-                    : (bool) $project->is_active;
-            });
+
+            // Dossiers visibles et classement par priorité.
+            $displayMasterFolders = $projectsMaster
+                ->filter(function ($project) use ($statusFilter) {
+                    return $statusFilter === 'archived'
+                        ? !$project->is_active
+                        : (bool) $project->is_active;
+                })
+                ->sortBy(function ($project) use ($masterTasks, $upcomingExamDates) {
+
+                    // PRIORITÉ 0 : EXAMEN À VENIR
+                    $nextExam = $upcomingExamDates->get($project->id);
+
+                    if ($nextExam) {
+                        return '0|' . $nextExam . '|' . mb_strtolower($project->title);
+                    }
+
+                    $tasks = $masterTasks->filter(function ($task) use ($project) {
+                        return (int) $task->project_id === (int) $project->id
+                            && !$task->is_archived;
+                    });
+
+                    // Reprendre exactement les statuts affichés
+                    // dans le tableau actuel des dossiers.
+
+                    if ($tasks->isEmpty()) {
+                        // PRIORITÉ 2 : À COMMENCER
+                        $priority = 2;
+                    } elseif ($tasks->every(fn($task) =>
+                        $task->document_status === 'done'
+                    )) {
+                        // PRIORITÉ 3 : TERMINÉ
+                        $priority = 3;
+                    } else {
+                        // PRIORITÉ 1 : EN COURS
+                        $priority = 1;
+                    }
+
+                    return $priority . '|9999-12-31|' . mb_strtolower($project->title);
+                })
+                ->values();
 
             // Dossiers actifs autorisés pour les vues globales.
             $activeMasterIds = $projectsMaster
@@ -1562,6 +1597,25 @@
 
                 @endif
 
+                
+                <style>
+                    /* Fond de toute la ligne des dossiers avec examen */
+                    tr[data-upcoming-exam="1"] > td {
+                        background-color: #fff3d6 !important;
+                    }
+
+                    /* Couleur au survol */
+                    tr[data-upcoming-exam="1"]:hover > td {
+                        background-color: #ffe7aa !important;
+                    }
+
+                    /* Marqueur de priorité */
+                    tr[data-upcoming-exam="1"] > td:first-child {
+                        border-left: 4px solid #f59e0b;
+                    }
+                </style>
+
+
                 <div class="overflow-x-auto">
 
                     <table class="w-full min-w-[700px] text-left text-xs">
@@ -1580,6 +1634,9 @@
                             @forelse($displayMasterFolders as $project)
 
                                 @php
+                                    // Prochain examen associé à ce dossier.
+                                    $nextFolderExam = $upcomingExamDates->get($project->id);
+
                                     $folderTasks = $masterTasks->filter(function ($task) use ($project) {
                                         return (int) $task->project_id === (int) $project->id;
                                     });
@@ -1601,7 +1658,9 @@
                                     ]);
                                 @endphp
 
+
                                 <tr
+                                    data-upcoming-exam="{{ $nextFolderExam ? '1' : '0' }}"
                                     class="cursor-pointer transition hover:bg-blue-50/60"
                                     onclick="window.location.href = @js($folderUrl)"
                                 >
