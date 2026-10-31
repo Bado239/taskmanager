@@ -1441,7 +1441,7 @@
 
                     <a
                         href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}"
-                        class="rounded-lg border px-3 py-2 text-xs font-bold {{ $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
+                        class="rounded-lg border px-3 py-2 text-xs font-bold transition {{ request()->has('filter') && $statusFilter === 'active' && $filter === 'all' ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-blue-50' }}"
                     >
                         Toutes actives
                     </a>
@@ -1458,13 +1458,6 @@
                         class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
                     >
                         🗓️ Emploi du temps
-                    </a>
-
-                    <a
-                        href="{{ route('dashboard', ['view' => 'master', 'status' => 'archived']) }}"
-                        class="rounded-lg border px-3 py-2 text-xs font-semibold {{ $statusFilter === 'archived' ? 'border-slate-700 bg-slate-700 text-white' : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100' }}"
-                    >
-                        📁 Archives
                     </a>
 
                 </div>
