@@ -1431,6 +1431,7 @@
 
             @if(!$masterActivityView)
 
+
             {{-- LISTE PRINCIPALE DES DOSSIERS MASTER --}}
             <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
 
@@ -1454,8 +1455,67 @@
                             </p>
                         </div>
                     </div>
+                
+                        @if($statusFilter !== 'archived')
+                            <button
+                                type="button"
+                                onclick="document.getElementById('newMasterFolderForm').classList.toggle('hidden')"
+                                class="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                            >
+                                + Nouveau dossier
+                            </button>
+                        @endif
+
+
 
                 </div>
+
+                {{-- FORMULAIRE DE CRÉATION D'UN DOSSIER MASTER --}}
+                @if($statusFilter !== 'archived')
+
+                    <form
+                        id="newMasterFolderForm"
+                        action="{{ route('projects.store') }}"
+                        method="POST"
+                        class="hidden border-b border-blue-100 bg-slate-50 px-4 py-4"
+                    >
+                        @csrf
+
+                        <label class="mb-2 block text-xs font-bold text-slate-700">
+                            📁 Nom du nouveau dossier
+                        </label>
+
+                        <div class="flex flex-wrap items-center gap-3">
+
+                            <input
+                                type="text"
+                                name="title"
+                                required
+                                maxlength="255"
+                                placeholder="Ex : Finances publiques"
+                                class="min-w-[220px] flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            >
+
+                            <button
+                                type="submit"
+                                class="rounded-lg bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                            >
+                                ✓ Créer le dossier
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="document.getElementById('newMasterFolderForm').classList.add('hidden')"
+                                class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                            >
+                                Annuler
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                @endif
 
                 <div class="overflow-x-auto">
 

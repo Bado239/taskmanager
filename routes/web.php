@@ -101,6 +101,12 @@ Route::delete('/projects/{id}', [
 
 
 
+Route::post('/projects', [
+    ProjectController::class,
+    'store'
+])->name('projects.store');
+
+
 /*
 |--------------------------------------------------------------------------
 | Gestion des catégories
