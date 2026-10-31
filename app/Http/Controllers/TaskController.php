@@ -383,10 +383,21 @@ class TaskController extends Controller
             'is_archived'     => 0,
         ]);
 
-        $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
 
-        return redirect()->route('dashboard', ['view' => $targetView])
-            ->with('success', 'Livrable enregistré avec succès !');
+        $targetView = in_array($request->type, ['office', 'master'])
+            ? $request->type
+            : 'dashboard';
+
+        $redirectParams = ['view' => $targetView];
+
+        // Revenir dans le dossier après la création.
+        if ($targetView === 'master' && $projectId && $projectId !== 'new') {
+            $redirectParams['folder'] = $projectId;
+        }
+
+        return redirect()
+            ->route('dashboard', $redirectParams)
+            ->with('success', 'Tâche enregistrée avec succès !');
     }
 
     /**
@@ -643,8 +654,15 @@ class TaskController extends Controller
 
 
 
+
+        $redirectParams = ['view' => $task->type];
+
+        if ($task->type === 'master' && $task->project_id) {
+            $redirectParams['folder'] = $task->project_id;
+        }
+
         return redirect()
-            ->route('dashboard', ['view' => $task->type])
+            ->route('dashboard', $redirectParams)
             ->with('success', 'Tâche modifiée avec succès !');
     }
 
