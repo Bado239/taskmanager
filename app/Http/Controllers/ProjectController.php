@@ -29,23 +29,24 @@ class ProjectController extends Controller
             ->with('success', 'Dossier créé avec succès !');
     }
 
+
     public function destroy(Project $project)
     {
-        try {
-            // Détache les tâches liées au projet avant suppression
-            $project->tasks()->update(['project_id' => null]);
-            
-            $project->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Projet supprimé avec succès.'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur lors de la suppression.'
-            ], 500);
+        if ($project->type !== 'master') {
+            abort(403, 'Suppression réservée aux dossiers Master.');
         }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($project) {
+
+            // Supprimer toutes les tâches du dossier.
+            $project->tasks()->delete();
+
+            // Supprimer définitivement le dossier.
+            $project->delete();
+        });
+
+        return redirect()
+            ->route('dashboard', ['view' => 'master'])
+            ->with('success', 'Dossier et tâches supprimés définitivement.');
     }
 }

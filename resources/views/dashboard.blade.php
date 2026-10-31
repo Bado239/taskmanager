@@ -1607,15 +1607,42 @@
                                         @endif
                                     </td>
 
-                                    {{-- ACTIONS : CONFIGURATION À L'ÉTAPE 2 --}}
+                                    {{-- ACTIONS DU DOSSIER --}}
                                     <td class="px-4 py-4 text-right">
-                                        <a
-                                            href="{{ $folderUrl }}"
-                                            class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-semibold text-blue-700 hover:bg-blue-100"
-                                        >
-                                            Ouvrir
-                                            <span class="ml-2">›</span>
-                                        </a>
+
+                                        <div class="flex items-center justify-end gap-2">
+
+                                            {{-- OUVRIR --}}
+                                            <a
+                                                href="{{ $folderUrl }}"
+                                                class="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-semibold text-blue-700 hover:bg-blue-100"
+                                            >
+                                                Ouvrir
+                                                <span class="ml-2">›</span>
+                                            </a>
+
+                                            {{-- SUPPRIMER DÉFINITIVEMENT --}}
+                                            <form
+                                                action="{{ route('projects.destroy', $project->id) }}"
+                                                method="POST"
+                                                class="inline"
+                                                onclick="event.stopPropagation()"
+                                                onsubmit="return confirm('Supprimer définitivement ce dossier et TOUTES ses tâches ? Cette action est irréversible.');"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button
+                                                    type="submit"
+                                                    title="Supprimer définitivement le dossier"
+                                                    class="inline-flex items-center rounded-lg border border-red-200 bg-red-50 px-3 py-2 font-semibold text-red-600 transition hover:bg-red-100"
+                                                >
+                                                    🗑 Supprimer
+                                                </button>
+                                            </form>
+
+                                        </div>
+
                                     </td>
 
                                 </tr>
