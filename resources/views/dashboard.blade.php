@@ -91,7 +91,8 @@
 
             currentMode: '{{ $currentType }}',
 
-            selectedProject: '',
+
+            selectedProject: '{{ $view === 'master' ? request()->integer('folder') : '' }}',
             selectedCategory: '',
 
             dueDate: '{{ $defaultDueDate }}',
@@ -383,17 +384,28 @@
                 1. Projet / Matière *
             </label>
             <div class="flex gap-2">
-                <select name="project_id"
-                        x-model="selectedProject"
-                        required
-                        class="w-full bg-[#f8fafc] border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0052cc]">
+
+                <select
+                    name="{{ $view === 'master' && request()->integer('folder') ? 'project_display' : 'project_id' }}"
+                    x-model="selectedProject"
+                    @if($view === 'master' && request()->integer('folder')) disabled @endif
+                    required
+                    class="w-full rounded-lg border border-gray-200 bg-[#f8fafc] px-3 py-2 text-sm focus:border-[#0052cc] focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-100 disabled:font-bold disabled:text-slate-700"
+                >
                     <option value="">-- Sélectionner --</option>
                     <template x-for="project in filteredProjects" :key="project.id">
                         <option :value="project.id" x-text="project.title"></option>
                     </template>
                     <option value="new">➕ Créer un nouveau...</option>
                 </select>
-
+                
+                    @if($view === 'master' && request()->integer('folder'))
+                        <input
+                            type="hidden"
+                            name="project_id"
+                            value="{{ request()->integer('folder') }}"
+                        >
+                    @endif
                 <template x-if="selectedProject && selectedProject !== 'new'">
                     <button type="button"
                             @click="deleteProject(selectedProject)"
@@ -589,8 +601,15 @@
                 const data = Alpine.$data(form);
 
                 if (data) {
+
                     data.currentMode = @json($currentType);
-                    data.selectedProject = '';
+
+                    data.selectedProject = @json(
+                        $view === 'master' && request()->integer('folder')
+                            ? (string) request()->integer('folder')
+                            : ''
+                    );
+
                     data.selectedCategory = '';
 
                     data.dueDate = @json($defaultDueDate);
@@ -2037,43 +2056,6 @@
                                         >
                                             ✎
                                         </button>
-
-                                        {{-- ARCHIVER --}}
-                                        @if(!$task->is_archived)
-
-                                            <form
-                                                action="{{ route('tasks.archive', $task->id) }}"
-                                                method="POST"
-                                                onsubmit="return confirm('Archiver cette tâche ?');"
-                                            >
-                                                @csrf
-
-
-                                                <button
-                                                    type="submit"
-                                                    title="Archiver la tâche"
-                                                    aria-label="Archiver la tâche"
-                                                    class="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-400 text-amber-950 shadow-sm transition hover:bg-amber-500"
-                                                >
-                                                    <svg
-                                                        class="h-4 w-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        stroke-width="1.8"
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <rect x="3" y="4" width="18" height="4" rx="1"/>
-                                                        <path d="M5 8v12h14V8"/>
-                                                        <path d="M9 13l3 3 3-3"/>
-                                                        <path d="M12 11v5"/>
-                                                    </svg>
-                                                </button>
-
-                                            </form>
-
-                                        @endif
 
                                         {{-- SUPPRIMER --}}
                                         <form
