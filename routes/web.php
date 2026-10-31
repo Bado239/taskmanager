@@ -307,3 +307,15 @@ Route::post('/exams', [
     ExamController::class,
     'store'
 ])->name('exams.store');
+
+
+Route::put('/exams/{exam}', [
+    ExamController::class,
+    'update'
+])->name('exams.update');
+
+Route::delete('/exams/{exam}', [
+    ExamController::class,
+    'destroy'
+])->name('exams.destroy');
+
