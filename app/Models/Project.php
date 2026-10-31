@@ -5,6 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
+/**
+ * @property int $id
+ * @property string $title
+ * @property string $type
+ * @property bool $is_active
+ */
 class Project extends Model
 {
     use HasFactory;

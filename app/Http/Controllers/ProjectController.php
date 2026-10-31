@@ -14,11 +14,15 @@ class ProjectController extends Controller
             'title' => 'required|string|max:255',
         ]);
 
-        $project = new Project();
-        $project->title = trim($data['title']);
-        $project->type = 'master';
-        $project->is_active = true;
-        $project->save();
+
+
+        \Illuminate\Support\Facades\DB::table('projects')->insert([
+            'title' => trim($data['title']),
+            'type' => 'master',
+            'is_active' => \Illuminate\Support\Facades\DB::raw('TRUE'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         return redirect()
             ->route('dashboard', ['view' => 'master'])
