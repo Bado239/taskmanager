@@ -319,3 +319,10 @@ Route::delete('/exams/{exam}', [
     'destroy'
 ])->name('exams.destroy');
 
+
+
+// Emploi du temps global : toutes les tâches du jour.
+Route::get('/schedule/today', [
+    TaskController::class,
+    'todaySchedule'
+])->name('schedule.today');

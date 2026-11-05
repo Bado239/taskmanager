@@ -298,6 +298,50 @@ class TaskController extends Controller
         ));
     }
 
+    
+/**
+ * Emploi du temps global du jour.
+ * Regroupe les tâches Office et Master.
+ */
+    public function todaySchedule()
+    {
+        $today = Carbon::today();
+
+        $todayTasks = Task::with(['project', 'category'])
+            ->whereIn('type', ['office', 'master'])
+            ->whereDate('execution_date', $today->toDateString())
+            ->where('is_archived', 0)
+            ->get()
+            ->sortBy(function ($task) {
+
+                // 0 : tâches non terminées
+                // 1 : tâches terminées
+                $group = $task->document_status === 'done' ? '1' : '0';
+
+                // Les tâches sans horaire viennent après.
+                $time = $task->heure_debut
+                    ? substr((string) $task->heure_debut, 0, 5)
+                    : '99:99';
+
+                return $group . '|' . $time . '|' .
+                    str_pad((string) $task->id, 12, '0', STR_PAD_LEFT);
+            })
+            ->values();
+
+        $officeCount = $todayTasks->where('type', 'office')->count();
+        $masterCount = $todayTasks->where('type', 'master')->count();
+        $completedCount = $todayTasks->where('document_status', 'done')->count();
+
+        return view('schedule.today', compact(
+            'today',
+            'todayTasks',
+            'officeCount',
+            'masterCount',
+            'completedCount'
+        ));
+    }
+
+
     /**
      * Bascule le mode courant et redirige vers la vue correspondante
      */

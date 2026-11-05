@@ -686,10 +686,23 @@
         
     <!-- ================= VUE : DASHBOARD GLOBAL ================= -->
     @if($view === 'dashboard')
+
         <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
-            <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
-                📊 Tableau de bord Global
-            </h1>
+
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+
+                <h1 class="flex items-center gap-2 text-xl font-bold text-gray-900">
+                    📊 Tableau de bord Global
+                </h1>
+
+                <a
+                    href="{{ route('schedule.today') }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                >
+                    🗓️ Emploi du temps
+                </a>
+
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
                 <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'total'])) }}" class="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'total' ? 'ring-2 ring-[#0052cc]' : '' }}">
                     <div class="text-xs text-blue-600 font-semibold">Total Actives</div>
