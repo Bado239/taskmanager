@@ -480,31 +480,238 @@
 
                             </td>
 
-                            {{-- ACTION --}}
+                            {{-- ACTIONS --}}
                             <td class="px-4 py-4 text-right">
 
-                                @if($task->type === 'master')
+                                <div class="flex items-center justify-end gap-2">
 
-                                    <a
-                                        href="{{ route('dashboard', [
-                                            'view' => 'master',
-                                            'folder' => $task->project_id
-                                        ]) }}"
-                                        class="inline-flex rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-bold text-blue-700 hover:bg-blue-100"
+                                    {{-- MODIFIER --}}
+                                    <button
+                                        type="button"
+                                        onclick="document.getElementById('editScheduleTask-{{ $task->id }}').showModal()"
+                                        title="Modifier la tâche"
+                                        class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
                                     >
-                                        Ouvrir dossier
-                                    </a>
+                                        ✎
+                                    </button>
 
-                                @else
-
-                                    <a
-                                        href="{{ route('dashboard', ['view' => 'office']) }}"
-                                        class="inline-flex rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 font-bold text-blue-700 hover:bg-blue-100"
+                                    {{-- SUPPRIMER --}}
+                                    <form
+                                        action="{{ route('tasks.destroy', $task->id) }}"
+                                        method="POST"
+                                        onsubmit="return confirm('Supprimer définitivement cette tâche ?');"
+                                        class="inline"
                                     >
-                                        Voir Office
-                                    </a>
+                                        @csrf
+                                        @method('DELETE')
 
-                                @endif
+                                        <button
+                                            type="submit"
+                                            title="Supprimer la tâche"
+                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white transition hover:bg-red-600"
+                                        >
+                                            🗑
+                                        </button>
+                                    </form>
+
+                                </div>
+
+                                {{-- FENÊTRE DE MODIFICATION --}}
+                                <dialog
+                                    id="editScheduleTask-{{ $task->id }}"
+                                    class="w-[95%] max-w-2xl rounded-2xl border border-blue-100 bg-white p-0 text-left shadow-2xl backdrop:bg-slate-900/50"
+                                >
+
+                                    <div class="border-b border-slate-100 px-5 py-4">
+
+                                        <h3 class="text-base font-extrabold text-slate-900">
+                                            ✏️ Modifier une tâche
+                                        </h3>
+
+                                        <p class="mt-1 text-xs text-slate-500">
+                                            {{ $task->type === 'master' ? '🎓 Mode Master' : '💼 Mode Office' }}
+                                        </p>
+
+                                    </div>
+
+                                    <form
+                                        action="{{ route('schedule.tasks.update', $task->id) }}"
+                                        method="POST"
+                                        class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2"
+                                    >
+                                        @csrf
+                                        @method('PUT')
+
+                                        {{-- PROJET / MATIÈRE --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Projet / Matière *
+                                            </label>
+
+                                            <select
+                                                name="project_id"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                                @foreach($scheduleProjects->where('type', $task->type) as $project)
+
+                                                    <option
+                                                        value="{{ $project->id }}"
+                                                        @selected($task->project_id == $project->id)
+                                                    >
+                                                        {{ $project->title }}
+                                                    </option>
+
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        {{-- ÉTAPE / LEÇON --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Étape / Leçon
+                                            </label>
+
+                                            <select
+                                                name="category_id"
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                                <option value="">-- Aucune --</option>
+
+                                                @foreach($scheduleCategories->where('type', $task->type) as $category)
+
+                                                    <option
+                                                        value="{{ $category->id }}"
+                                                        @selected($task->category_id == $category->id)
+                                                    >
+                                                        {{ $category->name }}
+                                                    </option>
+
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        {{-- LIBELLÉ --}}
+                                        <div class="sm:col-span-2">
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Libellé de la tâche *
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                name="title"
+                                                value="{{ $task->title }}"
+                                                maxlength="255"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                        </div>
+
+                                        {{-- HEURE DE DÉBUT --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Heure de début *
+                                            </label>
+
+                                            <input
+                                                type="time"
+                                                name="start_time"
+                                                value="{{ $task->heure_debut ? substr((string) $task->heure_debut, 0, 5) : '' }}"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                        </div>
+
+                                        {{-- HEURE DE FIN --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Heure de fin *
+                                            </label>
+
+                                            <input
+                                                type="time"
+                                                name="end_time"
+                                                value="{{ $task->heure_fin ? substr((string) $task->heure_fin, 0, 5) : '' }}"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                        </div>
+
+                                        {{-- STATUT --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Statut
+                                            </label>
+
+                                            <select
+                                                name="document_status"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                                <option value="todo" @selected($task->document_status === 'todo')>
+                                                    À faire
+                                                </option>
+
+                                                <option value="in_progress" @selected($task->document_status === 'in_progress')>
+                                                    En cours
+                                                </option>
+
+                                                <option value="done" @selected($task->document_status === 'done')>
+                                                    Terminée
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        {{-- PRIORITÉ --}}
+                                        <div>
+                                            <label class="mb-1 block text-xs font-bold text-slate-700">
+                                                Priorité
+                                            </label>
+
+                                            <select
+                                                name="priority"
+                                                required
+                                                class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                                            >
+                                                <option value="low" @selected($task->priority === 'low')>
+                                                    Basse
+                                                </option>
+
+                                                <option value="medium" @selected($task->priority === 'medium')>
+                                                    Moyenne
+                                                </option>
+
+                                                <option value="high" @selected($task->priority === 'high')>
+                                                    Haute
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        {{-- BOUTONS --}}
+                                        <div class="flex justify-end gap-2 border-t border-slate-100 pt-4 sm:col-span-2">
+
+                                            <button
+                                                type="button"
+                                                onclick="document.getElementById('editScheduleTask-{{ $task->id }}').close()"
+                                                class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                            >
+                                                Annuler
+                                            </button>
+
+                                            <button
+                                                type="submit"
+                                                class="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                                            >
+                                                💾 Enregistrer les modifications
+                                            </button>
+
+                                        </div>
+
+                                    </form>
+
+                                </dialog>
+
+                            </td>
 
                             </td>
 

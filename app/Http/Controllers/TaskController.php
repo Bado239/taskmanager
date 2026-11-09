@@ -298,6 +298,61 @@ class TaskController extends Controller
         ));
     }
 
+
+    /**
+     * Modifier une tâche depuis l'emploi du temps global.
+     */
+    public function updateScheduleTask(Request $request, Task $task)
+    {
+        // La tâche doit appartenir à Office ou Master.
+        if (!in_array($task->type, ['office', 'master'])) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+
+            'project_id' => [
+                'required',
+                'integer',
+                \Illuminate\Validation\Rule::exists('projects', 'id')
+                    ->where('type', $task->type)
+                    ->where('is_active', true),
+            ],
+
+            'category_id' => [
+                'nullable',
+                'integer',
+                \Illuminate\Validation\Rule::exists('categories', 'id')
+                    ->where('type', $task->type),
+            ],
+
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+
+            'document_status' => 'required|in:todo,in_progress,done',
+            'priority' => 'required|in:low,medium,high',
+        ]);
+
+        $project = Project::findOrFail($data['project_id']);
+
+        $task->update([
+            'title' => $data['title'],
+            'project_id' => $project->id,
+            'project_name' => $project->title,
+            'category_id' => $data['category_id'] ?? null,
+            'heure_debut' => $data['start_time'],
+            'heure_fin' => $data['end_time'],
+            'document_status' => $data['document_status'],
+            'priority' => $data['priority'],
+        ]);
+
+        return redirect()
+            ->route('schedule.today')
+            ->with('success', 'Tâche modifiée avec succès !');
+    }
+
+
     
 /**
  * Emploi du temps global du jour.

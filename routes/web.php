@@ -326,3 +326,9 @@ Route::get('/schedule/today', [
     TaskController::class,
     'todaySchedule'
 ])->name('schedule.today');
+
+
+Route::put('/schedule/today/tasks/{task}', [
+    TaskController::class,
+    'updateScheduleTask'
+])->name('schedule.tasks.update');
