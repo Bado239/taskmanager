@@ -436,14 +436,7 @@
                                 <span class="font-semibold text-slate-800">
                                     {{ $task->title }}
                                 </span>
-                            </td>
-
-                            {{-- TÂCHE --}}
-                            <td class="px-4 py-4 font-semibold text-slate-900">
-                                {{ $task->title }}
-                            </td>
-
-                            {{-- ACTIONS --}}
+                            </td>                            {{-- ACTIONS --}}
                             <td class="px-4 py-4 text-right">
 
                                 <div class="flex items-center justify-end gap-2">
@@ -673,8 +666,6 @@
                                     </form>
 
                                 </dialog>
-
-                            </td>
 
                             </td>
 
