@@ -328,16 +328,34 @@ class TaskController extends Controller
             })
             ->values();
 
+
         $officeCount = $todayTasks->where('type', 'office')->count();
         $masterCount = $todayTasks->where('type', 'master')->count();
-        $completedCount = $todayTasks->where('document_status', 'done')->count();
+
+        $completedCount = $todayTasks
+            ->where('document_status', 'done')
+            ->count();
+
+        // Projets et matières actifs des deux modes.
+        $scheduleProjects = Project::whereIn('type', ['office', 'master'])
+            ->whereRaw('is_active = TRUE')
+            ->orderBy('title')
+            ->get();
+
+        // Étapes et leçons des deux modes.
+        $scheduleCategories = Category::whereIn('type', ['office', 'master'])
+            ->orderBy('name')
+            ->get();
+
 
         return view('schedule.today', compact(
             'today',
             'todayTasks',
             'officeCount',
             'masterCount',
-            'completedCount'
+            'completedCount',
+            'scheduleProjects',
+            'scheduleCategories'
         ));
     }
 
@@ -368,9 +386,74 @@ class TaskController extends Controller
             'document_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png',
         ]);
 
+
+        if ($request->input('return_to') === 'schedule.today') {
+
+            $validator->after(function ($validator) use ($request) {
+
+                $validProject = Project::where('id', $request->project_id)
+                    ->where('type', $request->type)
+                    ->whereRaw('is_active = TRUE')
+                    ->exists();
+
+                if (!$validProject) {
+                    $validator->errors()->add(
+                        'project_id',
+                        'Sélectionnez un projet ou une matière valide.'
+                    );
+                }
+
+                if ($request->filled('category_id')) {
+                    $validCategory = Category::where('id', $request->category_id)
+                        ->where('type', $request->type)
+                        ->exists();
+
+                    if (!$validCategory) {
+                        $validator->errors()->add(
+                            'category_id',
+                            'La leçon ne correspond pas au mode sélectionné.'
+                        );
+                    }
+                }
+
+                if ($request->execution_date !== Carbon::today()->toDateString()) {
+                    $validator->errors()->add(
+                        'execution_date',
+                        'La date doit correspondre à aujourd’hui.'
+                    );
+                }
+
+                if (
+                    !$request->filled('start_time') ||
+                    !$request->filled('end_time') ||
+                    $request->end_time <= $request->start_time
+                ) {
+                    $validator->errors()->add(
+                        'end_time',
+                        'L’heure de fin doit être postérieure à l’heure de début.'
+                    );
+                }
+
+            });
+        }
+
+
+
         if ($validator->fails()) {
-            $targetView = in_array($request->type, ['office', 'master']) ? $request->type : 'dashboard';
-            return redirect()->route('dashboard', ['view' => $targetView])
+
+            if ($request->input('return_to') === 'schedule.today') {
+                return redirect()
+                    ->route('schedule.today')
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $targetView = in_array($request->type, ['office', 'master'])
+                ? $request->type
+                : 'dashboard';
+
+            return redirect()
+                ->route('dashboard', ['view' => $targetView])
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -440,6 +523,15 @@ class TaskController extends Controller
             'is_archived'     => 0,
         ]);
 
+
+
+        // Une tâche créée depuis l'emploi du temps
+        // reste sur la page de l'emploi du temps.
+        if ($request->input('return_to') === 'schedule.today') {
+            return redirect()
+                ->route('schedule.today')
+                ->with('success', 'Tâche ajoutée à votre emploi du temps !');
+        }
 
         $targetView = in_array($request->type, ['office', 'master'])
             ? $request->type
