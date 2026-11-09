@@ -366,118 +366,81 @@
 
         <div class="overflow-x-auto">
 
-            <table class="w-full min-w-[1050px] text-left text-xs">
+            <table class="w-full min-w-[800px] border-collapse text-left text-sm">
 
                 <thead class="border-b border-blue-100 bg-blue-50">
-
-                    <tr class="font-extrabold uppercase text-slate-600">
-                        <th class="px-4 py-3">Horaires</th>
-                        <th class="px-4 py-3">Mode</th>
-                        <th class="px-4 py-3">Projet / Matière</th>
-                        <th class="px-4 py-3">Étape / Leçon</th>
-                        <th class="px-4 py-3">Tâche</th>
-                        <th class="px-4 py-3">Statut</th>
-                        <th class="px-4 py-3">Priorité</th>
-                        <th class="px-4 py-3 text-right">Action</th>
+                    <tr class="text-xs font-extrabold uppercase tracking-wide text-slate-700">
+                        <th class="w-[17%] px-5 py-4">Horaires</th>
+                        <th class="w-[21%] px-5 py-4">Projet / Matière</th>
+                        <th class="w-[27%] px-5 py-4">Étape / Leçon</th>
+                        <th class="w-[23%] px-5 py-4">Tâche</th>
+                        <th class="w-[12%] px-5 py-4 text-right">Action</th>
                     </tr>
-
                 </thead>
-
                 <tbody class="divide-y divide-slate-100">
 
                     @forelse($todayTasks as $task)
 
-                        <tr class="transition hover:bg-blue-50/50">
+                        <tr class="border-b border-slate-100 transition-colors hover:bg-blue-50/40 [&>td]:align-middle">
+
 
                             {{-- HORAIRES --}}
-                            <td class="whitespace-nowrap px-4 py-4 font-semibold text-slate-700">
+                            <td class="px-5 py-4">
 
-                                {{ $task->heure_debut
-                                    ? substr((string) $task->heure_debut, 0, 5)
-                                    : '--:--' }}
+                                <span class="inline-flex items-center gap-2 whitespace-nowrap rounded-xl bg-blue-50 px-3 py-2 font-semibold text-blue-800">
 
-                                à
+                                    <svg
+                                        class="h-4 w-4 text-blue-600"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle cx="12" cy="12" r="9"/>
+                                        <path d="M12 7v5l3 2"/>
+                                    </svg>
 
-                                {{ $task->heure_fin
-                                    ? substr((string) $task->heure_fin, 0, 5)
-                                    : '--:--' }}
+                                    {{ $task->heure_debut
+                                        ? substr((string) $task->heure_debut, 0, 5)
+                                        : '--:--' }}
+
+                                    à
+
+                                    {{ $task->heure_fin
+                                        ? substr((string) $task->heure_fin, 0, 5)
+                                        : '--:--' }}
+
+                                </span>
 
                             </td>
 
-                            {{-- MODE --}}
-                            <td class="px-4 py-4">
-
-                                @if($task->type === 'master')
-                                    <span class="rounded-full bg-purple-50 px-3 py-1.5 font-bold text-purple-700">
-                                        🎓 Master
-                                    </span>
-                                @else
-                                    <span class="rounded-full bg-blue-50 px-3 py-1.5 font-bold text-blue-700">
-                                        💼 Office
-                                    </span>
-                                @endif
-
-                            </td>
 
                             {{-- PROJET / MATIÈRE --}}
-                            <td class="px-4 py-4 font-bold text-slate-800">
-                                {{ $task->project->title
-                                    ?? $task->project_name
-                                    ?? 'Général' }}
+                            <td class="px-5 py-4">
+                                <span class="font-bold text-slate-900">
+                                    {{ $task->project->title
+                                        ?? $task->project_name
+                                        ?? 'Général' }}
+                                </span>
                             </td>
 
                             {{-- ÉTAPE / LEÇON --}}
-                            <td class="px-4 py-4 text-blue-600">
-                                {{ $task->category->name ?? '—' }}
+                            <td class="px-5 py-4">
+                                <span class="font-medium text-blue-600">
+                                    {{ $task->category->name ?? '—' }}
+                                </span>
+                            </td>
+
+                            {{-- TÂCHE --}}
+                            <td class="px-5 py-4">
+                                <span class="font-semibold text-slate-800">
+                                    {{ $task->title }}
+                                </span>
                             </td>
 
                             {{-- TÂCHE --}}
                             <td class="px-4 py-4 font-semibold text-slate-900">
                                 {{ $task->title }}
-                            </td>
-
-                            {{-- STATUT --}}
-                            <td class="px-4 py-4">
-
-                                @if($task->document_status === 'done')
-
-                                    <span class="rounded-full bg-green-50 px-3 py-1.5 font-bold text-green-700">
-                                        ✓ Terminée
-                                    </span>
-
-                                @elseif($task->document_status === 'in_progress')
-
-                                    <span class="rounded-full bg-blue-50 px-3 py-1.5 font-bold text-blue-700">
-                                        ◷ En cours
-                                    </span>
-
-                                @else
-
-                                    <span class="rounded-full bg-slate-100 px-3 py-1.5 font-bold text-slate-600">
-                                        À faire
-                                    </span>
-
-                                @endif
-
-                            </td>
-
-                            {{-- PRIORITÉ --}}
-                            <td class="px-4 py-4">
-
-                                @if($task->priority === 'high')
-                                    <span class="font-bold text-red-600">
-                                        ↑ Haute
-                                    </span>
-                                @elseif($task->priority === 'low')
-                                    <span class="font-bold text-green-700">
-                                        ↓ Basse
-                                    </span>
-                                @else
-                                    <span class="font-bold text-amber-700">
-                                        = Moyenne
-                                    </span>
-                                @endif
-
                             </td>
 
                             {{-- ACTIONS --}}
@@ -490,7 +453,7 @@
                                         type="button"
                                         onclick="document.getElementById('editScheduleTask-{{ $task->id }}').showModal()"
                                         title="Modifier la tâche"
-                                        class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white transition hover:bg-blue-700"
+                                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
                                     >
                                         ✎
                                     </button>
@@ -508,7 +471,7 @@
                                         <button
                                             type="submit"
                                             title="Supprimer la tâche"
-                                            class="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500 text-white transition hover:bg-red-600"
+                                            class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white shadow-sm transition hover:bg-red-600 hover:shadow-md"
                                         >
                                             🗑
                                         </button>
@@ -720,7 +683,7 @@
                     @empty
 
                         <tr>
-                            <td colspan="8" class="px-4 py-12 text-center text-slate-500">
+                            <td colspan="5" class="px-4 py-12 text-center text-slate-500">
 
                                 <p class="text-3xl">🗓️</p>
 
