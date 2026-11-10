@@ -92,6 +92,22 @@
         </div>
     @endif
 
+
+    @if($nextSlot['date'] !== $today->toDateString())
+        <div class="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            🗓️ Le programme d'aujourd'hui est complet.
+            La prochaine tâche sera programmée le
+            <strong>
+                {{ \Carbon\Carbon::parse($nextSlot['date'])->format('d/m/Y') }}
+            </strong>
+            de
+            <strong>{{ $nextSlot['start'] }}</strong>
+            à
+            <strong>{{ $nextSlot['end'] }}</strong>.
+        </div>
+    @endif
+
+
     {{-- FORMULAIRE DE CRÉATION --}}
     <section
         id="scheduleTaskFormContainer"
@@ -122,16 +138,17 @@
             <input type="hidden" name="return_to" value="schedule.today">
 
             {{-- Date d'exécution : aujourd'hui --}}
+
             <input
                 type="hidden"
                 name="execution_date"
-                value="{{ $today->format('Y-m-d') }}"
+                value="{{ $nextSlot['date'] }}"
             >
 
             <input
                 type="hidden"
                 name="date_prevue"
-                value="{{ $today->format('Y-m-d') }}"
+                value="{{ $nextSlot['date'] }}"
             >
 
             {{-- MODE --}}
@@ -217,7 +234,7 @@
                 <input
                     type="text"
                     readonly
-                    value="{{ $today->format('d/m/Y') }}"
+                    value="{{ \Carbon\Carbon::parse($nextSlot['date'])->format('d/m/Y') }}"
                     class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700"
                 >
             </div>
@@ -248,7 +265,7 @@
                 <input
                     type="time"
                     name="start_time"
-                    value="{{ old('start_time', '09:00') }}"
+                    value="{{ old('start_time', $nextSlot['start']) }}"
                     required
                     class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                 >
@@ -263,7 +280,7 @@
                 <input
                     type="time"
                     name="end_time"
-                    value="{{ old('end_time', '11:00') }}"
+                    value="{{ old('end_time', $nextSlot['end']) }}"
                     required
                     class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                 >

@@ -353,6 +353,61 @@ class TaskController extends Controller
     }
 
 
+    private function nextScheduleSlot(): array
+    {
+        $start = Carbon::now('Africa/Dakar')->startOfMinute();
+
+        for ($i = 0; $i < 365; $i++) {
+
+            $date = $start->toDateString();
+
+            // Dernière heure de fin des tâches programmées
+            // pour cette date, Office et Master confondus.
+            $lastTask = Task::query()
+                ->whereIn('type', ['office', 'master'])
+                ->where('is_archived', 0)
+                ->whereDate('execution_date', $date)
+                ->whereNotNull('heure_fin')
+                ->orderBy('heure_fin', 'desc')
+                ->first();
+
+            if ($lastTask) {
+
+                $lastEnd = Carbon::parse(
+                    $date . ' ' . $lastTask->heure_fin,
+                    'Africa/Dakar'
+                );
+
+                // Ne jamais proposer une heure déjà passée.
+                if ($lastEnd->gt($start)) {
+                    $start = $lastEnd;
+                }
+            }
+
+            $end = $start->copy()->addHours(2);
+
+            // Conserver des créneaux de 2 heures
+            // entièrement compris dans la même journée.
+            if ($end->toDateString() === $start->toDateString()) {
+                return [
+                    'date' => $start->toDateString(),
+                    'start' => $start->format('H:i'),
+                    'end' => $end->format('H:i'),
+                ];
+            }
+
+            // Sinon, passer au lendemain à 09:00.
+            $start = $start->copy()
+                ->addDay()
+                ->startOfDay()
+                ->setTime(9, 0);
+        }
+
+        throw new \RuntimeException(
+            'Aucun créneau disponible dans les 365 prochains jours.'
+        );
+    }
+
     
 /**
  * Emploi du temps global du jour.
@@ -360,8 +415,32 @@ class TaskController extends Controller
  */
     public function todaySchedule()
     {
-        $today = Carbon::today();
 
+        $today = Carbon::today('Africa/Dakar');
+
+        // Tâches des jours précédents non terminées.
+        $overdueTasks = Task::query()
+            ->whereIn('type', ['office', 'master'])
+            ->where('is_archived', 0)
+            ->where('document_status', '!=', 'done')
+            ->whereDate('execution_date', '<', $today->toDateString())
+            ->orderBy('execution_date')
+            ->orderBy('heure_debut')
+            ->get();
+
+        // Reporter chaque tâche au prochain créneau disponible.
+        foreach ($overdueTasks as $overdueTask) {
+
+            $slot = $this->nextScheduleSlot();
+
+            $overdueTask->update([
+                'execution_date' => $slot['date'],
+                'heure_debut' => $slot['start'],
+                'heure_fin' => $slot['end'],
+            ]);
+        }
+
+        // Recharger ensuite le programme du jour.
         $todayTasks = Task::with(['project', 'category'])
             ->whereIn('type', ['office', 'master'])
             ->whereDate('execution_date', $today->toDateString())
@@ -403,6 +482,8 @@ class TaskController extends Controller
             ->get();
 
 
+        $nextSlot = $this->nextScheduleSlot();
+
         return view('schedule.today', compact(
             'today',
             'todayTasks',
@@ -410,7 +491,8 @@ class TaskController extends Controller
             'masterCount',
             'completedCount',
             'scheduleProjects',
-            'scheduleCategories'
+            'scheduleCategories',
+            'nextSlot'
         ));
     }
 
@@ -439,6 +521,10 @@ class TaskController extends Controller
             'new_category_name' => 'nullable|string|max:255',
             'document_link' => 'nullable|url:http,https|max:2048',
             'document_file' => 'nullable|file|max:20480|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,jpg,jpeg,png',
+            'execution_date' => 'required_if:return_to,schedule.today|nullable|date',
+            'date_prevue' => 'nullable|date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
         ]);
 
 
@@ -471,10 +557,15 @@ class TaskController extends Controller
                     }
                 }
 
-                if ($request->execution_date !== Carbon::today()->toDateString()) {
+                if (
+                    !$request->filled('execution_date') ||
+                    !\Carbon\Carbon::parse($request->execution_date)
+                        ->startOfDay()
+                        ->gte(\Carbon\Carbon::today('Africa/Dakar'))
+                ) {
                     $validator->errors()->add(
                         'execution_date',
-                        'La date doit correspondre à aujourd’hui.'
+                        'La date de programmation ne peut pas être passée.'
                     );
                 }
 
