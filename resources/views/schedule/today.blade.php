@@ -398,8 +398,43 @@
 
                     @forelse($todayTasks as $task)
 
-                        <tr class="border-b border-slate-100 transition-colors hover:bg-blue-50/40 [&>td]:align-middle">
+                        @php
+                            $currentTime = \Carbon\Carbon::now('Africa/Dakar');
 
+                            $isCompleted = $task->document_status === 'done';
+
+                            $isWithinSchedule = false;
+
+                            if ($task->heure_debut && $task->heure_fin) {
+
+                                $taskStart = \Carbon\Carbon::parse(
+                                    $today->format('Y-m-d') . ' ' . $task->heure_debut,
+                                    'Africa/Dakar'
+                                );
+
+                                $taskEnd = \Carbon\Carbon::parse(
+                                    $today->format('Y-m-d') . ' ' . $task->heure_fin,
+                                    'Africa/Dakar'
+                                );
+
+                                $isWithinSchedule =
+                                    $currentTime->gte($taskStart)
+                                    && $currentTime->lt($taskEnd);
+                            }
+
+                            $isRunning = !$isCompleted && (
+                                $task->document_status === 'in_progress'
+                                || $isWithinSchedule
+                            );
+
+                            $rowColor = $isCompleted
+                                ? 'bg-emerald-50 hover:bg-emerald-100'
+                                : ($isRunning
+                                    ? 'bg-blue-50 hover:bg-blue-100'
+                                    : 'bg-white hover:bg-slate-50');
+                        @endphp
+
+                        <tr class="border-b border-slate-100 transition-colors [&>td]:align-middle {{ $rowColor }}">
 
                             {{-- HORAIRES --}}
                             <td class="px-5 py-4">
@@ -789,6 +824,36 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    setInterval(function () {
+
+        // Ne rien faire si l'onglet est masqué.
+        if (document.hidden) return;
+
+        // Ne pas interrompre une modification.
+        if (document.querySelector('dialog[open]')) return;
+
+        // Ne pas interrompre la création d'une tâche.
+        const form = document.getElementById(
+            'scheduleTaskFormContainer'
+        );
+
+        if (form && !form.classList.contains('hidden')) {
+            return;
+        }
+
+        // Recharger le programme pour recalculer
+        // les horaires et les couleurs.
+        window.location.reload();
+
+    }, 60000);
+
+});
+</script>
+
 
 
 @endsection

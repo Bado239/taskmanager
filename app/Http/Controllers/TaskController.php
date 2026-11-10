@@ -416,19 +416,46 @@ class TaskController extends Controller
     public function todaySchedule()
     {
 
-        $today = Carbon::today('Africa/Dakar');
 
-        // Tâches des jours précédents non terminées.
+        $now = Carbon::now('Africa/Dakar');
+        $today = $now->copy()->startOfDay();
+
+        // Identifier les tâches non terminées :
+        // - datant des jours précédents ;
+        // - ou terminées en horaire aujourd'hui.
         $overdueTasks = Task::query()
             ->whereIn('type', ['office', 'master'])
             ->where('is_archived', 0)
             ->where('document_status', '!=', 'done')
-            ->whereDate('execution_date', '<', $today->toDateString())
+            ->whereNotNull('execution_date')
+            ->where(function ($query) use ($today, $now) {
+
+                $query->whereDate(
+                    'execution_date',
+                    '<',
+                    $today->toDateString()
+                );
+
+                $query->orWhere(function ($q) use ($today, $now) {
+                    $q->whereDate(
+                        'execution_date',
+                        $today->toDateString()
+                    )
+                    ->whereNotNull('heure_fin')
+                    ->whereTime(
+                        'heure_fin',
+                        '<=',
+                        $now->format('H:i:s')
+                    );
+                });
+
+            })
             ->orderBy('execution_date')
-            ->orderBy('heure_debut')
+            ->orderBy('heure_fin')
+            ->orderBy('id')
             ->get();
 
-        // Reporter chaque tâche au prochain créneau disponible.
+        // Reporter les tâches dont le créneau est écoulé.
         foreach ($overdueTasks as $overdueTask) {
 
             $slot = $this->nextScheduleSlot();
