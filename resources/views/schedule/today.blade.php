@@ -385,7 +385,7 @@
 
             <table class="w-full min-w-[800px] border-collapse text-left text-sm">
 
-                <thead class="border-b border-blue-100 bg-blue-50">
+                <thead class="border-b border-blue-200 bg-[#D1E2F8]">
                     <tr class="text-xs font-extrabold uppercase tracking-wide text-slate-700">
                         <th class="w-[17%] px-5 py-4">Horaires</th>
                         <th class="w-[21%] px-5 py-4">Projet / Matière</th>
