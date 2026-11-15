@@ -10,7 +10,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\CourseResourceController;
 use App\Http\Controllers\LearningDocumentController;
 use App\Http\Controllers\GeneratedCourseController;
-
+use App\Http\Controllers\FinanceController;
 
 
 /*
@@ -332,3 +332,36 @@ Route::put('/schedule/today/tasks/{task}', [
     TaskController::class,
     'updateScheduleTask'
 ])->name('schedule.tasks.update');
+
+
+// =========================================
+// GESTION FINANCIÈRE PERSONNELLE
+// =========================================
+
+Route::get('/finances', [
+    FinanceController::class, 'index'
+])->name('finances.index');
+
+Route::put('/finances/income', [
+    FinanceController::class, 'updateIncome'
+])->name('finances.income.update');
+
+Route::post('/finances/categories', [
+    FinanceController::class, 'storeCategory'
+])->name('finances.categories.store');
+
+Route::put('/finances/categories/{id}', [
+    FinanceController::class, 'updateCategory'
+])->name('finances.categories.update');
+
+Route::delete('/finances/categories/{id}', [
+    FinanceController::class, 'destroyCategory'
+])->name('finances.categories.destroy');
+
+Route::post('/finances/movements', [
+    FinanceController::class, 'storeMovement'
+])->name('finances.movements.store');
+
+Route::delete('/finances/movements/{id}', [
+    FinanceController::class, 'destroyMovement'
+])->name('finances.movements.destroy');

@@ -701,6 +701,12 @@
                 >
                     🗓️ Emploi du temps
                 </a>
+                <a
+                    href="{{ route('finances.index') }}"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+                >
+                    💰 Mes Finances
+                </a>
 
             </div>
             <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">

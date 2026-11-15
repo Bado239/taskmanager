@@ -285,6 +285,20 @@
                             <span class="ml-auto h-2 w-2 shrink-0 rounded-full bg-emerald-400"></span>
                         @endif
                     </a>
+                    <a
+                        href="{{ route('finances.index') }}"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3
+                            text-sm font-semibold transition-colors
+                            {{ request()->routeIs('finances.*')
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-slate-200 hover:bg-blue-800/50' }}"
+                    >
+                        <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-xl">
+                            💰
+                        </span>
+
+                        <span>Mes Finances</span>
+                    </a>
                 </section>
             </nav>
 
