@@ -12,13 +12,6 @@
 
     $income = (int) $financeMonth->income;
 
-    $expensePercent = $income > 0
-        ? min(100, $plannedExpenses / $income * 100)
-        : 0;
-
-    $savingPercent = $income > 0
-        ? min(100 - $expensePercent, $plannedSavings / $income * 100)
-        : 0;
 @endphp
 
 <div
@@ -27,7 +20,8 @@
         editBudget: false,
         showMovement: false,
         showCategory: false,
-        showIncome: false
+        showIncome: false,
+        showDetails: false
     }"
 >
 
@@ -135,6 +129,33 @@
 
     </div>
 
+    {{-- BOUTON AFFICHER / MASQUER LES DÉTAILS --}}
+    <div class="flex justify-end">
+
+        <button
+            type="button"
+            @click="showDetails = !showDetails"
+            class="inline-flex items-center gap-2 rounded-xl
+                border border-blue-200 bg-white
+                px-5 py-3 text-sm font-bold text-blue-700
+                shadow-sm transition hover:bg-blue-50"
+        >
+            <span x-text="showDetails ? '👁️ Masquer les détails' : '📊 Afficher les détails'"></span>
+
+            <svg
+                class="h-4 w-4 transition-transform"
+                :class="showDetails ? 'rotate-180' : ''"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <path d="m6 9 6 6 6-6"/>
+            </svg>
+        </button>
+
+    </div>
+
     {{-- AJUSTER LE REVENU --}}
     <section
         x-show="editBudget"
@@ -176,49 +197,9 @@
         </form>
     </section>
 
-    {{-- RÉPARTITION DU BUDGET --}}
-    <section class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
 
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h2 class="font-extrabold text-slate-900">
-                📊 Répartition du budget
-            </h2>
-
-            <span class="text-xs text-slate-500">
-                Dépenses prévues et épargne prévue
-            </span>
-        </div>
-
-        <div class="flex h-4 overflow-hidden rounded-full bg-slate-100">
-            <div
-                class="h-full bg-amber-500"
-                style="width: {{ $expensePercent }}%"
-            ></div>
-
-            <div
-                class="h-full bg-emerald-500"
-                style="width: {{ $savingPercent }}%"
-            ></div>
-        </div>
-
-        <div class="mt-3 flex flex-wrap gap-5 text-xs font-semibold">
-            <span class="text-amber-700">
-                ● Dépenses : {{ $formatMoney($plannedExpenses) }}
-            </span>
-
-            <span class="text-emerald-700">
-                ● Épargne : {{ $formatMoney($plannedSavings) }}
-            </span>
-        </div>
-
-        @if($unallocated < 0)
-            <p class="mt-3 rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700">
-                ⚠️ Vos prévisions dépassent votre revenu de
-                {{ $formatMoney(abs($unallocated)) }}.
-            </p>
-        @endif
-
-    </section>
+    {{-- DÉTAILS FINANCIERS MASQUÉS PAR DÉFAUT --}}
+    <div x-show="showDetails" x-cloak class="space-y-5">
 
     {{-- ACTIONS RAPIDES --}}
     <section class="flex flex-wrap items-center justify-between gap-3">
@@ -736,7 +717,11 @@
                 </tbody>
             </table>
         </div>
+
     </section>
+
+    {{-- FIN DES DÉTAILS FINANCIERS --}}
+    </div>
 
 </div>
 
