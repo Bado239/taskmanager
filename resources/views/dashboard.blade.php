@@ -797,10 +797,12 @@
                 </a>
 
                 {{-- OBJECTIF DU JOUR --}}
-                <div class="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-
+                <a
+                    href="{{ route('schedule.today') }}"
+                    class="group block rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                >
                     <div class="mb-3 flex items-center justify-between">
-                        <span class="rounded-xl bg-emerald-50 p-2 text-xl">
+                        <span class="rounded-xl bg-emerald-50 p-2 text-xl transition group-hover:scale-110">
                             🎯
                         </span>
                         <span class="text-xs font-bold text-emerald-600">
@@ -825,13 +827,14 @@
                         {{ $performanceToday['total'] }}
                         tâche(s) programmée(s)
                     </p>
-                </div>
-
-                {{-- SEMAINE --}}
-                <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
-
+                </a>
+                {{-- CETTE SEMAINE --}}
+                <a
+                    href="{{ route('schedule.index') }}"
+                    class="group block rounded-2xl border border-amber-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+                >
                     <div class="mb-3 flex items-center justify-between">
-                        <span class="rounded-xl bg-amber-50 p-2 text-xl">
+                        <span class="rounded-xl bg-amber-50 p-2 text-xl transition group-hover:scale-110">
                             📈
                         </span>
                         <span class="text-xs font-bold text-amber-600">
@@ -849,9 +852,7 @@
                     <p class="mt-1 text-xs text-slate-500">
                         Tâches programmées et terminées
                     </p>
-                </div>
-
-            </div>
+                </a>
 
             {{-- MISSIONS PRIORITAIRES REPLIABLES --}}
             <section
