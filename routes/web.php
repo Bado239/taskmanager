@@ -337,11 +337,12 @@ Route::put('/schedule/today/tasks/{task}', [
 
 
 
+
 // =======================================
-// ACCÈS SÉCURISÉ À MES FINANCES
+// ACCÈS À MES FINANCES
 // =======================================
 
-// Page de saisie du mot de passe
+// Page du mot de passe financier
 Route::get('/finances/deverrouiller', [
     FinanceAccessController::class, 'show'
 ])->name('finances.unlock');
@@ -350,17 +351,16 @@ Route::get('/finances/deverrouiller', [
 Route::post('/finances/deverrouiller', [
     FinanceAccessController::class, 'unlock'
 ])
-    ->middleware('throttle:5,1')
-    ->name('finances.unlock.submit');
+->middleware('throttle:5,1')
+->name('finances.unlock.submit');
 
 // Verrouillage manuel
 Route::post('/finances/verrouiller', [
     FinanceAccessController::class, 'lock'
 ])->name('finances.lock');
 
-Route::middleware(['auth'])->group(function () {
-    // Placez ici toutes vos routes financières,
-    // y compris les routes de déverrouillage.
+// Toutes les opérations financières protégées
+Route::middleware([FinanceAccess::class])->group(function () {
 
     Route::get('/finances', [
         FinanceController::class, 'index'
