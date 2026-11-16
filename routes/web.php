@@ -214,6 +214,11 @@ Route::get('/tasks/{task}/learning',
     [TaskController::class, 'learning']
 )->name('tasks.learning');
 
+Route::patch(
+    '/tasks/{task}/learning-status',
+    [TaskController::class, 'updateLearningStatus']
+)->name('tasks.learning.status');
+
 /*
 |--------------------------------------------------------------------------
 | Evaluation des ressources de cours

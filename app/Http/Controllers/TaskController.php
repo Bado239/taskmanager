@@ -780,6 +780,7 @@ class TaskController extends Controller
     {
         $validator = \Validator::make($request->all(), [
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:10000',
             'type'  => 'required|string|in:office,master',
             'new_project_name' => 'nullable|string|max:255',
             'new_category_name' => 'nullable|string|max:255',
@@ -919,6 +920,7 @@ class TaskController extends Controller
         // Enregistrement de la tâche
         Task::create([
             'title'           => $request->title,
+            'description' => $request->description,
             'document_link'   => $documentLink,
             'category_id'     => $categoryId,
             'project_id'      => $projectId,
@@ -1098,7 +1100,22 @@ class TaskController extends Controller
                 'Cours actualisés avec succès'
             );
 
-    }    
+    }
+    
+    public function updateLearningStatus(Request $request, Task $task)
+    {
+        $data = $request->validate([
+            'document_status' => 'required|in:todo,in_progress,done',
+        ]);
+
+        $task->update([
+            'document_status' => $data['document_status'],
+        ]);
+
+        return redirect()
+            ->route('tasks.learning', $task->id)
+            ->with('success', 'Statut de la mission mis à jour avec succès.');
+    }
 
 
     /**
@@ -1148,6 +1165,7 @@ class TaskController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:10000',
             'document_link' => 'nullable|url:http,https|max:2048',
             'document_file' => 'nullable|file|max:10240',
             'date_prevue' => 'nullable|date',
@@ -1158,6 +1176,8 @@ class TaskController extends Controller
         $data = [
 
             'title' => $request->title,
+
+            'description' => $request->description,
 
             'project_id' => $request->project_id,
 
