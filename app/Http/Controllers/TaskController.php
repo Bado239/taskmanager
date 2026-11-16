@@ -135,6 +135,173 @@ class TaskController extends Controller
         $masterTodayCount = Task::where('is_archived', 0)->where('type', 'master')->where('execution_date', $today)->count();
         $archivedCount = Task::where('is_archived', 1)->count();
 
+
+
+        // ===========================================
+        // CENTRE DE PERFORMANCE — DASHBOARD GLOBAL
+        // ===========================================
+
+        $performanceToday = collect();
+        $performanceWeek = collect();
+        $topPriorityTasks = collect();
+        $nextMasterExams = collect();
+
+        if ($view === 'dashboard') {
+
+            $performanceDate = Carbon::today('Africa/Dakar');
+            $todayDate = $performanceDate->toDateString();
+
+            // Tâches programmées aujourd'hui.
+            $todayPerformanceTasks = Task::query()
+                ->whereIn('type', ['office', 'master'])
+                ->where('is_archived', 0)
+                ->whereDate('execution_date', $todayDate)
+                ->get();
+
+            $officeToday = $todayPerformanceTasks
+                ->where('type', 'office');
+
+            $masterToday = $todayPerformanceTasks
+                ->where('type', 'master');
+
+            $todayTotal = $todayPerformanceTasks->count();
+            $todayDone = $todayPerformanceTasks
+                ->where('document_status', 'done')
+                ->count();
+
+            $performanceToday = collect([
+                'office_total' => $officeToday->count(),
+                'office_done' => $officeToday
+                    ->where('document_status', 'done')
+                    ->count(),
+
+                'master_total' => $masterToday->count(),
+                'master_done' => $masterToday
+                    ->where('document_status', 'done')
+                    ->count(),
+
+                'total' => $todayTotal,
+                'done' => $todayDone,
+                'rate' => $todayTotal > 0
+                    ? round($todayDone * 100 / $todayTotal)
+                    : 0,
+            ]);
+
+            // Bilan des tâches programmées cette semaine.
+            $weekStart = $performanceDate
+                ->copy()->startOfWeek();
+
+            $weekEnd = $performanceDate
+                ->copy()->endOfWeek();
+
+            $weekTasks = Task::query()
+                ->whereIn('type', ['office', 'master'])
+                ->where('is_archived', 0)
+                ->whereBetween('execution_date', [
+                    $weekStart->toDateString(),
+                    $weekEnd->toDateString(),
+                ])
+                ->get();
+
+            $performanceWeek = collect([
+                'total' => $weekTasks->count(),
+                'done' => $weekTasks
+                    ->where('document_status', 'done')
+                    ->count(),
+
+                'office_done' => $weekTasks
+                    ->where('type', 'office')
+                    ->where('document_status', 'done')
+                    ->count(),
+
+                'master_done' => $weekTasks
+                    ->where('type', 'master')
+                    ->where('document_status', 'done')
+                    ->count(),
+            ]);
+
+            // Identifier les tâches importantes non terminées.
+            $priorityCandidates = Task::query()
+                ->with(['project', 'category'])
+                ->whereIn('type', ['office', 'master'])
+                ->where('is_archived', 0)
+                ->whereIn('document_status', ['todo', 'in_progress'])
+                ->get()
+                ->sortBy(function ($task) use ($todayDate) {
+
+                    $taskDate = $task->execution_date
+                        ? Carbon::parse(
+                            $task->execution_date
+                        )->format('Y-m-d')
+                        : (
+                            $task->date_prevue
+                                ? Carbon::parse(
+                                    $task->date_prevue
+                                )->format('Y-m-d')
+                                : '9999-12-31'
+                        );
+
+                    // Les tâches en retard ou prévues
+                    // aujourd'hui passent en priorité.
+                    $dateGroup = $taskDate <= $todayDate ? 0 : 1;
+
+                    $priorityGroup = match ($task->priority) {
+                        'high' => 0,
+                        'medium' => 1,
+                        default => 2,
+                    };
+
+                    return sprintf(
+                        '%d|%d|%s|%010d',
+                        $dateGroup,
+                        $priorityGroup,
+                        $taskDate,
+                        $task->id
+                    );
+                })
+                ->values();
+
+            // Préserver l'équilibre entre Office et Master.
+            // Une mission de chaque mode, si disponible.
+            $topPriorityTasks = $priorityCandidates
+                ->where('type', 'office')
+                ->take(1)
+                ->concat(
+                    $priorityCandidates
+                        ->where('type', 'master')
+                        ->take(1)
+                )
+                ->concat($priorityCandidates)
+                ->unique('id')
+                ->take(3)
+                ->values();
+
+            // Prochains examens Master :
+            // réutilisation des dates déjà récupérées.
+            $nextMasterExams = $upcomingExamDates
+                ->map(function ($examDate, $projectId) use (
+                    $projectsMaster
+                ) {
+                    $project = $projectsMaster->firstWhere(
+                        'id', (int) $projectId
+                    );
+
+                    if (!$project) {
+                        return null;
+                    }
+
+                    return [
+                        'project' => $project->title,
+                        'date' => Carbon::parse($examDate),
+                    ];
+                })
+                ->filter()
+                ->sortBy('date')
+                ->take(3)
+                ->values();
+        }
+
+
         // Si l'utilisateur a cliqué sur un indicateur du Dashboard Global
         $globalIndicatorTasks = collect();
         if ($view === 'dashboard' && $indicator) {
@@ -294,7 +461,11 @@ class TaskController extends Controller
             'projectsMaster',
             'categoriesOffice',
             'categoriesMaster',
-            'upcomingExamDates'
+            'upcomingExamDates',
+            'performanceToday',
+            'performanceWeek',
+            'topPriorityTasks',
+            'nextMasterExams'
         ));
     }
 

@@ -686,59 +686,492 @@
         
     <!-- ================= VUE : DASHBOARD GLOBAL ================= -->
     @if($view === 'dashboard')
+        {{-- ========================================= --}}
+        {{-- MON CENTRE DE PERFORMANCE                 --}}
+        {{-- ========================================= --}}
 
-        <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-6">
+        <div class="space-y-5 mb-6">
 
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+            {{-- BANDEAU PRINCIPAL --}}
+            <section class="overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-blue-950 to-blue-800 p-6 text-white shadow-lg">
 
-                <h1 class="flex items-center gap-2 text-xl font-bold text-gray-900">
-                    📊 Tableau de bord Global
-                </h1>
+                <div class="flex flex-wrap items-center justify-between gap-5">
 
+                    <div class="space-y-2">
+
+                        <p class="text-xs font-bold uppercase tracking-widest text-blue-200">
+                            🚀 TaskManager PRO
+                        </p>
+
+                        <h1 class="text-2xl font-extrabold">
+                            Mon Centre de Performance
+                        </h1>
+
+                        <p class="max-w-xl text-sm text-blue-100">
+                            Chaque journée est une occasion d'avancer.
+                            Concentrez-vous sur vos priorités et mesurez
+                            vos progrès au bureau comme en Master.
+                        </p>
+
+                        <p class="text-xs font-semibold text-blue-200">
+                            📅 {{ \Carbon\Carbon::now('Africa/Dakar')->translatedFormat('l d F Y') }}
+                        </p>
+
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+
+                        <a
+                            href="{{ route('schedule.today') }}"
+                            class="rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-blue-900 transition hover:bg-blue-100"
+                        >
+                            🗓️ Emploi du temps
+                        </a>
+
+                        <a
+                            href="{{ route('finances.index') }}"
+                            class="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-white/20"
+                        >
+                            💰 Mes Finances
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {{-- QUATRE INDICATEURS PRINCIPAUX --}}
+            <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+
+                {{-- OFFICE --}}
                 <a
-                    href="{{ route('schedule.today') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
+                    href="{{ route('dashboard', ['view' => 'office', 'filter' => 'today']) }}"
+                    class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md"
                 >
-                    🗓️ Emploi du temps
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="rounded-xl bg-blue-50 p-2 text-xl">
+                            💼
+                        </span>
+                        <span class="text-xs font-bold text-blue-600">
+                            OFFICE
+                        </span>
+                    </div>
+
+                    <p class="text-2xl font-extrabold text-slate-900">
+                        {{ $performanceToday['office_done'] }}
+                        <span class="text-lg text-slate-400">
+                            / {{ $performanceToday['office_total'] }}
+                        </span>
+                    </p>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Missions terminées aujourd'hui
+                    </p>
                 </a>
+
+                {{-- MASTER --}}
                 <a
-                    href="{{ route('finances.index') }}"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-700 transition hover:bg-emerald-100"
+                    href="{{ route('dashboard', ['view' => 'master', 'filter' => 'today']) }}"
+                    class="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm transition hover:border-purple-300 hover:shadow-md"
                 >
-                    💰 Mes Finances
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="rounded-xl bg-purple-50 p-2 text-xl">
+                            🎓
+                        </span>
+                        <span class="text-xs font-bold text-purple-600">
+                            MASTER
+                        </span>
+                    </div>
+
+                    <p class="text-2xl font-extrabold text-slate-900">
+                        {{ $performanceToday['master_done'] }}
+                        <span class="text-lg text-slate-400">
+                            / {{ $performanceToday['master_total'] }}
+                        </span>
+                    </p>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Révisions terminées aujourd'hui
+                    </p>
                 </a>
+
+                {{-- OBJECTIF DU JOUR --}}
+                <div class="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
+
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="rounded-xl bg-emerald-50 p-2 text-xl">
+                            🎯
+                        </span>
+                        <span class="text-xs font-bold text-emerald-600">
+                            OBJECTIF DU JOUR
+                        </span>
+                    </div>
+
+                    <p class="text-2xl font-extrabold text-slate-900">
+                        {{ $performanceToday['rate'] }} %
+                    </p>
+
+                    <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                            class="h-full rounded-full bg-emerald-500"
+                            style="width: {{ $performanceToday['rate'] }}%"
+                        ></div>
+                    </div>
+
+                    <p class="mt-2 text-xs text-slate-500">
+                        {{ $performanceToday['done'] }}
+                        sur
+                        {{ $performanceToday['total'] }}
+                        tâche(s) programmée(s)
+                    </p>
+                </div>
+
+                {{-- SEMAINE --}}
+                <div class="rounded-2xl border border-amber-100 bg-white p-5 shadow-sm">
+
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="rounded-xl bg-amber-50 p-2 text-xl">
+                            📈
+                        </span>
+                        <span class="text-xs font-bold text-amber-600">
+                            CETTE SEMAINE
+                        </span>
+                    </div>
+
+                    <p class="text-2xl font-extrabold text-slate-900">
+                        {{ $performanceWeek['done'] }}
+                        <span class="text-lg text-slate-400">
+                            / {{ $performanceWeek['total'] }}
+                        </span>
+                    </p>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Tâches programmées et terminées
+                    </p>
+                </div>
 
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'total'])) }}" class="bg-blue-50 hover:bg-blue-100 border border-blue-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'total' ? 'ring-2 ring-[#0052cc]' : '' }}">
-                    <div class="text-xs text-blue-600 font-semibold">Total Actives</div>
-                    <div class="text-2xl font-bold text-[#0052cc]">{{ $totalTasks }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'todo'])) }}" class="bg-red-50 hover:bg-red-100 border border-red-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'todo' ? 'ring-2 ring-red-500' : '' }}">
-                    <div class="text-xs text-red-600 font-semibold">À faire</div>
-                    <div class="text-2xl font-bold text-red-600">{{ $todoTasks }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'doing'])) }}" class="bg-amber-50 hover:bg-amber-100 border border-amber-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'doing' ? 'ring-2 ring-amber-500' : '' }}">
-                    <div class="text-xs text-amber-600 font-semibold">En cours</div>
-                    <div class="text-2xl font-bold text-amber-600">{{ $doingTasks }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'done'])) }}" class="bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'done' ? 'ring-2 ring-emerald-500' : '' }}">
-                    <div class="text-xs text-emerald-600 font-semibold">Validées</div>
-                    <div class="text-2xl font-bold text-emerald-600">{{ $doneTasks }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'office_today'])) }}" class="bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'office_today' ? 'ring-2 ring-indigo-500' : '' }}">
-                    <div class="text-xs text-indigo-600 font-semibold">Office (Aujourd'hui)</div>
-                    <div class="text-2xl font-bold text-indigo-600">{{ $officeTodayCount }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'master_today'])) }}" class="bg-purple-50 hover:bg-purple-100 border border-purple-100 p-4 rounded-xl text-center transition-all block {{ $indicator === 'master_today' ? 'ring-2 ring-purple-500' : '' }}">
-                    <div class="text-xs text-purple-600 font-semibold">Master (Aujourd'hui)</div>
-                    <div class="text-2xl font-bold text-purple-600">{{ $masterTodayCount }}</div>
-                </a>
-                <a href="{{ route('dashboard', array_merge(request()->only('search'), ['view' => 'dashboard', 'indicator' => 'archived'])) }}" class="bg-gray-100 hover:bg-gray-200 border border-gray-200 p-4 rounded-xl text-center transition-all block {{ $indicator === 'archived' ? 'ring-2 ring-gray-600' : '' }}">
-                    <div class="text-xs text-gray-600 font-semibold">Archives</div>
-                    <div class="text-2xl font-bold text-gray-700">{{ $archivedCount }}</div>
-                </a>
+
+            {{-- MISSIONS PRIORITAIRES --}}
+            <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-blue-50 px-5 py-4">
+
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-900">
+                            🎯 Mes 3 victoires du jour
+                        </h2>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Vos missions prioritaires, en retard ou à venir.
+                        </p>
+                    </div>
+
+                    <a
+                        href="{{ route('schedule.today') }}"
+                        class="text-xs font-bold text-blue-700 hover:underline"
+                    >
+                        Voir mon programme →
+                    </a>
+
+                </div>
+
+                <div class="grid grid-cols-1 gap-3 p-4 lg:grid-cols-3">
+
+                    @forelse($topPriorityTasks as $task)
+
+                        @php
+                            $isMaster = $task->type === 'master';
+
+                            $priorityLabel = match ($task->priority) {
+                                'high' => 'Haute',
+                                'medium' => 'Moyenne',
+                                default => 'Basse',
+                            };
+
+                            $taskDate = $task->execution_date
+                                ?: $task->date_prevue;
+                        @endphp
+
+                        <div class="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-300 hover:bg-white">
+
+                            <div class="space-y-3">
+
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+
+                                    <span class="rounded-lg px-2.5 py-1 text-xs font-bold {{ $isMaster ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                                        {{ $isMaster ? '🎓 Master' : '💼 Office' }}
+                                    </span>
+
+                                    <span class="text-xs font-bold {{ $task->priority === 'high' ? 'text-red-600' : 'text-slate-500' }}">
+                                        {{ $priorityLabel }}
+                                    </span>
+
+                                </div>
+
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-500">
+                                        {{ $task->project->title
+                                            ?? $task->project_name
+                                            ?? 'Général' }}
+                                    </p>
+
+                                    <h3 class="mt-1 text-sm font-extrabold leading-6 text-slate-900">
+                                        {{ $task->title }}
+                                    </h3>
+                                </div>
+
+                                <p class="text-xs text-slate-500">
+                                    📌 {{ $task->category->name ?? 'Sans étape' }}
+                                </p>
+
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3">
+
+                                <span class="text-xs font-semibold text-slate-500">
+                                    📅 {{ $taskDate
+                                        ? \Carbon\Carbon::parse($taskDate)->format('d/m/Y')
+                                        : 'Non planifiée' }}
+                                </span>
+
+                                <a
+                                    href="{{ $isMaster
+                                        ? route('dashboard', [
+                                            'view' => 'master',
+                                            'folder' => $task->project_id
+                                        ])
+                                        : route('dashboard', [
+                                            'view' => 'office'
+                                        ]) }}"
+                                    class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
+                                >
+                                    Travailler →
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    @empty
+
+                        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center lg:col-span-3">
+                            <p class="text-2xl">🏆</p>
+                            <p class="mt-2 font-bold text-slate-800">
+                                Aucune tâche prioritaire en attente.
+                            </p>
+                            <p class="mt-1 text-xs text-slate-500">
+                                Ajoutez votre prochaine mission Office ou Master.
+                            </p>
+                        </div>
+
+                    @endforelse
+
+                </div>
+
+            </section>
+
+            {{-- PERFORMANCE OFFICE ET MASTER --}}
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+                <section class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
+
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="font-extrabold text-slate-900">
+                            💼 Ma performance Office
+                        </h2>
+
+                        <a
+                            href="{{ route('dashboard', ['view' => 'office']) }}"
+                            class="text-xs font-bold text-blue-600 hover:underline"
+                        >
+                            Accéder →
+                        </a>
+                    </div>
+
+                    @php
+                        $officeRate = $performanceToday['office_total'] > 0
+                            ? round(
+                                $performanceToday['office_done'] * 100
+                                / $performanceToday['office_total']
+                            )
+                            : 0;
+                    @endphp
+
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-extrabold text-blue-700">
+                                {{ $officeRate }} %
+                            </p>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Missions du jour terminées
+                            </p>
+                        </div>
+
+                        <span class="text-xs font-semibold text-slate-500">
+                            {{ $performanceWeek['office_done'] }}
+                            terminée(s) parmi les tâches de la semaine
+                        </span>
+                    </div>
+
+                    <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                            class="h-full rounded-full bg-blue-600"
+                            style="width: {{ $officeRate }}%"
+                        ></div>
+                    </div>
+
+                </section>
+
+                <section class="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
+
+                    <div class="mb-4 flex items-center justify-between">
+                        <h2 class="font-extrabold text-slate-900">
+                            🎓 Ma progression Master
+                        </h2>
+
+                        <a
+                            href="{{ route('dashboard', ['view' => 'master']) }}"
+                            class="text-xs font-bold text-purple-600 hover:underline"
+                        >
+                            Accéder →
+                        </a>
+                    </div>
+
+                    @php
+                        $masterRate = $performanceToday['master_total'] > 0
+                            ? round(
+                                $performanceToday['master_done'] * 100
+                                / $performanceToday['master_total']
+                            )
+                            : 0;
+                    @endphp
+
+                    <div class="flex items-end justify-between">
+                        <div>
+                            <p class="text-3xl font-extrabold text-purple-700">
+                                {{ $masterRate }} %
+                            </p>
+
+                            <p class="mt-1 text-xs text-slate-500">
+                                Révisions du jour terminées
+                            </p>
+                        </div>
+
+                        <span class="text-xs font-semibold text-slate-500">
+                            {{ $performanceWeek['master_done'] }}
+                            terminée(s) parmi les tâches de la semaine
+                        </span>
+                    </div>
+
+                    <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                            class="h-full rounded-full bg-purple-600"
+                            style="width: {{ $masterRate }}%"
+                        ></div>
+                    </div>
+
+                    {{-- PROCHAINS EXAMENS --}}
+                    @if($nextMasterExams->isNotEmpty())
+
+                        <div class="mt-5 space-y-2 border-t border-slate-100 pt-4">
+
+                            <p class="text-xs font-extrabold text-slate-700">
+                                📚 Examens à venir
+                            </p>
+
+                            @foreach($nextMasterExams as $exam)
+
+                                <div class="flex items-center justify-between gap-3 rounded-lg bg-purple-50 px-3 py-2">
+
+                                    <span class="text-xs font-semibold text-slate-800">
+                                        {{ $exam['project'] }}
+                                    </span>
+
+                                    <span class="whitespace-nowrap text-xs font-bold text-purple-700">
+                                        {{ $exam['date']->format('d/m/Y') }}
+                                    </span>
+
+                                </div>
+
+                            @endforeach
+
+                            <a
+                                href="{{ route('exams.index') }}"
+                                class="inline-block text-xs font-bold text-purple-600 hover:underline"
+                            >
+                                Préparation aux examens →
+                            </a>
+
+                        </div>
+
+                    @endif
+
+                </section>
+
             </div>
+
+            {{-- ANCIENS INDICATEURS CONSERVÉS, MAIS REPLIABLES --}}
+            <section
+                x-data="{ open: false }"
+                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            >
+
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="flex w-full items-center justify-between px-5 py-4 text-left"
+                >
+                    <span class="text-sm font-extrabold text-slate-800">
+                        📊 Statistiques générales
+                    </span>
+
+                    <span
+                        class="text-xs font-bold text-blue-600"
+                        x-text="open ? 'Masquer −' : 'Afficher +'">
+                    </span>
+                </button>
+
+                <div x-show="open" x-cloak class="border-t border-slate-100 p-4">
+
+                    <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+
+                        @foreach([
+                            ['total', 'Actives', $totalTasks],
+                            ['todo', 'À faire', $todoTasks],
+                            ['doing', 'En cours', $doingTasks],
+                            ['done', 'Validées', $doneTasks],
+                            ['office_today', 'Office aujourd’hui', $officeTodayCount],
+                            ['master_today', 'Master aujourd’hui', $masterTodayCount],
+                            ['archived', 'Archives', $archivedCount],
+                        ] as [$key, $label, $value])
+
+                            <a
+                                href="{{ route('dashboard', [
+                                    'view' => 'dashboard',
+                                    'indicator' => $key
+                                ]) }}"
+                                class="rounded-xl border border-blue-100 bg-blue-50 p-3 text-center transition hover:bg-blue-100"
+                            >
+                                <p class="text-xs font-semibold text-slate-600">
+                                    {{ $label }}
+                                </p>
+
+                                <p class="mt-2 text-xl font-extrabold text-blue-700">
+                                    {{ $value }}
+                                </p>
+                            </a>
+
+                        @endforeach
+
+                    </div>
+
+                </div>
+
+            </section>
+
         </div>
 
         @if($indicator)
