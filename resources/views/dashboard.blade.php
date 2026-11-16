@@ -952,19 +952,11 @@
                                     </span>
 
                                     <a
-                                        href="{{ $isMaster
-                                            ? route('dashboard', [
-                                                'view' => 'master',
-                                                'folder' => $task->project_id
-                                            ])
-                                            : route('dashboard', [
-                                                'view' => 'office'
-                                            ]) }}"
+                                        href="{{ route('tasks.learning', $task->id) }}"
                                         class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700"
                                     >
                                         Travailler →
                                     </a>
-
                                 </div>
 
                             </div>
