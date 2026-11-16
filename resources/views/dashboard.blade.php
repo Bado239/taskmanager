@@ -853,265 +853,137 @@
 
             </div>
 
-            {{-- MISSIONS PRIORITAIRES --}}
-            <section class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm">
+            {{-- MISSIONS PRIORITAIRES REPLIABLES --}}
+            <section
+                x-data="{ open: false }"
+                class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm"
+            >
 
-                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-blue-50 px-5 py-4">
-
+                <button
+                    type="button"
+                    @click="open = !open"
+                    class="flex w-full items-center justify-between gap-3 bg-blue-50 px-5 py-4 text-left transition hover:bg-blue-100"
+                >
                     <div>
                         <h2 class="text-base font-extrabold text-slate-900">
                             🎯 Mes 3 victoires du jour
                         </h2>
 
                         <p class="mt-1 text-xs text-slate-500">
-                            Vos missions prioritaires, en retard ou à venir.
+                            Vos missions prioritaires Office et Master.
                         </p>
                     </div>
 
-                    <a
-                        href="{{ route('schedule.today') }}"
-                        class="text-xs font-bold text-blue-700 hover:underline"
-                    >
-                        Voir mon programme →
-                    </a>
+                    <span
+                        class="whitespace-nowrap text-xs font-bold text-blue-700"
+                        x-text="open ? 'Masquer −' : 'Afficher +'"
+                    ></span>
+                </button>
 
-                </div>
+                <div x-show="open" x-cloak class="border-t border-blue-100">
 
-                <div class="grid grid-cols-1 gap-3 p-4 lg:grid-cols-3">
+                    <div class="flex justify-end px-5 pt-4">
+                        <a
+                            href="{{ route('schedule.today') }}"
+                            class="text-xs font-bold text-blue-700 hover:underline"
+                        >
+                            Voir mon programme →
+                        </a>
+                    </div>
 
-                    @forelse($topPriorityTasks as $task)
+                    <div class="grid grid-cols-1 gap-3 p-4 lg:grid-cols-3">
 
-                        @php
-                            $isMaster = $task->type === 'master';
+                        @forelse($topPriorityTasks as $task)
 
-                            $priorityLabel = match ($task->priority) {
-                                'high' => 'Haute',
-                                'medium' => 'Moyenne',
-                                default => 'Basse',
-                            };
+                            @php
+                                $isMaster = $task->type === 'master';
 
-                            $taskDate = $task->execution_date
-                                ?: $task->date_prevue;
-                        @endphp
+                                $priorityLabel = match ($task->priority) {
+                                    'high' => 'Haute',
+                                    'medium' => 'Moyenne',
+                                    default => 'Basse',
+                                };
 
-                        <div class="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-300 hover:bg-white">
+                                $taskDate = $task->execution_date
+                                    ?: $task->date_prevue;
+                            @endphp
 
-                            <div class="space-y-3">
+                            <div class="flex flex-col justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="space-y-3">
 
-                                    <span class="rounded-lg px-2.5 py-1 text-xs font-bold {{ $isMaster ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
-                                        {{ $isMaster ? '🎓 Master' : '💼 Office' }}
-                                    </span>
+                                    <div class="flex items-center justify-between gap-2">
 
-                                    <span class="text-xs font-bold {{ $task->priority === 'high' ? 'text-red-600' : 'text-slate-500' }}">
-                                        {{ $priorityLabel }}
-                                    </span>
+                                        <span class="rounded-lg px-2.5 py-1 text-xs font-bold {{ $isMaster ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' }}">
+                                            {{ $isMaster ? '🎓 Master' : '💼 Office' }}
+                                        </span>
 
-                                </div>
+                                        <span class="text-xs font-bold text-slate-500">
+                                            {{ $priorityLabel }}
+                                        </span>
 
-                                <div>
-                                    <p class="text-xs font-semibold text-slate-500">
-                                        {{ $task->project->title
-                                            ?? $task->project_name
-                                            ?? 'Général' }}
+                                    </div>
+
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-500">
+                                            {{ $task->project->title
+                                                ?? $task->project_name
+                                                ?? 'Général' }}
+                                        </p>
+
+                                        <h3 class="mt-1 text-sm font-extrabold text-slate-900">
+                                            {{ $task->title }}
+                                        </h3>
+                                    </div>
+
+                                    <p class="text-xs text-slate-500">
+                                        📌 {{ $task->category->name ?? 'Sans étape' }}
                                     </p>
 
-                                    <h3 class="mt-1 text-sm font-extrabold leading-6 text-slate-900">
-                                        {{ $task->title }}
-                                    </h3>
                                 </div>
 
-                                <p class="text-xs text-slate-500">
-                                    📌 {{ $task->category->name ?? 'Sans étape' }}
+                                <div class="flex items-center justify-between gap-2 border-t border-slate-200 pt-3">
+
+                                    <span class="text-xs text-slate-500">
+                                        📅 {{ $taskDate
+                                            ? \Carbon\Carbon::parse($taskDate)->format('d/m/Y')
+                                            : 'Non planifiée' }}
+                                    </span>
+
+                                    <a
+                                        href="{{ $isMaster
+                                            ? route('dashboard', [
+                                                'view' => 'master',
+                                                'folder' => $task->project_id
+                                            ])
+                                            : route('dashboard', [
+                                                'view' => 'office'
+                                            ]) }}"
+                                        class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                                    >
+                                        Travailler →
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        @empty
+
+                            <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center lg:col-span-3">
+                                <p class="text-2xl">🏆</p>
+                                <p class="mt-2 font-bold text-slate-800">
+                                    Aucune tâche prioritaire en attente.
                                 </p>
-
                             </div>
 
-                            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3">
+                        @endforelse
 
-                                <span class="text-xs font-semibold text-slate-500">
-                                    📅 {{ $taskDate
-                                        ? \Carbon\Carbon::parse($taskDate)->format('d/m/Y')
-                                        : 'Non planifiée' }}
-                                </span>
-
-                                <a
-                                    href="{{ $isMaster
-                                        ? route('dashboard', [
-                                            'view' => 'master',
-                                            'folder' => $task->project_id
-                                        ])
-                                        : route('dashboard', [
-                                            'view' => 'office'
-                                        ]) }}"
-                                    class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
-                                >
-                                    Travailler →
-                                </a>
-
-                            </div>
-
-                        </div>
-
-                    @empty
-
-                        <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center lg:col-span-3">
-                            <p class="text-2xl">🏆</p>
-                            <p class="mt-2 font-bold text-slate-800">
-                                Aucune tâche prioritaire en attente.
-                            </p>
-                            <p class="mt-1 text-xs text-slate-500">
-                                Ajoutez votre prochaine mission Office ou Master.
-                            </p>
-                        </div>
-
-                    @endforelse
+                    </div>
 
                 </div>
 
             </section>
-
-            {{-- PERFORMANCE OFFICE ET MASTER --}}
-            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-                <section class="rounded-2xl border border-blue-100 bg-white p-5 shadow-sm">
-
-                    <div class="mb-4 flex items-center justify-between">
-                        <h2 class="font-extrabold text-slate-900">
-                            💼 Ma performance Office
-                        </h2>
-
-                        <a
-                            href="{{ route('dashboard', ['view' => 'office']) }}"
-                            class="text-xs font-bold text-blue-600 hover:underline"
-                        >
-                            Accéder →
-                        </a>
-                    </div>
-
-                    @php
-                        $officeRate = $performanceToday['office_total'] > 0
-                            ? round(
-                                $performanceToday['office_done'] * 100
-                                / $performanceToday['office_total']
-                            )
-                            : 0;
-                    @endphp
-
-                    <div class="flex items-end justify-between">
-                        <div>
-                            <p class="text-3xl font-extrabold text-blue-700">
-                                {{ $officeRate }} %
-                            </p>
-
-                            <p class="mt-1 text-xs text-slate-500">
-                                Missions du jour terminées
-                            </p>
-                        </div>
-
-                        <span class="text-xs font-semibold text-slate-500">
-                            {{ $performanceWeek['office_done'] }}
-                            terminée(s) parmi les tâches de la semaine
-                        </span>
-                    </div>
-
-                    <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
-                        <div
-                            class="h-full rounded-full bg-blue-600"
-                            style="width: {{ $officeRate }}%"
-                        ></div>
-                    </div>
-
-                </section>
-
-                <section class="rounded-2xl border border-purple-100 bg-white p-5 shadow-sm">
-
-                    <div class="mb-4 flex items-center justify-between">
-                        <h2 class="font-extrabold text-slate-900">
-                            🎓 Ma progression Master
-                        </h2>
-
-                        <a
-                            href="{{ route('dashboard', ['view' => 'master']) }}"
-                            class="text-xs font-bold text-purple-600 hover:underline"
-                        >
-                            Accéder →
-                        </a>
-                    </div>
-
-                    @php
-                        $masterRate = $performanceToday['master_total'] > 0
-                            ? round(
-                                $performanceToday['master_done'] * 100
-                                / $performanceToday['master_total']
-                            )
-                            : 0;
-                    @endphp
-
-                    <div class="flex items-end justify-between">
-                        <div>
-                            <p class="text-3xl font-extrabold text-purple-700">
-                                {{ $masterRate }} %
-                            </p>
-
-                            <p class="mt-1 text-xs text-slate-500">
-                                Révisions du jour terminées
-                            </p>
-                        </div>
-
-                        <span class="text-xs font-semibold text-slate-500">
-                            {{ $performanceWeek['master_done'] }}
-                            terminée(s) parmi les tâches de la semaine
-                        </span>
-                    </div>
-
-                    <div class="mt-4 h-2.5 overflow-hidden rounded-full bg-slate-100">
-                        <div
-                            class="h-full rounded-full bg-purple-600"
-                            style="width: {{ $masterRate }}%"
-                        ></div>
-                    </div>
-
-                    {{-- PROCHAINS EXAMENS --}}
-                    @if($nextMasterExams->isNotEmpty())
-
-                        <div class="mt-5 space-y-2 border-t border-slate-100 pt-4">
-
-                            <p class="text-xs font-extrabold text-slate-700">
-                                📚 Examens à venir
-                            </p>
-
-                            @foreach($nextMasterExams as $exam)
-
-                                <div class="flex items-center justify-between gap-3 rounded-lg bg-purple-50 px-3 py-2">
-
-                                    <span class="text-xs font-semibold text-slate-800">
-                                        {{ $exam['project'] }}
-                                    </span>
-
-                                    <span class="whitespace-nowrap text-xs font-bold text-purple-700">
-                                        {{ $exam['date']->format('d/m/Y') }}
-                                    </span>
-
-                                </div>
-
-                            @endforeach
-
-                            <a
-                                href="{{ route('exams.index') }}"
-                                class="inline-block text-xs font-bold text-purple-600 hover:underline"
-                            >
-                                Préparation aux examens →
-                            </a>
-
-                        </div>
-
-                    @endif
-
-                </section>
-
-            </div>
 
             {{-- ANCIENS INDICATEURS CONSERVÉS, MAIS REPLIABLES --}}
             <section
