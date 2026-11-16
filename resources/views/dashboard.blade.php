@@ -830,7 +830,7 @@
                 </a>
                 {{-- CETTE SEMAINE --}}
                 <a
-                    href="{{ route('schedule.index') }}"
+                    href="{{ route('schedule.week') }}"
                     class="group block rounded-2xl border border-amber-100 bg-white p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
                 >
                     <div class="mb-3 flex items-center justify-between">
@@ -853,11 +853,11 @@
                         Tâches programmées et terminées
                     </p>
                 </a>
-
             {{-- MISSIONS PRIORITAIRES REPLIABLES --}}
             <section
                 x-data="{ open: false }"
-                class="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm"
+                class="w-full min-w-0 col-span-full overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm"
+                style="width:100%; grid-column:1 / -1; flex:0 0 100%;"
             >
 
                 <button
@@ -989,7 +989,8 @@
             {{-- ANCIENS INDICATEURS CONSERVÉS, MAIS REPLIABLES --}}
             <section
                 x-data="{ open: false }"
-                class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                class="w-full min-w-0 col-span-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                style="width:100%; grid-column:1 / -1; flex:0 0 100%;"
             >
 
                 <button

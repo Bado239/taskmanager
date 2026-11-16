@@ -696,6 +696,72 @@ class TaskController extends Controller
 
 
     /**
+     * Emploi du temps global de la semaine.
+     * Regroupe les tâches Office et Master.
+     */
+    public function weekSchedule()
+    {
+        $now = Carbon::now('Africa/Dakar');
+
+        $weekStart = $now->copy()->startOfWeek();
+        $weekEnd = $now->copy()->endOfWeek();
+
+        // Récupérer les tâches de la semaine
+        $weekTasks = Task::with(['project', 'category'])
+            ->whereIn('type', ['office', 'master'])
+            ->where('is_archived', 0)
+            ->whereBetween('execution_date', [
+                $weekStart->toDateString(),
+                $weekEnd->toDateString()
+            ])
+            ->get()
+            ->sortBy(function ($task) {
+                return $task->execution_date . '|' .
+                    ($task->heure_debut ?? '99:99');
+            })
+            ->values();
+
+        // Regrouper les tâches par jour
+        $tasksByDay = $weekTasks->groupBy(function ($task) {
+            return Carbon::parse($task->execution_date)->toDateString();
+        });
+
+        // Statistiques
+        $totalTasks = $weekTasks->count();
+
+        $completedTasks = $weekTasks
+            ->where('document_status', 'done')
+            ->count();
+
+        $pendingTasks = $weekTasks
+            ->where('document_status', 'todo')
+            ->count();
+
+        $inProgressTasks = $weekTasks
+            ->where('document_status', 'in_progress')
+            ->count();
+
+        $completionRate = $totalTasks > 0
+            ? round(($completedTasks / $totalTasks) * 100)
+            : 0;
+
+        return view('schedule.week', compact(
+            'now',
+            'weekStart',
+            'weekEnd',
+            'weekTasks',
+            'tasksByDay',
+            'totalTasks',
+            'completedTasks',
+            'pendingTasks',
+            'inProgressTasks',
+            'completionRate'
+        ));
+    }
+
+
+
+    /**
      * Bascule le mode courant et redirige vers la vue correspondante
      */
     public function switchMode(Request $request, $mode)

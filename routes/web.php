@@ -336,6 +336,13 @@ Route::put('/schedule/today/tasks/{task}', [
 ])->name('schedule.tasks.update');
 
 
+// Emploi du temps hebdomadaire global
+Route::get('/schedule/week', [
+    TaskController::class,
+    'weekSchedule'
+])->name('schedule.week');
+
+
 
 
 // =======================================
@@ -391,3 +398,12 @@ Route::middleware([FinanceAccess::class])->group(function () {
     ])->name('finances.movements.destroy');
 
 });
+
+Route::get('/schedule/week', [TaskController::class, 'weekSchedule'])
+    ->name('schedule.week');
+
+Route::get('/schedule/today', [TaskController::class, 'todaySchedule'])
+    ->name('schedule.today');
+
+Route::get('/schedule/week', [TaskController::class, 'weekSchedule'])
+    ->name('schedule.week');
