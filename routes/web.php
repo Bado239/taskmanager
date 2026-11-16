@@ -11,6 +11,8 @@ use App\Http\Controllers\CourseResourceController;
 use App\Http\Controllers\LearningDocumentController;
 use App\Http\Controllers\GeneratedCourseController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\FinanceAccessController;
+use App\Http\Middleware\FinanceAccess;
 
 
 /*
@@ -334,34 +336,58 @@ Route::put('/schedule/today/tasks/{task}', [
 ])->name('schedule.tasks.update');
 
 
-// =========================================
-// GESTION FINANCIÈRE PERSONNELLE
-// =========================================
 
-Route::get('/finances', [
-    FinanceController::class, 'index'
-])->name('finances.index');
+// =======================================
+// ACCÈS SÉCURISÉ À MES FINANCES
+// =======================================
 
-Route::put('/finances/income', [
-    FinanceController::class, 'updateIncome'
-])->name('finances.income.update');
+// Page de saisie du mot de passe
+Route::get('/finances/deverrouiller', [
+    FinanceAccessController::class, 'show'
+])->name('finances.unlock');
 
-Route::post('/finances/categories', [
-    FinanceController::class, 'storeCategory'
-])->name('finances.categories.store');
+// Vérification du mot de passe
+Route::post('/finances/deverrouiller', [
+    FinanceAccessController::class, 'unlock'
+])
+    ->middleware('throttle:5,1')
+    ->name('finances.unlock.submit');
 
-Route::put('/finances/categories/{id}', [
-    FinanceController::class, 'updateCategory'
-])->name('finances.categories.update');
+// Verrouillage manuel
+Route::post('/finances/verrouiller', [
+    FinanceAccessController::class, 'lock'
+])->name('finances.lock');
 
-Route::delete('/finances/categories/{id}', [
-    FinanceController::class, 'destroyCategory'
-])->name('finances.categories.destroy');
+Route::middleware(['auth'])->group(function () {
+    // Placez ici toutes vos routes financières,
+    // y compris les routes de déverrouillage.
 
-Route::post('/finances/movements', [
-    FinanceController::class, 'storeMovement'
-])->name('finances.movements.store');
+    Route::get('/finances', [
+        FinanceController::class, 'index'
+    ])->name('finances.index');
 
-Route::delete('/finances/movements/{id}', [
-    FinanceController::class, 'destroyMovement'
-])->name('finances.movements.destroy');
+    Route::put('/finances/income', [
+        FinanceController::class, 'updateIncome'
+    ])->name('finances.income.update');
+
+    Route::post('/finances/categories', [
+        FinanceController::class, 'storeCategory'
+    ])->name('finances.categories.store');
+
+    Route::put('/finances/categories/{id}', [
+        FinanceController::class, 'updateCategory'
+    ])->name('finances.categories.update');
+
+    Route::delete('/finances/categories/{id}', [
+        FinanceController::class, 'destroyCategory'
+    ])->name('finances.categories.destroy');
+
+    Route::post('/finances/movements', [
+        FinanceController::class, 'storeMovement'
+    ])->name('finances.movements.store');
+
+    Route::delete('/finances/movements/{id}', [
+        FinanceController::class, 'destroyMovement'
+    ])->name('finances.movements.destroy');
+
+});
