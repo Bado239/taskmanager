@@ -325,52 +325,46 @@
 
                 </div>
 
+                <!-- DATE D'EXÉCUTION -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">
+                        Date d'exécution
+                    </label>
 
-
-
+                    <input type="date"
+                        name="execution_date"
+                        value="{{ old('execution_date', $task->execution_date ? \Carbon\Carbon::parse($task->execution_date)->format('Y-m-d') : '') }}"
+                        class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
+                </div>
 
                 <!-- HEURES -->
-
                 <div class="grid grid-cols-2 gap-4">
 
-
                     <div>
-
                         <label class="block text-sm font-medium">
                             Heure début
                         </label>
 
-
                         <input type="time"
-                               id="heure_debut"
-                               name="heure_debut"
-                               value="{{ old('heure_debut',$task->heure_debut ? substr($task->heure_debut,0,5):'') }}"
-                               class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
-
-
+                            id="heure_debut"
+                            name="start_time"
+                            value="{{ old('start_time', $task->heure_debut ? substr($task->heure_debut, 0, 5) : '') }}"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
                     </div>
 
-
-
                     <div>
-
                         <label class="block text-sm font-medium">
                             Heure fin
                         </label>
 
-
                         <input type="time"
-                               id="heure_fin"
-                               name="heure_fin"
-                               value="{{ old('heure_fin',$task->heure_fin ? substr($task->heure_fin,0,5):'') }}"
-                               class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
-
-
+                            id="heure_fin"
+                            name="end_time"
+                            value="{{ old('end_time', $task->heure_fin ? substr($task->heure_fin, 0, 5) : '') }}"
+                            class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
                     </div>
 
-
                 </div>
-
 
 
 
