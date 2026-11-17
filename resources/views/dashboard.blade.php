@@ -1398,10 +1398,13 @@
 
                                 {{-- TÂCHE ET DOCUMENT --}}
                                 <td>
-                                    <div class="font-bold text-slate-900">
+                                    <a
+                                        href="{{ route('tasks.learning', $task->id) }}"
+                                        class="font-bold text-slate-900 hover:text-blue-700 hover:underline transition"
+                                    >
                                         {{ $task->title }}
-                                    </div>
-
+                                    </a>
+                                    
                                     @if($task->document_link)
 
                                         @php
