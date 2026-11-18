@@ -1211,7 +1211,7 @@
         {{-- BARRE COMPACTE : FILTRES + NOUVELLE TÂCHE --}}
         <section class="mb-3 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
 
-            <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex w-full flex-wrap items-center justify-between gap-3">
 
                 {{-- FILTRES --}}
                 <div class="flex flex-wrap items-center gap-2">
@@ -1793,7 +1793,8 @@
 
             <section class="mb-3 rounded-xl border border-blue-100 bg-white px-4 py-2 shadow-sm">
 
-                <div class="flex flex-wrap items-center gap-2">
+                <div class="flex w-full flex-wrap items-center justify-between gap-3">
+                    <div class="flex flex-wrap items-center gap-2">
 
                     <a
                         href="{{ route('dashboard', ['view' => 'master', 'filter' => 'all', 'status' => 'active']) }}"
@@ -1824,6 +1825,19 @@
                         🎓 Préparation aux examens
                     </a>
 
+                </div>
+
+                {{-- BOUTON À L'EXTRÊME DROITE --}}
+                @if($statusFilter !== 'archived')
+                    <button
+                        type="button"
+                        id="btnToggleForm"
+                        onclick="toggleTaskForm()"
+                        class="ml-auto inline-flex shrink-0 items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                    >
+                        + Nouvelle tâche (Mode Master)
+                    </button>
+                @endif
 
                 </div>
 
